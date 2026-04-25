@@ -22,11 +22,14 @@ const EndSequence = () => {
     setIsSubmitting(true);
 
     try {
-      // Send the data to the 'feedback' table
+      
+      const visitorId = localStorage.getItem('artifact_visitor_id');
+
       const { error } = await supabase
         .from('feedback')
         .insert([
           { 
+            visitor_id: visitorId, // LINKED!
             q1_experience: answers.q1,
             q2_navigation: answers.q2,
             q3_responsiveness: answers.q3,

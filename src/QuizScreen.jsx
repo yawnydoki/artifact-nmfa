@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { supabase } from './supabaseClient';
 
 const QuizScreen = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -175,6 +176,28 @@ const QuizScreen = () => {
       )}
     </div>
   );
+
+  const handleAnswer = async (index) => {
+    setSelectedAnswer(index);
+    
+    if (index === currentQuiz.correct) {
+      setGameState('passed');
+      
+      // Save the gold badge to the database!
+      const visitorId = localStorage.getItem('artifact_visitor_id');
+      if (visitorId) {
+        await supabase.from('unlocked_badges').insert([
+          { 
+            visitor_id: visitorId, 
+            artwork_id: 1, // Assuming Spoliarium is ID 1
+            badge_type: 'Gold' 
+          }
+        ]);
+      }
+    } else {
+      setGameState('failed');
+    }
+  };
 };
 
 export default QuizScreen;
