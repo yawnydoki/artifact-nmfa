@@ -1,84 +1,131 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // State for the Language Modal
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const [activeLang, setActiveLang] = useState('English');
+
+  const languages = ['English', 'Tagalog', '中文 (Chinese)', '日本語 (Japanese)', '한국어 (Korean)'];
 
   const navItems = [
-    { path: '/language' }, // Placeholder for the first icon
+    { path: '/language' }, 
     { path: '/map' },
-    { path: '/' },         // Center Scanner
+    { path: '/' },         
     { path: '/passport' },
     { path: '/end' }
   ];
 
   const activeIndex = navItems.findIndex(item => location.pathname === item.path);
-  const safeActiveIndex = activeIndex === -1 ? 2 : activeIndex;
+  // If we are on the language modal, keep the indicator on the 0th index
+  const safeActiveIndex = isLangOpen ? 0 : (activeIndex === -1 ? 2 : activeIndex);
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-white/20 backdrop-blur-md rounded-full p-1.5 w-11/12 max-w-sm border border-white/10 shadow-2xl z-50">
-      
-      {/* Container holding the slider and the icons */}
-      <div className="relative flex items-center w-full h-14">
-        
-        {/* --- THE SLIDING CIRCULAR INDICATOR --- */}
+    <>
+      {/* --- LANGUAGE SELECTION MODAL --- */}
+      {/* Dark overlay background */}
+      {isLangOpen && (
         <div 
-          className="absolute top-0 h-full w-1/5 flex items-center justify-center transition-transform duration-500 ease-out z-0"
-          style={{ transform: `translateX(${safeActiveIndex * 100}%)` }}
-        >
-          <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full border border-white/40 shadow-[inset_0_0_10px_rgba(255,255,255,0.3)]"></div>
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fade-in-up"
+          onClick={() => setIsLangOpen(false)}
+        ></div>
+      )}
+      
+      {/* Slide-up Card */}
+      <div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-artifact-card rounded-3xl p-6 shadow-2xl z-40 transition-transform duration-300 border-4 border-[#C9B99A] ${isLangOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-daruma text-artifact-border text-2xl">Select Language</h3>
+          <button onClick={() => setIsLangOpen(false)} className="text-artifact-border font-bold text-xl hover:opacity-70">✕</button>
         </div>
-
-        {/* --- THE ICONS --- */}
         
-        {/* 1. Language/Web */}
-        <div className="w-1/5 flex justify-center items-center z-10 h-full">
-          <button className={`transition-opacity ${safeActiveIndex === 0 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
-          </button>
+        <div className="flex flex-col gap-3">
+          {languages.map((lang) => (
+            <button
+              key={lang}
+              onClick={() => {
+                setActiveLang(lang);
+                setTimeout(() => setIsLangOpen(false), 200); // Close after brief delay
+              }}
+              className={`py-3 px-4 rounded-xl font-daruma text-lg text-left transition-all ${
+                activeLang === lang 
+                  ? 'bg-artifact-border text-white shadow-md pl-6' 
+                  : 'bg-white/50 text-artifact-border hover:bg-white'
+              }`}
+            >
+              {lang}
+            </button>
+          ))}
         </div>
-
-        <div className="w-1/5 flex justify-center items-center z-10 h-full">
-          <button 
-            onClick={() => navigate('/map')}
-            className={`transition-opacity ${safeActiveIndex === 1 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          </button>
-        </div>
-
-        <div className="w-1/5 flex justify-center items-center z-10 h-full">
-          <button 
-            onClick={() => navigate('/')}
-            className={`transition-opacity ${safeActiveIndex === 2 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
-          >
-            <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" strokeWidth="2"/></svg>
-          </button>
-        </div>
-
-        {/* 4. Passport */}
-        <div className="w-1/5 flex justify-center items-center z-10 h-full">
-          <button 
-            onClick={() => navigate('/passport')}
-            className={`transition-opacity ${safeActiveIndex === 3 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-          </button>
-        </div>
-
-        {/* 5. End Tour */}
-        <div className="w-1/5 flex justify-center items-center z-10 h-full">
-          <button 
-            onClick={() => navigate('/end')}
-            className={`transition-opacity ${safeActiveIndex === 4 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-          </button>
-        </div>
-
       </div>
-    </div>
+
+      {/* --- BOTTOM NAVIGATION BAR --- */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-white/20 backdrop-blur-md rounded-full p-1.5 w-11/12 max-w-sm border border-white/10 shadow-2xl z-50">
+        <div className="relative flex items-center w-full h-14">
+          
+          {/* Sliding Circular Indicator */}
+          <div 
+            className="absolute top-0 h-full w-1/5 flex items-center justify-center transition-transform duration-500 ease-out z-0"
+            style={{ transform: `translateX(${safeActiveIndex * 100}%)` }}
+          >
+            <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full border border-white/40 shadow-[inset_0_0_10px_rgba(255,255,255,0.3)]"></div>
+          </div>
+
+          {/* 1. Language/Web */}
+          <div className="w-1/5 flex justify-center items-center z-10 h-full">
+            <button 
+              onClick={() => setIsLangOpen(!isLangOpen)}
+              className={`transition-opacity ${safeActiveIndex === 0 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+            </button>
+          </div>
+
+          {/* 2. Map */}
+          <div className="w-1/5 flex justify-center items-center z-10 h-full">
+            <button 
+              onClick={() => { setIsLangOpen(false); navigate('/map'); }}
+              className={`transition-opacity ${safeActiveIndex === 1 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </button>
+          </div>
+
+          {/* 3. Center Scanner (Camera) */}
+          <div className="w-1/5 flex justify-center items-center z-10 h-full">
+            <button 
+              onClick={() => { setIsLangOpen(false); navigate('/'); }}
+              className={`transition-opacity ${safeActiveIndex === 2 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
+            >
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" strokeWidth="2"/></svg>
+            </button>
+          </div>
+
+          {/* 4. Passport */}
+          <div className="w-1/5 flex justify-center items-center z-10 h-full">
+            <button 
+              onClick={() => { setIsLangOpen(false); navigate('/passport'); }}
+              className={`transition-opacity ${safeActiveIndex === 3 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+            </button>
+          </div>
+
+          {/* 5. End Tour */}
+          <div className="w-1/5 flex justify-center items-center z-10 h-full">
+            <button 
+              onClick={() => { setIsLangOpen(false); navigate('/end'); }}
+              className={`transition-opacity ${safeActiveIndex === 4 ? 'text-white opacity-100 drop-shadow-md' : 'text-white opacity-70 hover:opacity-100'}`}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </>
   );
 };
 
