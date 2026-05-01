@@ -1,203 +1,181 @@
-import React, { useState } from "react";
-import { supabase } from './supabaseClient';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { supabase } from './supabaseClient'; // Make sure this path is correct!
 
 const QuizScreen = () => {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [lives, setLives] = useState(3);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // 1. Grab the active painting's data passed from the Dashboard
+  const artwork = location.state?.artwork;
+
+  const [currentQIndex, setCurrentQIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [showResult, setShowResult] = useState(false);
+  const [gameState, setGameState] = useState('playing'); // 'playing', 'passed', 'failed'
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const questions = [
-    {
-      question: "Who is the Artist of Spoliarium?",
-      options: [
-        "Fernando Amorsolo",
-        "Juan Luna",
-        "Francisco Balagtas",
-        "Jose Rizal",
-      ],
-      answer: "Juan Luna",
-    },
-    {
-      question: "Spoliarium year of creation?",
-      options: ["1884", "1899", "1972", "1989"],
-      answer: "1884",
-    },
-    {
-      question: "What does the painting depict?",
-      options: [
-        "A peaceful landscape",
-        "A fallen gladiator",
-        "A political treaty",
-        "A market scene",
-      ],
-      answer: "A fallen gladiator",
-    },
-  ];
+  // Kick the user back to the dashboard if they refresh the page and lose the artwork data
+  useEffect(() => {
+    if (!artwork) navigate('/');
+  }, [artwork, navigate]);
 
-  const handleAnswerClick = (option) => {
-    if (selectedAnswer) return;
+  if (!artwork) return null; // Prevents crash while redirecting
 
-    setSelectedAnswer(option);
+  // 2. Bundle the 5 JSON columns into a clean array we can loop through
+  const questions = [artwork.q1, artwork.q2, artwork.q3, artwork.q4, artwork.q5];
+  const currentQuestionData = questions[currentQIndex];
 
-    const isCorrect = option === questions[currentQuestion].answer;
+  // 3. Extract the current language data (Defaulting to English)
+  const currentLang = 'eng'; 
+  const questionText = currentQuestionData[currentLang].question;
+  const choices = currentQuestionData[currentLang].choices;
+  const correctIndex = currentQuestionData.correct_index;
 
-    setTimeout(() => {
-      let newScore = score;
-      let newLives = lives;
+  // 4. Handle their answer selection
+  const handleAnswer = async (index) => {
+    // Prevent clicking multiple buttons
+    if (selectedAnswer !== null) return; 
+    
+    setSelectedAnswer(index);
+    const isCorrect = index === correctIndex;
+    const newScore = isCorrect ? score + 1 : score;
+    setScore(newScore);
 
-      if (isCorrect) {
-        newScore = score + 1;
-        setScore(newScore);
+    // Pause for 1 second so they can see if they got it right/wrong, then move on
+    setTimeout(async () => {
+      setSelectedAnswer(null);
+
+      if (currentQIndex === 4) {
+        // End of quiz! Let's say 3 out of 5 is a passing grade
+        if (newScore >= 3) {
+          setGameState('passed');
+          await awardBadge();
+        } else {
+          setGameState('failed');
+        }
       } else {
-        newLives = lives - 1;
-        setLives(newLives);
+        // Move to the next question
+        setCurrentQIndex(prev => prev + 1);
       }
-
-      // Move to next question or end quiz
-      if (currentQuestion + 1 < questions.length && newLives > 0) {
-        setCurrentQuestion(currentQuestion + 1);
-        setSelectedAnswer(null);
-      } else {
-        setShowResult(true);
-      }
-    }, 600); // 600ms delay so the user sees what they clicked
+    }, 1200);
   };
 
-  const earnedBadge = score === 3 ? "Gold" : "Silver";
-
-  return (
-    <div className="h-screen w-screen bg-artifact-blue flex flex-col items-center py-10 font-hind relative overflow-hidden">
-      {!showResult ? (
-        /* --- QUIZ ACTIVE STATE --- */
-        <div className="w-11/12 max-w-sm flex flex-col h-full">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-10 px-2">
-            <h2 className="text-white font-daruma text-2xl tracking-wider">
-              Test yourself!
-            </h2>
-            <div className="bg-artifact-green/80 border border-white/30 text-white text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1 shadow-sm">
-              <span>♡</span> {lives}/3 LIVES
-            </div>
-          </div>
-
-          {/* Quiz Card */}
-          <div className="bg-[#2B435D] p-2 rounded-3xl shadow-2xl relative">
-            {/* Inner Beige Card */}
-            <div className="bg-artifact-card rounded-2xl pt-4 pb-8 px-5 flex flex-col items-center">
-              {/* Progress Bars */}
-              <div className="flex gap-2 w-1/2 mb-6">
-                {questions.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`h-1.5 flex-1 rounded-full ${idx <= currentQuestion ? "bg-[#5B6F3A]" : "bg-[#C9B99A]"}`}
-                  ></div>
-                ))}
-              </div>
-
-              {/* Question Text */}
-              <h3 className="font-daruma text-artifact-border text-xl text-center mb-8 leading-snug">
-                {questions[currentQuestion].question}
-              </h3>
-
-              {/* Options */}
-              <div className="w-full flex flex-col gap-3">
-                {questions[currentQuestion].options.map((option, idx) => {
-                  const isSelected = selectedAnswer === option;
-                  const isCorrect =
-                    option === questions[currentQuestion].answer;
-
-                  // Visual feedback logic for when an answer is clicked
-                  let buttonClass =
-                    "bg-[#EAE0C8] border-[#C9B99A] text-artifact-border"; // Default
-                  if (selectedAnswer) {
-                    if (isSelected && isCorrect)
-                      buttonClass =
-                        "bg-green-200 border-green-500 text-green-900";
-                    if (isSelected && !isCorrect)
-                      buttonClass = "bg-red-200 border-red-500 text-red-900";
-                    if (!isSelected && isCorrect)
-                      buttonClass =
-                        "bg-green-100 border-green-400 text-green-800"; // Reveal correct
-                  }
-
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleAnswerClick(option)}
-                      className={`w-full py-3.5 px-4 rounded-2xl border-b-4 font-daruma text-lg tracking-wide transition-all active:translate-y-1 active:border-b-0 ${buttonClass}`}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="w-11/12 max-w-sm flex flex-col items-center justify-center h-full pb-20 animate-fade-in-up">
-          <h1 className="text-white font-daruma text-4xl tracking-wider mb-10 drop-shadow-md">
-            Congratulations!
-          </h1>
-
-          <div className="bg-[#2B435D] p-3 rounded-3xl relative shadow-2xl w-full max-w-[280px]">
-            {/* Close 'X' Button */}
-            <button
-              onClick={() => window.location.reload()} // Quick reset for prototype
-              className="absolute -top-3 -right-3 bg-[#C9B99A] border-2 border-artifact-border text-artifact-border rounded-full w-8 h-8 flex items-center justify-center font-bold z-10 hover:bg-white"
-            >
-              ✕
-            </button>
-
-            <div className="bg-artifact-card rounded-2xl p-6 flex flex-col items-center text-center">
-              <h3 className="font-daruma text-artifact-border text-xl border-b-2 border-artifact-border/20 pb-2 w-full mb-6">
-                Badge Unlocked!
-              </h3>
-
-              {/* Badge UI */}
-              <div
-                className={`w-28 h-28 rounded-full border-8 shadow-inner mb-4 bg-white flex items-center justify-center
-                ${earnedBadge === "Gold" ? "border-artifact-gold" : "border-gray-400"}`}
-              >
-                {/* Normally the painting thumbnail goes here */}
-              </div>
-
-              <p className="font-daruma text-artifact-border text-lg mt-2">
-                The Fallen Galea
-              </p>
-              <p className="text-artifact-border/70 font-bold text-xs mt-1 uppercase tracking-widest">
-                {earnedBadge} Badge Earned
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  const handleAnswer = async (index) => {
-    setSelectedAnswer(index);
+  // 5. The Database saving function
+  const awardBadge = async () => {
+    setIsSaving(true);
+    const visitorId = localStorage.getItem('artifact_visitor_id');
     
-    if (index === currentQuiz.correct) {
-      setGameState('passed');
-      
-      // Save the gold badge to the database!
-      const visitorId = localStorage.getItem('artifact_visitor_id');
-      if (visitorId) {
+    if (visitorId) {
+      try {
         await supabase.from('unlocked_badges').insert([
           { 
             visitor_id: visitorId, 
-            artwork_id: 1, // Assuming Spoliarium is ID 1
+            artwork_id: artwork.id, 
             badge_type: 'Gold' 
           }
         ]);
+        console.log("Badge saved to database!");
+      } catch (error) {
+        console.error("Error saving badge:", error.message);
       }
-    } else {
-      setGameState('failed');
     }
+    setIsSaving(false);
   };
+
+  return (
+    <div className="h-screen w-screen bg-[#16120c] overflow-hidden flex flex-col items-center justify-center font-hind relative">
+      
+      {/* HEADER */}
+      <div className="absolute top-12 text-center w-full px-4">
+        <h2 className="font-daruma text-[#EBDAB5] text-2xl tracking-widest">{artwork.title[currentLang]}</h2>
+        <p className="text-[#E6BA39] text-sm">Badge Challenge</p>
+      </div>
+
+      {/* --- PLAYING STATE --- */}
+      {gameState === 'playing' && (
+        <div className="w-11/12 max-w-sm bg-[#9C7042] p-2 rounded-[32px] shadow-2xl animate-fade-in-up">
+          <div className="bg-[#EBDAB5] rounded-2xl p-6 flex flex-col items-center text-center min-h-[350px]">
+            
+            <div className="w-full flex justify-between text-[#4A2E1B] text-xs font-bold mb-4">
+              <span>Q {currentQIndex + 1} / 5</span>
+              <span>Score: {score}</span>
+            </div>
+
+            <h3 className="font-daruma text-[#4A2E1B] text-xl leading-snug mb-8 min-h-[60px]">
+              {questionText}
+            </h3>
+            
+            <div className="flex flex-col w-full gap-3 mt-auto">
+              {choices.map((choice, index) => {
+                // Logic to show green for correct, red for wrong after clicking
+                let buttonStyle = "bg-white border-2 border-[#C9B99A] text-[#4A2E1B]";
+                if (selectedAnswer !== null) {
+                  if (index === correctIndex) buttonStyle = "bg-green-500 border-green-600 text-white"; // Highlight correct
+                  else if (index === selectedAnswer) buttonStyle = "bg-red-500 border-red-600 text-white"; // Highlight wrong selection
+                }
+
+                return (
+                  <button 
+                    key={index}
+                    onClick={() => handleAnswer(index)}
+                    className={`rounded-xl py-3 px-4 font-daruma text-lg transition-all shadow-sm ${buttonStyle}`}
+                  >
+                    {choice}
+                  </button>
+                );
+              })}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* --- PASSED STATE --- */}
+      {gameState === 'passed' && (
+        <div className="w-11/12 max-w-sm bg-[#E6BA39] p-2 rounded-[32px] shadow-2xl animate-fade-in-up text-center">
+          <div className="bg-[#16120c] rounded-2xl p-8 flex flex-col items-center border-4 border-[#E6BA39]">
+            <h3 className="font-daruma text-white text-3xl mb-2">Quiz Passed!</h3>
+            <p className="text-white/80 mb-6">Score: {score} / 5</p>
+            
+            {/* Mockup of the Gold Badge */}
+            <div className="w-24 h-24 bg-gradient-to-br from-[#FFF3A3] to-[#D4AF37] rounded-full mb-6 shadow-[0_0_20px_rgba(230,186,57,0.5)] border-4 border-white flex items-center justify-center">
+               <span className="font-daruma text-[#4A2E1B] text-2xl">★</span>
+            </div>
+
+            <p className="text-[#E6BA39] text-sm mb-8">
+              {isSaving ? "Saving badge to Passport..." : "Gold Badge Unlocked!"}
+            </p>
+
+            <button 
+              onClick={() => navigate('/passport')}
+              className="w-full bg-[#E6BA39] text-[#16120c] py-3 rounded-xl font-daruma text-lg hover:opacity-90"
+            >
+              View Passport
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- FAILED STATE --- */}
+      {gameState === 'failed' && (
+        <div className="w-11/12 max-w-sm bg-gray-500 p-2 rounded-[32px] shadow-2xl animate-fade-in-up text-center">
+          <div className="bg-[#EBDAB5] rounded-2xl p-8 flex flex-col items-center">
+            <h3 className="font-daruma text-[#4A2E1B] text-3xl mb-2">Not Quite!</h3>
+            <p className="text-[#4A2E1B]/80 mb-8">Score: {score} / 5<br/>You need 3 to pass.</p>
+            
+            <button 
+              onClick={() => navigate('/')}
+              className="w-full bg-[#4A2E1B] text-white py-3 rounded-xl font-daruma text-lg hover:opacity-90"
+            >
+              Scan Again
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
 };
 
 export default QuizScreen;
