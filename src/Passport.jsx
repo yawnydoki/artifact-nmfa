@@ -9,7 +9,7 @@ const Passport = () => {
   
   const { currentLang } = useLanguage();
   const t = uiDict[currentLang] || uiDict.eng;
-  const isCJK = ['chinese', 'jap', 'kor'].includes(currentLang);
+  const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
 
   const [activeTab, setActiveTab] = useState("badges");
   const [selectedArtwork, setSelectedArtwork] = useState(null);

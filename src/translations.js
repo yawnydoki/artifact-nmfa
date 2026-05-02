@@ -18,7 +18,10 @@ export const uiDict = {
     returnToCamera: "Return to Camera",
     congratulations: "Congratulations!",
     badgeUnlocked: "Badge Unlocked!",
-    loading: "Loading..."
+    loading: "Loading...",
+    areaEmpty: "No paintings in this area.",
+    found: "Found!",
+    selectArea: "Select an area to view clues..."
   },
   tag: {
     scanPrompt: "I-scan ang Sining",
@@ -39,7 +42,7 @@ export const uiDict = {
     returnToCamera: "Bumalik sa Camera",
     congratulations: "Binabati kita!",
     badgeUnlocked: "Na-unlock ang Badge!",
-    loading: "Naglo-load..."
+    loading: "Naglo-load...",
   },
   jap: {
     scanPrompt: "アートワークをスキャン",
@@ -60,9 +63,9 @@ export const uiDict = {
     returnToCamera: "カメラに戻る",
     congratulations: "おめでとうございます！",
     badgeUnlocked: "バッジのロックを解除しました！",
-    loading: "読み込み中..."
+    loading: "読み込み中...",
   },
-  chinese: {
+  chi: {
     scanPrompt: "扫描艺术品",
     baseBadge: "基础徽章",
     viewInfo: "查看信息",
@@ -83,7 +86,7 @@ export const uiDict = {
     badgeUnlocked: "徽章已解锁！",
     loading: "加载中...",
     museumMap: "博物馆地图",
-    clueBehind: "背后线索"
+    clueBehind: "背后线索",
   },
   kor: {
     scanPrompt: "작품 스캔",
@@ -106,6 +109,6 @@ export const uiDict = {
     badgeUnlocked: "배지 잠금 해제!",
     loading: "로딩 중...",
     museumMap: "박물관 지도",
-    clueBehind: "숨겨진 단서"
-  }
+    clueBehind: "숨겨진 단서",
+  },
 };

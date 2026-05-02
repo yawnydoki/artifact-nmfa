@@ -7,7 +7,7 @@ const MuseumMap = () => {
   const { currentLang } = useLanguage();
   const t = uiDict[currentLang] || uiDict.eng;
   
-  const isCJK = ['chinese', 'jap', 'kor'].includes(currentLang);
+  const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
 
   const [activeZone, setActiveZone] = useState(null); 
   const [artworks, setArtworks] = useState([]);

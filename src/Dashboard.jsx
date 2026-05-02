@@ -10,7 +10,7 @@ const Dashboard = () => {
   
   const { currentLang } = useLanguage(); 
   const t = uiDict[currentLang] || uiDict.eng;
-  const isCJK = ['chinese', 'jap', 'kor'].includes(currentLang);
+  const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
 
   const [paintingDetected, setPaintingDetected] = useState(false);
   const [activeArtwork, setActiveArtwork] = useState(null); 
