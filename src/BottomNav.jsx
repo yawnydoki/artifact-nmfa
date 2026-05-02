@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useLanguage } from './LanguageContext';
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // State for the Language Modal
+  const { currentLang, setCurrentLang } = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const [activeLang, setActiveLang] = useState('English');
 
-  const languages = ['English', 'Tagalog', '中文 (Chinese)', '日本語 (Japanese)', '한국어 (Korean)'];
+  const languages = [
+    { code: 'eng', label: 'English' },
+    { code: 'tag', label: 'Tagalog' },
+    { code: 'chinese', label: '中文 (Chinese)' },
+    { code: 'jap', label: '日本語 (Japanese)' },
+    { code: 'kor', label: '한국어 (Korean)' }
+  ];
 
   const navItems = [
     { path: '/language' }, 
@@ -20,13 +26,10 @@ const BottomNav = () => {
   ];
 
   const activeIndex = navItems.findIndex(item => location.pathname === item.path);
-  // If we are on the language modal, keep the indicator on the 0th index
   const safeActiveIndex = isLangOpen ? 0 : (activeIndex === -1 ? 2 : activeIndex);
 
   return (
     <>
-      {/* --- LANGUAGE SELECTION MODAL --- */}
-      {/* Dark overlay background */}
       {isLangOpen && (
         <div 
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fade-in-up"
@@ -34,7 +37,6 @@ const BottomNav = () => {
         ></div>
       )}
       
-      {/* Slide-up Card */}
       <div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-artifact-card rounded-3xl p-6 shadow-2xl z-40 transition-transform duration-300 border-4 border-[#C9B99A] ${isLangOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-daruma text-artifact-border text-2xl">Select Language</h3>
@@ -44,28 +46,25 @@ const BottomNav = () => {
         <div className="flex flex-col gap-3">
           {languages.map((lang) => (
             <button
-              key={lang}
+              key={lang.code}
               onClick={() => {
-                setActiveLang(lang);
-                setTimeout(() => setIsLangOpen(false), 200); // Close after brief delay
+                setCurrentLang(lang.code); 
+                setTimeout(() => setIsLangOpen(false), 200); 
               }}
               className={`py-3 px-4 rounded-xl font-daruma text-lg text-left transition-all ${
-                activeLang === lang 
+                currentLang === lang.code 
                   ? 'bg-artifact-border text-white shadow-md pl-6' 
                   : 'bg-white/50 text-artifact-border hover:bg-white'
               }`}
             >
-              {lang}
+              {lang.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* --- BOTTOM NAVIGATION BAR --- */}
       <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-white/20 backdrop-blur-md rounded-full p-1.5 w-11/12 max-w-sm border border-white/10 shadow-2xl z-50">
         <div className="relative flex items-center w-full h-14">
-          
-          {/* Sliding Circular Indicator */}
           <div 
             className="absolute top-0 h-full w-1/5 flex items-center justify-center transition-transform duration-500 ease-out z-0"
             style={{ transform: `translateX(${safeActiveIndex * 100}%)` }}
@@ -73,7 +72,6 @@ const BottomNav = () => {
             <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full border border-white/40 shadow-[inset_0_0_10px_rgba(255,255,255,0.3)]"></div>
           </div>
 
-          {/* 1. Language/Web */}
           <div className="w-1/5 flex justify-center items-center z-10 h-full">
             <button 
               onClick={() => setIsLangOpen(!isLangOpen)}
@@ -83,7 +81,6 @@ const BottomNav = () => {
             </button>
           </div>
 
-          {/* 2. Map */}
           <div className="w-1/5 flex justify-center items-center z-10 h-full">
             <button 
               onClick={() => { setIsLangOpen(false); navigate('/map'); }}
@@ -93,7 +90,6 @@ const BottomNav = () => {
             </button>
           </div>
 
-          {/* 3. Center Scanner (Camera) */}
           <div className="w-1/5 flex justify-center items-center z-10 h-full">
             <button 
               onClick={() => { setIsLangOpen(false); navigate('/'); }}
@@ -103,7 +99,6 @@ const BottomNav = () => {
             </button>
           </div>
 
-          {/* 4. Passport */}
           <div className="w-1/5 flex justify-center items-center z-10 h-full">
             <button 
               onClick={() => { setIsLangOpen(false); navigate('/passport'); }}
@@ -113,7 +108,6 @@ const BottomNav = () => {
             </button>
           </div>
 
-          {/* 5. End Tour */}
           <div className="w-1/5 flex justify-center items-center z-10 h-full">
             <button 
               onClick={() => { setIsLangOpen(false); navigate('/end'); }}

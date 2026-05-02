@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // IMPORT NAVIGATE!
+import { useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
+import { useLanguage } from "./LanguageContext";
+import { uiDict } from "./translations";
 
 const Passport = () => {
-  const navigate = useNavigate(); // Initialize navigation
+  const navigate = useNavigate();
+  
+  const { currentLang } = useLanguage();
+  const t = uiDict[currentLang] || uiDict.eng;
+  const isCJK = ['chinese', 'jap', 'kor'].includes(currentLang);
 
-  // States for Tabs and Modal
   const [activeTab, setActiveTab] = useState("badges");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   
-  // NEW: State to track which info button is clicked inside the modal
   const [activeModalTab, setActiveModalTab] = useState("clues"); 
 
-  // States for Real Data
   const [passportStamps, setPassportStamps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -63,29 +66,25 @@ const Passport = () => {
   const totalCount = passportStamps.length || 10;
   const unlockedHistory = passportStamps.filter((s) => s.isUnlocked);
 
-  // Helper to open modal and reset text to clues
   const handleOpenArtwork = (artwork) => {
     setSelectedArtwork(artwork);
-    setActiveModalTab("clues"); // Always reset to clues when opening a new painting
+    setActiveModalTab("clues"); 
   };
 
   return (
     <div className="h-[100dvh] w-screen bg-artifact-passport overflow-hidden flex flex-col items-center pt-10 pb-[100px] font-hind relative box-border">
       
-      {/* Header */}
       <div className="w-11/12 max-w-sm flex justify-between items-center mb-6 pl-2 flex-shrink-0">
-        <h2 className="font-daruma text-white text-3xl tracking-wide">
-          Passport
+        <h2 className={`${isCJK ? 'font-sans font-bold' : 'font-daruma'} text-white text-3xl tracking-wide`}>
+          {t.passport}
         </h2>
         <div className="bg-green-700/80 border border-white/30 text-white text-[10px] px-3 py-1 rounded-full font-bold shadow-sm uppercase tracking-wider">
-          {unlockedCount}/{totalCount} Unlocked
+          {unlockedCount}/{totalCount} {t.unlocked}
         </div>
       </div>
 
-      {/* --- TABS & MAIN CARD --- */}
       <div className="w-11/12 max-w-sm flex-1 flex flex-col relative z-0 min-h-0">
         
-        {/* Tab Buttons */}
         <div className="flex w-[90%] mx-auto z-10 relative top-2 flex-shrink-0">
           <button
             onClick={() => setActiveTab("badges")}
@@ -95,7 +94,7 @@ const Passport = () => {
                 : "bg-[#9C7042] text-white/70 z-10"
             }`}
           >
-            Your Badges
+            {t.yourBadges}
           </button>
           <button
             onClick={() => setActiveTab("history")}
@@ -105,18 +104,17 @@ const Passport = () => {
                 : "bg-[#9C7042] text-white/70 z-10"
             }`}
           >
-            History
+            {t.history}
           </button>
         </div>
 
-        {/* Content Area */}
         <div className="bg-artifact-card flex-1 rounded-3xl p-6 shadow-2xl border-b-8 border-[#C9B99A] relative z-20 overflow-y-auto hide-scrollbar">
           {isLoading ? (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <p className="font-daruma text-artifact-border animate-pulse text-lg">Loading Passport...</p>
+              <p className="font-daruma text-artifact-border animate-pulse text-lg">{t.loading || "Loading..."}</p>
             </div>
           ) : activeTab === "badges" ? (
-            /* Badges Grid View */
+          
             <div className="grid grid-cols-2 gap-6 justify-items-center mt-4 pb-8">
               {passportStamps.map((stamp) => (
                 <div
@@ -143,13 +141,13 @@ const Passport = () => {
                       stamp.isUnlocked ? "text-artifact-border" : "text-[#9C7042]"
                     }`}
                   >
-                    {stamp.isUnlocked ? stamp.title?.eng : "???"}
+                    {stamp.isUnlocked ? (stamp.title?.[currentLang] || stamp.title?.eng) : "???"}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            /* History List View */
+       
             <div className="flex flex-col gap-4 mt-2 pb-8">
               {unlockedHistory.length === 0 ? (
                 <p className="font-hind text-center text-artifact-border/70 mt-4">
@@ -165,7 +163,7 @@ const Passport = () => {
                     <div className="w-14 h-14 bg-gray-200 rounded-lg flex-shrink-0"></div>
                     <div>
                       <h3 className="font-daruma text-artifact-border text-xl">
-                        {item.title?.eng}
+                        {item.title?.[currentLang] || item.title?.eng}
                       </h3>
                       <p className="text-artifact-border/70 text-xs font-bold">
                         Scanned: {item.unlockDate}
@@ -179,7 +177,6 @@ const Passport = () => {
         </div>
       </div>
 
-      {/* --- DETAILED ARTWORK MODAL (SLIDE UP) --- */}
       {selectedArtwork && (
         <div className="absolute inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm animate-fade-in-up">
           <div className="bg-artifact-passport w-full h-[85%] rounded-t-[40px] p-4 flex flex-col items-center relative border-t-4 border-artifact-card pb-[100px]">
@@ -196,20 +193,17 @@ const Passport = () => {
               </div>
 
               <h2 className="font-daruma text-artifact-border text-3xl mb-1 flex-shrink-0">
-                {selectedArtwork.title?.eng}
+                {selectedArtwork.title?.[currentLang] || selectedArtwork.title?.eng}
               </h2>
               
-              {/* Note: if your DB 'artist' column is long text, we just hardcode a short byline here or use another field if you have it */}
               <p className="text-artifact-border font-bold text-sm mb-4 flex-shrink-0">
-                NMFA Collection
+                by {selectedArtwork.artist?.[currentLang] || selectedArtwork.artist?.eng}
               </p>
 
-              {/* DYNAMIC TEXT AREA: Pulls from DB based on which button is clicked! */}
-              <div className="text-artifact-border/80 text-sm mb-6 flex-1 overflow-y-auto pr-2 bg-white/40 p-3 rounded-xl border border-[#C9B99A]">
-                {selectedArtwork[activeModalTab]?.eng || "More information coming soon..."}
+              <div className={`text-artifact-border/80 text-sm mb-6 flex-1 overflow-y-auto pr-2 bg-white/40 p-3 rounded-xl border border-[#C9B99A] ${isCJK ? 'font-sans leading-relaxed' : 'font-hind'}`}>
+                {selectedArtwork[activeModalTab]?.[currentLang] || selectedArtwork[activeModalTab]?.eng || "More information coming soon..."}
               </div>
 
-              {/* Action Buttons: They change the activeModalTab state to swap the text above */}
               <div className="grid grid-cols-3 gap-2 mb-3 flex-shrink-0">
                 <button 
                   onClick={() => setActiveModalTab("origin")}
@@ -219,7 +213,7 @@ const Passport = () => {
                     : "bg-transparent text-artifact-border hover:bg-gray-100"
                   }`}
                 >
-                  Origin
+                  {t.origin}
                 </button>
                 <button 
                   onClick={() => setActiveModalTab("artist")}
@@ -229,7 +223,7 @@ const Passport = () => {
                     : "bg-transparent text-artifact-border hover:bg-gray-100"
                   }`}
                 >
-                  Artist
+                  {t.artist}
                 </button>
                 <button 
                   onClick={() => setActiveModalTab("art_element")}
@@ -239,16 +233,14 @@ const Passport = () => {
                     : "bg-transparent text-artifact-border hover:bg-gray-100"
                   }`}
                 >
-                  Elements
+                  {t.elements}
                 </button>
               </div>
 
-              {/* START QUIZ BUTTON: Navigates to QuizScreen and passes the active artwork */}
               <button 
                 onClick={() => navigate('/quiz', { state: { artwork: selectedArtwork } })}
-                className="w-full flex-shrink-0 bg-artifact-gold text-artifact-border rounded-full py-3 font-daruma text-lg tracking-wider shadow-md hover:brightness-110 transition-all"
-              >
-                Start Quiz
+                className={`w-full flex-shrink-0 bg-artifact-gold text-artifact-border rounded-full py-3 ${isCJK ? 'font-sans font-bold' : 'font-daruma'} text-lg tracking-wider shadow-md hover:brightness-110 transition-all`}>
+                {t.startQuiz}
               </button>
             </div>
           </div>
