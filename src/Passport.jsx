@@ -1,47 +1,92 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // IMPORT NAVIGATE!
+import { supabase } from "./supabaseClient";
 
 const Passport = () => {
+  const navigate = useNavigate(); // Initialize navigation
+
   // States for Tabs and Modal
   const [activeTab, setActiveTab] = useState("badges");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
+  
+  // NEW: State to track which info button is clicked inside the modal
+  const [activeModalTab, setActiveModalTab] = useState("clues"); 
 
-  // Mock Data for Badges
-  const badges = [
-    { id: 1, title: "Welcom Badge", unlocked: true, type: "gold" },
-    { id: 2, title: "The Fallen Galea", unlocked: true, type: "silver" },
-    { id: 3, title: "???", unlocked: false },
-    { id: 4, title: "???", unlocked: false },
-    { id: 5, title: "???", unlocked: false },
-    { id: 6, title: "???", unlocked: false },
-  ];
+  // States for Real Data
+  const [passportStamps, setPassportStamps] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock Data for History
-  const history = [
-    { id: 1, title: "Spoliarium", artist: "Juan Luna", date: "Oct 24, 2025" },
-    {
-      id: 2,
-      title: "The Parisian Life",
-      artist: "Juan Luna",
-      date: "Oct 24, 2025",
-    },
-  ];
+  useEffect(() => {
+    const fetchPassportData = async () => {
+      const visitorId = localStorage.getItem("artifact_visitor_id");
+      if (!visitorId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data: artworksData, error: artworksError } = await supabase
+          .from("artworks")
+          .select("*")
+          .order("id", { ascending: true });
+          
+        if (artworksError) throw artworksError;
+
+        const { data: badgesData, error: badgesError } = await supabase
+          .from("unlocked_badges")
+          .select("artwork_id, badge_type, created_at")
+          .eq("visitor_id", visitorId);
+          
+        if (badgesError) throw badgesError;
+
+        const mergedData = artworksData.map((artwork) => {
+          const unlockedBadge = badgesData.find((b) => b.artwork_id === artwork.id);
+          return {
+            ...artwork,
+            isUnlocked: !!unlockedBadge,
+            badgeType: unlockedBadge ? unlockedBadge.badge_type : null,
+            unlockDate: unlockedBadge ? new Date(unlockedBadge.created_at).toLocaleDateString() : null
+          };
+        });
+
+        setPassportStamps(mergedData);
+      } catch (error) {
+        console.error("Error fetching passport data:", error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPassportData();
+  }, []);
+
+  const unlockedCount = passportStamps.filter((s) => s.isUnlocked).length;
+  const totalCount = passportStamps.length || 10;
+  const unlockedHistory = passportStamps.filter((s) => s.isUnlocked);
+
+  // Helper to open modal and reset text to clues
+  const handleOpenArtwork = (artwork) => {
+    setSelectedArtwork(artwork);
+    setActiveModalTab("clues"); // Always reset to clues when opening a new painting
+  };
 
   return (
-    <div className="h-screen w-screen bg-artifact-passport overflow-hidden flex flex-col items-center pt-10 pb-24 font-hind relative">
+    <div className="h-[100dvh] w-screen bg-artifact-passport overflow-hidden flex flex-col items-center pt-10 pb-[100px] font-hind relative box-border">
+      
       {/* Header */}
-      <div className="w-11/12 max-w-sm flex justify-between items-center mb-6 pl-2">
+      <div className="w-11/12 max-w-sm flex justify-between items-center mb-6 pl-2 flex-shrink-0">
         <h2 className="font-daruma text-white text-3xl tracking-wide">
           Passport
         </h2>
         <div className="bg-green-700/80 border border-white/30 text-white text-[10px] px-3 py-1 rounded-full font-bold shadow-sm uppercase tracking-wider">
-          Auto-Saved
+          {unlockedCount}/{totalCount} Unlocked
         </div>
       </div>
 
       {/* --- TABS & MAIN CARD --- */}
-      <div className="w-11/12 max-w-sm flex-1 flex flex-col relative z-0">
+      <div className="w-11/12 max-w-sm flex-1 flex flex-col relative z-0 min-h-0">
+        
         {/* Tab Buttons */}
-        <div className="flex w-[90%] mx-auto z-10 relative top-2">
+        <div className="flex w-[90%] mx-auto z-10 relative top-2 flex-shrink-0">
           <button
             onClick={() => setActiveTab("badges")}
             className={`flex-1 py-3 font-daruma rounded-t-2xl text-lg transition-colors duration-200 ${
@@ -64,61 +109,71 @@ const Passport = () => {
           </button>
         </div>
 
-        {/* Content Area (Beige Card) */}
+        {/* Content Area */}
         <div className="bg-artifact-card flex-1 rounded-3xl p-6 shadow-2xl border-b-8 border-[#C9B99A] relative z-20 overflow-y-auto hide-scrollbar">
-          {activeTab === "badges" ? (
+          {isLoading ? (
+            <div className="w-full h-full flex flex-col items-center justify-center">
+              <p className="font-daruma text-artifact-border animate-pulse text-lg">Loading Passport...</p>
+            </div>
+          ) : activeTab === "badges" ? (
             /* Badges Grid View */
-            <div className="grid grid-cols-2 gap-6 justify-items-center mt-4">
-              {badges.map((badge) => (
+            <div className="grid grid-cols-2 gap-6 justify-items-center mt-4 pb-8">
+              {passportStamps.map((stamp) => (
                 <div
-                  key={badge.id}
+                  key={stamp.id}
                   className="flex flex-col items-center cursor-pointer"
-                  onClick={() =>
-                    badge.unlocked && setSelectedArtwork(history[0])
-                  }
+                  onClick={() => stamp.isUnlocked && handleOpenArtwork(stamp)}
                 >
                   <div
                     className={`w-24 h-24 rounded-full border-4 shadow-md flex items-center justify-center mb-2 transition-transform hover:scale-105
                     ${
-                      !badge.unlocked
+                      !stamp.isUnlocked
                         ? "bg-[#9C7042] border-[#8A6136]"
-                        : badge.type === "gold"
-                          ? "bg-white border-artifact-gold"
-                          : "bg-white border-gray-400"
+                        : stamp.badgeType === "Gold"
+                        ? "bg-white border-artifact-gold"
+                        : "bg-white border-gray-400"
                     }`}
                   >
-                    {badge.unlocked && (
+                    {stamp.isUnlocked && (
                       <div className="w-16 h-16 rounded-full bg-gray-100"></div>
                     )}
                   </div>
                   <p
-                    className={`font-daruma text-sm text-center leading-tight ${badge.unlocked ? "text-artifact-border" : "text-[#9C7042]"}`}
+                    className={`font-daruma text-sm text-center leading-tight ${
+                      stamp.isUnlocked ? "text-artifact-border" : "text-[#9C7042]"
+                    }`}
                   >
-                    {badge.title}
+                    {stamp.isUnlocked ? stamp.title?.eng : "???"}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
             /* History List View */
-            <div className="flex flex-col gap-4 mt-2">
-              {history.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => setSelectedArtwork(item)}
-                  className="bg-white p-4 rounded-2xl shadow-sm border-2 border-[#C9B99A] flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors"
-                >
-                  <div className="w-14 h-14 bg-gray-200 rounded-lg flex-shrink-0"></div>
-                  <div>
-                    <h3 className="font-daruma text-artifact-border text-xl">
-                      {item.title}
-                    </h3>
-                    <p className="text-artifact-border/70 text-xs font-bold">
-                      Scanned: {item.date}
-                    </p>
+            <div className="flex flex-col gap-4 mt-2 pb-8">
+              {unlockedHistory.length === 0 ? (
+                <p className="font-hind text-center text-artifact-border/70 mt-4">
+                  Scan paintings to start your history!
+                </p>
+              ) : (
+                unlockedHistory.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => handleOpenArtwork(item)}
+                    className="bg-white p-4 rounded-2xl shadow-sm border-2 border-[#C9B99A] flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-14 h-14 bg-gray-200 rounded-lg flex-shrink-0"></div>
+                    <div>
+                      <h3 className="font-daruma text-artifact-border text-xl">
+                        {item.title?.eng}
+                      </h3>
+                      <p className="text-artifact-border/70 text-xs font-bold">
+                        Scanned: {item.unlockDate}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
         </div>
@@ -127,49 +182,73 @@ const Passport = () => {
       {/* --- DETAILED ARTWORK MODAL (SLIDE UP) --- */}
       {selectedArtwork && (
         <div className="absolute inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm animate-fade-in-up">
-          <div className="bg-artifact-passport w-full h-[85%] rounded-t-[40px] p-4 flex flex-col items-center relative border-t-4 border-artifact-card">
-            {/* Close Button */}
+          <div className="bg-artifact-passport w-full h-[85%] rounded-t-[40px] p-4 flex flex-col items-center relative border-t-4 border-artifact-card pb-[100px]">
             <button
               onClick={() => setSelectedArtwork(null)}
-              className="absolute top-6 right-6 w-8 h-8 bg-artifact-card rounded-full text-artifact-border font-bold shadow-md hover:bg-white"
+              className="absolute top-6 right-6 w-8 h-8 bg-artifact-card rounded-full text-artifact-border font-bold shadow-md hover:bg-white z-10"
             >
               ✕
             </button>
 
-            {/* Modal Inner Content */}
-            <div className="w-11/12 max-w-sm mt-12 bg-artifact-card flex-1 rounded-3xl p-5 border-b-8 border-[#C9B99A] shadow-xl flex flex-col">
-              {/* Image Placeholder */}
-              <div className="w-full h-48 bg-gray-300 rounded-xl mb-4 flex items-center justify-center text-gray-500 font-bold border-2 border-artifact-border/20">
+            <div className="w-11/12 max-w-sm mt-12 bg-artifact-card flex-1 rounded-3xl p-5 border-b-8 border-[#C9B99A] shadow-xl flex flex-col overflow-hidden">
+              <div className="w-full h-48 flex-shrink-0 bg-gray-300 rounded-xl mb-4 flex items-center justify-center text-gray-500 font-bold border-2 border-artifact-border/20">
                 Img
               </div>
 
-              {/* Text Info */}
-              <h2 className="font-daruma text-artifact-border text-3xl mb-1">
-                {selectedArtwork.title}
+              <h2 className="font-daruma text-artifact-border text-3xl mb-1 flex-shrink-0">
+                {selectedArtwork.title?.eng}
               </h2>
-              <p className="text-artifact-border font-bold text-sm mb-4">
-                by {selectedArtwork.artist}
+              
+              {/* Note: if your DB 'artist' column is long text, we just hardcode a short byline here or use another field if you have it */}
+              <p className="text-artifact-border font-bold text-sm mb-4 flex-shrink-0">
+                NMFA Collection
               </p>
 
-              <p className="text-artifact-border/80 text-xs mb-6 flex-1 overflow-y-auto pr-2">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua...
-              </p>
+              {/* DYNAMIC TEXT AREA: Pulls from DB based on which button is clicked! */}
+              <div className="text-artifact-border/80 text-sm mb-6 flex-1 overflow-y-auto pr-2 bg-white/40 p-3 rounded-xl border border-[#C9B99A]">
+                {selectedArtwork[activeModalTab]?.eng || "More information coming soon..."}
+              </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                <button className="bg-artifact-border text-artifact-card rounded-full py-2 font-daruma text-sm hover:opacity-90 transition-opacity">
-                  Details
+              {/* Action Buttons: They change the activeModalTab state to swap the text above */}
+              <div className="grid grid-cols-3 gap-2 mb-3 flex-shrink-0">
+                <button 
+                  onClick={() => setActiveModalTab("origin")}
+                  className={`rounded-full py-2 font-daruma text-sm transition-colors border-2 border-artifact-border ${
+                    activeModalTab === "origin" 
+                    ? "bg-artifact-border text-artifact-card" 
+                    : "bg-transparent text-artifact-border hover:bg-gray-100"
+                  }`}
+                >
+                  Origin
                 </button>
-                <button className="bg-transparent border-2 border-artifact-border text-artifact-border rounded-full py-2 font-daruma text-sm hover:bg-gray-100 transition-colors">
+                <button 
+                  onClick={() => setActiveModalTab("artist")}
+                  className={`rounded-full py-2 font-daruma text-sm transition-colors border-2 border-artifact-border ${
+                    activeModalTab === "artist" 
+                    ? "bg-artifact-border text-artifact-card" 
+                    : "bg-transparent text-artifact-border hover:bg-gray-100"
+                  }`}
+                >
                   Artist
                 </button>
-                <button className="bg-transparent border-2 border-artifact-border text-artifact-border rounded-full py-2 font-daruma text-sm hover:bg-gray-100 transition-colors">
+                <button 
+                  onClick={() => setActiveModalTab("art_element")}
+                  className={`rounded-full py-2 font-daruma text-sm transition-colors border-2 border-artifact-border ${
+                    activeModalTab === "art_element" 
+                    ? "bg-artifact-border text-artifact-card" 
+                    : "bg-transparent text-artifact-border hover:bg-gray-100"
+                  }`}
+                >
                   Elements
                 </button>
               </div>
-              <button className="w-full bg-artifact-gold text-artifact-border rounded-full py-3 font-daruma text-lg tracking-wider shadow-md hover:brightness-110 transition-all">
-                Read More
+
+              {/* START QUIZ BUTTON: Navigates to QuizScreen and passes the active artwork */}
+              <button 
+                onClick={() => navigate('/quiz', { state: { artwork: selectedArtwork } })}
+                className="w-full flex-shrink-0 bg-artifact-gold text-artifact-border rounded-full py-3 font-daruma text-lg tracking-wider shadow-md hover:brightness-110 transition-all"
+              >
+                Start Quiz
               </button>
             </div>
           </div>
