@@ -53,8 +53,7 @@ const MuseumMap = () => {
   ];
 
   return (
-    <div className="h-[100dvh] w-screen bg-[#617A55] overflow-hidden flex flex-col items-center pt-12 pb-[100px] font-hind-kochi relative box-border">
-      
+    <div className="h-[100dvh] w-screen bg-[#617A55] overflow-hidden flex flex-col items-center pt-12 pb-[120px] font-hind-kochi relative box-border">
       <div className="w-11/12 max-w-sm mb-4 pl-2 flex-shrink-0">
         <h2 className={`${isCJK ? 'font-sans font-bold' : 'font-daruma'} text-white text-3xl tracking-wide`}>
           {t.museumMap || "Museum Map"}
