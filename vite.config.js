@@ -27,7 +27,8 @@ export default defineConfig({
           "A Gamified Markerless Augmented Reality System at the National Museum of Fine Arts",
         theme_color: "#16120c",
         background_color: "#16120c",
-        display: "fullscreen",
+        display: "standalone",
+        start_url: '/?mode=standalone',
         orientation: "portrait",
         icons: [
           {

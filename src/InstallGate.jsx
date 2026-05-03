@@ -7,7 +7,14 @@ const InstallGate = ({ children }) => {
 
   useEffect(() => {
     const checkStandalone = () => {
-      return (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone);
+      
+      const isStandaloneMedia = window.matchMedia('(display-mode: standalone)').matches;
+      
+      const isIOSStandalone = window.navigator.standalone === true;
+     
+      const isStandaloneUrl = window.location.search.includes('mode=standalone');
+
+      return isStandaloneMedia || isIOSStandalone || isStandaloneUrl;
     };
     setIsStandalone(checkStandalone());
 
