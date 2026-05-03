@@ -50,40 +50,43 @@ const Dashboard = () => {
       </p>
 
       {paintingDetected && activeArtwork && !showInfoModal && (
-        <div className="absolute bottom-32 w-11/12 max-w-sm bg-[#16120c] border-4 border-[#4A2E1B] rounded-2xl p-1 shadow-xl animate-fade-in-up z-40">
-          <div className="bg-[#EBDAB5] rounded-xl p-4">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-daruma'} text-[#4A2E1B] text-2xl`}>
-                {activeArtwork.title?.[currentLang] || activeArtwork.title?.eng}
-              </h3>
-              <span className="bg-[#4A2E1B] text-white text-xs font-bold px-2 py-1 rounded-full">
-                {t.baseBadge}
-              </span>
-            </div>
-            
-            <p className={`${isCJK ? 'font-sans' : 'font-hind'} text-[#4A2E1B] text-xs mb-4`}>
-              {activeArtwork.artist?.[currentLang] || activeArtwork.artist?.eng}
-            </p>
-            
-            <div className="flex gap-2">
-              <button 
-                onClick={() => {
-                  setActiveModalTab("clues");
-                  setShowInfoModal(true);
-                }}
-                className={`flex-1 bg-[#4A2E1B] text-[#EBDAB5] py-2 rounded-full ${isCJK ? 'font-sans font-bold' : 'font-daruma'} tracking-wider text-sm hover:opacity-90`}
-              >
-                {t.viewInfo}
-              </button>
+        <div className="absolute inset-0 z-50 flex flex-col justify-end items-center pb-[120px] pointer-events-none">
+          <div className="w-11/12 max-w-sm bg-[#16120c] border-4 border-[#4A2E1B] rounded-2xl p-1 shadow-xl animate-fade-in-up pointer-events-auto">
+            <div className="bg-[#EBDAB5] rounded-xl p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-daruma'} text-[#4A2E1B] text-2xl`}>
+                  {activeArtwork.title?.[currentLang] || activeArtwork.title?.eng}
+                </h3>
+                <span className="bg-[#4A2E1B] text-white text-xs font-bold px-2 py-1 rounded-full flex-shrink-0">
+                  {t.baseBadge}
+                </span>
+              </div>
+              
+              <p className={`${isCJK ? 'font-sans' : 'font-hind'} text-[#4A2E1B] text-xs mb-4`}>
+                {activeArtwork.artist?.[currentLang] || activeArtwork.artist?.eng}
+              </p>
+              
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    setActiveModalTab("clues");
+                    setShowInfoModal(true);
+                  }}
+                  className={`flex-1 bg-[#4A2E1B] text-[#EBDAB5] py-2 rounded-full ${isCJK ? 'font-sans font-bold' : 'font-daruma'} tracking-wider text-sm hover:opacity-90`}
+                >
+                  {t.viewInfo}
+                </button>
 
-              <button 
-                onClick={() => navigate('/quiz', { state: { artwork: activeArtwork } })}
-                className={`flex-1 bg-white border-2 border-[#4A2E1B] text-[#4A2E1B] py-2 rounded-full ${isCJK ? 'font-sans font-bold' : 'font-daruma'} tracking-wider text-sm hover:bg-gray-100`}
-              >
-                {t.startQuiz}
-              </button>
+                <button 
+                  onClick={() => navigate('/quiz', { state: { artwork: activeArtwork } })}
+                  className={`flex-1 bg-white border-2 border-[#4A2E1B] text-[#4A2E1B] py-2 rounded-full ${isCJK ? 'font-sans font-bold' : 'font-daruma'} tracking-wider text-sm hover:bg-gray-100`}
+                >
+                  {t.startQuiz}
+                </button>
+              </div>
             </div>
           </div>
+          
         </div>
       )}
 
