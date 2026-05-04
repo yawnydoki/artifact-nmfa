@@ -1,50 +1,104 @@
 import React, { useEffect, useRef } from 'react';
 
+// Map each painting index to its sound file
+const PAINTING_SOUNDS = {
+  0: '/sounds/painting-0.mp3',
+  1: '/sounds/painting-1.mp3',
+  2: '/sounds/painting-2.mp3',
+  // add more sounds yeah (public/sounds)
+};
+
 const ArScanner = ({ onTargetFound, onTargetLost }) => {
   const sceneRef = useRef(null);
-
   const callbacksRef = useRef({ onTargetFound, onTargetLost });
-
+  const audioRef = useRef(null); // Tracks currently playing audio
+ 
+  // Keep callbacks ref in sync without re-running the effect
+  useEffect(() => {
+    callbacksRef.current = { onTargetFound, onTargetLost };
+  }, [onTargetFound, onTargetLost]);
+ 
   useEffect(() => {
     const targets = document.querySelectorAll('[mindar-image-target]');
-    
+ 
+    const stopCurrentAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+    };
+ 
     const handleTargetFound = (event) => {
       const index = parseInt(event.target.dataset.index);
-      
       console.log(`Painting Detected! Index: ${index}`);
-      if (callbacksRef.current.onTargetFound) callbacksRef.current.onTargetFound(index);
+ 
+      // Stop any currently playing sound first
+      stopCurrentAudio();
+ 
+      // Play the sound mapped to this specific painting
+      const soundSrc = PAINTING_SOUNDS[index];
+      if (soundSrc) {
+        const audio = new Audio(soundSrc);
+        audio.play().catch((err) =>
+          console.warn(`Audio play failed for painting ${index}:`, err)
+        );
+        audioRef.current = audio;
+ 
+        // Clean up ref when audio finishes naturally
+        audio.addEventListener('ended', () => {
+          audioRef.current = null;
+        });
+      }
+ 
+      if (callbacksRef.current.onTargetFound) {
+        callbacksRef.current.onTargetFound(index);
+      }
     };
-
+ 
     const handleTargetLost = () => {
       console.log('Target Lost!');
-      if (callbacksRef.current.onTargetLost) callbacksRef.current.onTargetLost();
+ 
+      // Stop sound when painting goes out of frame
+      stopCurrentAudio();
+ 
+      if (callbacksRef.current.onTargetLost) {
+        callbacksRef.current.onTargetLost();
+      }
     };
-
+ 
     targets.forEach((target) => {
       target.addEventListener('targetFound', handleTargetFound);
       target.addEventListener('targetLost', handleTargetLost);
     });
-
+ 
     return () => {
+      // Remove event listeners
       targets.forEach((target) => {
         target.removeEventListener('targetFound', handleTargetFound);
         target.removeEventListener('targetLost', handleTargetLost);
       });
-
+ 
+      // Stop any playing audio on unmount
+      stopCurrentAudio();
+ 
+      // Stop camera tracks
       const videoElements = document.querySelectorAll('video');
       videoElements.forEach((video) => {
         if (video.srcObject) {
-          video.srcObject.getTracks().forEach(track => {
-            track.stop();
-          });
+          video.srcObject.getTracks().forEach((track) => track.stop());
         }
       });
-      
-      if (sceneRef.current && sceneRef.current.systems["mindar-image-system"]) {
+ 
+      // Stop MindAR system
+      if (
+        sceneRef.current &&
+        sceneRef.current.systems['mindar-image-system']
+      ) {
         try {
-          sceneRef.current.systems["mindar-image-system"].stop();
+          sceneRef.current.systems['mindar-image-system'].stop();
         } catch (err) {
-          console.log("MindAR cleanup caught safely.");
+          console.log('MindAR cleanup caught safely.');
         }
       }
     };
