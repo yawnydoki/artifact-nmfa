@@ -23,8 +23,6 @@ export default defineConfig({
       manifest: {
         name: "ArtiFact: NMFA Guide",
         short_name: "ArtiFact",
-        description:
-          "A Gamified Markerless Augmented Reality System at the National Museum of Fine Arts",
         theme_color: "#16120c",
         background_color: "#16120c",
         display: "standalone",

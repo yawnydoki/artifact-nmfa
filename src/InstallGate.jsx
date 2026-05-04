@@ -40,7 +40,9 @@ const InstallGate = ({ children }) => {
     }
   };
 
-  if (isStandalone) {
+  // add ?dev=true to the end of your localhost url
+  const isDevBypass = window.location.search.includes('dev=true');
+  if (isStandalone || isDevBypass) {
     return children;
   }
 
