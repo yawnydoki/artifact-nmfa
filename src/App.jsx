@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from './supabaseClient';
 
-// Screen Imports
 import LoadingScreen from './LoadingScreen';
 import Dashboard from './Dashboard';
 import MuseumMap from './MuseumMap';
@@ -13,7 +12,6 @@ import Passport from './Passport';
 import EndSequence from './EndSequence';
 import BottomNav from './BottomNav';
 
-// Wrapper for the routes to handle animations properly
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
@@ -29,7 +27,6 @@ const AnimatedRoutes = () => {
   );
 };
 
-// Reusable animation wrapper for every page
 const PageWrapper = ({ children }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
@@ -46,9 +43,22 @@ function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Invisible User Registration
     const initializeVisitor = async () => {
       let visitorId = localStorage.getItem('artifact_visitor_id');
+
+      if (visitorId) {
+        const { data, error } = await supabase
+          .from('visitors')
+          .select('id')
+          .eq('id', visitorId)
+          .single();
+
+        if (error || !data) {
+          console.warn("Ghost ID detected! Wiping local storage and resetting...");
+          visitorId = null; 
+          localStorage.removeItem('artifact_visitor_id');
+        }
+      }
 
       if (!visitorId) {
         visitorId = uuidv4();
@@ -60,7 +70,7 @@ function App() {
           if (error) throw error;
           
           localStorage.setItem('artifact_visitor_id', visitorId);
-          console.log("New anonymous visitor registered!");
+          console.log("New anonymous visitor registered:", visitorId);
         } catch (err) {
           console.error("Error registering visitor:", err.message);
         }
@@ -71,18 +81,15 @@ function App() {
 
     initializeVisitor();
 
-    // 2. Loading Screen Timer
     const timer = setTimeout(() => setIsAppLoading(false), 5000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Show loading screen while initializing
   if (isAppLoading) return <LoadingScreen />;
 
-  // Render the actual app
   return (
     <BrowserRouter>
-      <div className="relative w-screen h-screen overflow-hidden bg-[#16120c]">
+      <div className="relative w-screen h-[100dvh] overflow-hidden bg-artifact-bg">
         <AnimatedRoutes />
         <BottomNav />
       </div>
