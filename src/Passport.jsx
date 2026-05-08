@@ -6,15 +6,15 @@ import { uiDict } from "./translations";
 
 const Passport = () => {
   const navigate = useNavigate();
-  
+
   const { currentLang } = useLanguage();
   const t = uiDict[currentLang] || uiDict.eng;
-  const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
+  const isCJK = ["chi", "jap", "kor"].includes(currentLang);
 
   const [activeTab, setActiveTab] = useState("badges");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
-  
-  const [activeModalTab, setActiveModalTab] = useState("clues"); 
+
+  const [activeModalTab, setActiveModalTab] = useState("clues");
 
   const [passportStamps, setPassportStamps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,23 +32,27 @@ const Passport = () => {
           .from("artworks")
           .select("*")
           .order("id", { ascending: true });
-          
+
         if (artworksError) throw artworksError;
 
         const { data: badgesData, error: badgesError } = await supabase
           .from("unlocked_badges")
           .select("artwork_id, badge_type, created_at")
           .eq("visitor_id", visitorId);
-          
+
         if (badgesError) throw badgesError;
 
         const mergedData = artworksData.map((artwork) => {
-          const unlockedBadge = badgesData.find((b) => b.artwork_id === artwork.id);
+          const unlockedBadge = badgesData.find(
+            (b) => b.artwork_id === artwork.id,
+          );
           return {
             ...artwork,
             isUnlocked: !!unlockedBadge,
             badgeType: unlockedBadge ? unlockedBadge.badge_type : null,
-            unlockDate: unlockedBadge ? new Date(unlockedBadge.created_at).toLocaleDateString() : null
+            unlockDate: unlockedBadge
+              ? new Date(unlockedBadge.created_at).toLocaleDateString()
+              : null,
           };
         });
 
@@ -68,54 +72,53 @@ const Passport = () => {
 
   const handleOpenArtwork = (artwork) => {
     setSelectedArtwork(artwork);
-    setActiveModalTab("clues"); 
+    setActiveModalTab("clues");
   };
 
   return (
-    <div className="h-[100dvh] w-screen bg-artifact-passport overflow-hidden flex flex-col items-center pt-10 pb-[100px] font-hind relative box-border">
-      
+    <div className="h-[100dvh] w-screen bg-[#946A42] overflow-hidden flex flex-col items-center pt-10 pb-[120px] font-neohellenic relative box-border">
       <div className="w-11/12 max-w-sm flex justify-between items-center mb-6 pl-2 flex-shrink-0">
-        <h2 className={`${isCJK ? 'font-sans font-bold' : 'font-daruma'} text-white text-3xl tracking-wide`}>
-          {t.passport}
+        <h2 className="font-sans font-bold text-white text-3xl tracking-wide">
+          {t.passport || "Passport"}
         </h2>
-        <div className="bg-green-700/80 border border-white/30 text-white text-[10px] px-3 py-1 rounded-full font-bold shadow-sm uppercase tracking-wider">
-          {unlockedCount}/{totalCount} {t.unlocked}
+        <div className="bg-[#4C7541] border border-[#6BB252] text-white text-[10px] px-3 py-1.5 rounded-full shadow-sm tracking-wider">
+          {unlockedCount}/{totalCount} {t.unlocked || "unlocked"}
         </div>
       </div>
 
       <div className="w-11/12 max-w-sm flex-1 flex flex-col relative z-0 min-h-0">
-        
-        <div className="flex w-[90%] mx-auto z-10 relative top-2 flex-shrink-0">
+        <div className="flex w-full mx-auto z-10 relative flex-shrink-0 px-2 gap-1">
           <button
             onClick={() => setActiveTab("badges")}
-            className={`flex-1 py-3 font-daruma rounded-t-2xl text-lg transition-colors duration-200 ${
+            className={`flex-1 py-3 font-serif rounded-t-xl text-[1.1rem] transition-colors duration-200 ${
               activeTab === "badges"
-                ? "bg-artifact-tab text-white z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]"
-                : "bg-[#9C7042] text-white/70 z-10"
+                ? "bg-[#E0CCB6] text-[#5A3B22] z-20 shadow-[0_-2px_5px_rgba(0,0,0,0.05)]"
+                : "bg-[#C4AB8F] text-[#5A3B22]/70 z-10"
             }`}
           >
-            {t.yourBadges}
+            {t.yourBadges || "User Badges"}
           </button>
           <button
             onClick={() => setActiveTab("history")}
-            className={`flex-1 py-3 font-daruma rounded-t-2xl text-lg transition-colors duration-200 ${
+            className={`flex-1 py-3 font-serif rounded-t-xl text-[1.1rem] transition-colors duration-200 ${
               activeTab === "history"
-                ? "bg-artifact-tab text-white z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]"
-                : "bg-[#9C7042] text-white/70 z-10"
+                ? "bg-[#E0CCB6] text-[#5A3B22] z-20 shadow-[0_-2px_5px_rgba(0,0,0,0.05)]"
+                : "bg-[#C4AB8F] text-[#5A3B22]/70 z-10"
             }`}
           >
-            {t.history}
+            {t.history || "History"}
           </button>
         </div>
 
-        <div className="bg-artifact-card flex-1 rounded-3xl p-6 shadow-2xl border-b-8 border-[#C9B99A] relative z-20 overflow-y-auto hide-scrollbar">
+        <div className="bg-[#E0CCB6] flex-1 rounded-[1.5rem] p-6 shadow-2xl relative z-20 overflow-y-auto hide-scrollbar flex flex-col -mt-1">
           {isLoading ? (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <p className="font-daruma text-artifact-border animate-pulse text-lg">{t.loading || "Loading..."}</p>
+              <p className="font-serif text-[#5A3B22] animate-pulse text-lg">
+                {t.loading || "Loading..."}
+              </p>
             </div>
           ) : activeTab === "badges" ? (
-          
-            <div className="grid grid-cols-2 gap-6 justify-items-center mt-4 pb-8">
+            <div className="grid grid-cols-2 gap-y-10 justify-items-center mt-2 pb-8">
               {passportStamps.map((stamp) => (
                 <div
                   key={stamp.id}
@@ -123,124 +126,131 @@ const Passport = () => {
                   onClick={() => stamp.isUnlocked && handleOpenArtwork(stamp)}
                 >
                   <div
-                    className={`w-24 h-24 rounded-full border-4 shadow-md flex items-center justify-center mb-2 transition-transform hover:scale-105
+                    className={`w-[110px] h-[110px] rounded-full border-[5px] flex items-center justify-center mb-3 transition-transform hover:scale-105 shadow-md
                     ${
                       !stamp.isUnlocked
-                        ? "bg-[#9C7042] border-[#8A6136]"
-                        : stamp.badgeType === "Gold"
-                        ? "bg-white border-artifact-gold"
-                        : "bg-white border-gray-400"
+                        ? "bg-[#9A7B5C] border-[#70563C]"
+                        : "bg-white border-[#F2C94C]" // Unlocked Gold Ring
                     }`}
-                  >
-                    {stamp.isUnlocked && (
-                      <div className="w-16 h-16 rounded-full bg-gray-100"></div>
-                    )}
-                  </div>
+                  ></div>
+
                   <p
-                    className={`font-daruma text-sm text-center leading-tight ${
-                      stamp.isUnlocked ? "text-artifact-border" : "text-[#9C7042]"
-                    }`}
+                    className={`font-serif text-[15px] text-center leading-tight max-w-[100px] ${stamp.isUnlocked ? "text-[#8E431E]" : "text-[#A28464]"}`}
                   >
-                    {stamp.isUnlocked ? (stamp.title?.[currentLang] || stamp.title?.eng) : "???"}
+                    {stamp.isUnlocked
+                      ? stamp.title?.[currentLang] || stamp.title?.eng
+                      : "???"}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-       
-            <div className="flex flex-col gap-4 mt-2 pb-8">
-              {unlockedHistory.length === 0 ? (
-                <p className="font-hind text-center text-artifact-border/70 mt-4">
-                  Scan paintings to start your history!
-                </p>
-              ) : (
-                unlockedHistory.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleOpenArtwork(item)}
-                    className="bg-white p-4 rounded-2xl shadow-sm border-2 border-[#C9B99A] flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="w-14 h-14 bg-gray-200 rounded-lg flex-shrink-0"></div>
-                    <div>
-                      <h3 className="font-daruma text-artifact-border text-xl">
-                        {item.title?.[currentLang] || item.title?.eng}
-                      </h3>
-                      <p className="text-artifact-border/70 text-xs font-bold">
-                        Scanned: {item.unlockDate}
-                      </p>
+            <div className="flex flex-col flex-1 relative">
+              <div className="flex flex-col gap-4 mt-2 pb-16 overflow-y-auto hide-scrollbar">
+                {unlockedHistory.length === 0 ? (
+                  <p className="font-serif text-center text-[#9A7B5C] mt-4 italic text-lg">
+                    {t.areaEmpty || "Scan paintings to start your history!"}
+                  </p>
+                ) : (
+                  unlockedHistory.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleOpenArtwork(item)}
+                      className="bg-white p-4 rounded-3xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-[60px] h-[60px] bg-[#BBA58F] rounded-2xl flex-shrink-0"></div>
+
+                      <div className="flex flex-col">
+                        <h3
+                          className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-[#1A0F0A] text-lg leading-none mb-1`}
+                        >
+                          {item.title?.[currentLang] || item.title?.eng}
+                        </h3>
+                        <p className="font-serif text-[#783713] text-sm italic">
+                          {item.artist?.[currentLang] || item.artist?.eng} •
+                          1884
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
+
+              <div className="absolute bottom-0 right-0 pt-4 bg-[#E0CCB6]">
+                <button className="bg-[#381111] text-white font-serif text-[1.1rem] px-6 py-2 rounded-xl shadow-md hover:brightness-110 transition-all">
+                  Save Data
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
 
       {selectedArtwork && (
-        <div className="absolute inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm animate-fade-in-up">
-          <div className="bg-artifact-passport w-full h-[85%] rounded-t-[40px] p-4 flex flex-col items-center relative border-t-4 border-artifact-card pb-[100px]">
-            <button
-              onClick={() => setSelectedArtwork(null)}
-              className="absolute top-6 right-6 w-8 h-8 bg-artifact-card rounded-full text-artifact-border font-bold shadow-md hover:bg-white z-10"
+        <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#E0CCB6] w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl flex flex-col relative border border-[#C4AB8F]">
+            <div className="bg-[#381111] py-4 px-6 flex justify-between items-center text-white font-serif shadow-sm">
+              <span className="text-2xl">About</span>
+              <button
+                onClick={() => setSelectedArtwork(null)}
+                className="text-xl opacity-80 hover:opacity-100 transition-opacity"
+              >
+                [x]
+              </button>
+            </div>
+            <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl">
+              img
+            </div>
+
+            <h2
+              className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-center text-[2.5rem] text-[#4A260F] mt-3 leading-none`}
             >
-              ✕
-            </button>
+              {selectedArtwork.title?.[currentLang] ||
+                selectedArtwork.title?.eng}
+            </h2>
+            <p className="text-center font-serif italic text-[#783713] text-sm mb-4">
+              {selectedArtwork.artist?.[currentLang] ||
+                selectedArtwork.artist?.eng}{" "}
+              • 1884
+            </p>
 
-            <div className="w-11/12 max-w-sm mt-12 bg-artifact-card flex-1 rounded-3xl p-5 border-b-8 border-[#C9B99A] shadow-xl flex flex-col overflow-hidden">
-              <div className="w-full h-48 flex-shrink-0 bg-gray-300 rounded-xl mb-4 flex items-center justify-center text-gray-500 font-bold border-2 border-artifact-border/20">
-                Img
-              </div>
+            <div
+              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-36 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6]`}
+            >
+              {selectedArtwork[activeModalTab]?.[currentLang] ||
+                selectedArtwork[activeModalTab]?.eng ||
+                "More information coming soon..."}
+            </div>
 
-              <h2 className="font-daruma text-artifact-border text-3xl mb-1 flex-shrink-0">
-                {selectedArtwork.title?.[currentLang] || selectedArtwork.title?.eng}
-              </h2>
-              
-              <p className="text-artifact-border font-bold text-sm mb-4 flex-shrink-0">
-                by {selectedArtwork.artist?.[currentLang] || selectedArtwork.artist?.eng}
-              </p>
+            <div className="mx-5 grid grid-cols-3 gap-3 mb-3">
+              <button
+                onClick={() => setActiveModalTab("origin")}
+                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors ${activeModalTab === "origin" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
+              >
+                {t.origin || "Origin"}
+              </button>
+              <button
+                onClick={() => setActiveModalTab("artist")}
+                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors ${activeModalTab === "artist" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
+              >
+                {t.artist || "Artist"}
+              </button>
+              <button
+                onClick={() => setActiveModalTab("art_element")}
+                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-[12px] transition-colors ${activeModalTab === "art_element" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
+              >
+                {t.elements || "Art Elements"}
+              </button>
+            </div>
 
-              <div className={`text-artifact-border/80 text-sm mb-6 flex-1 overflow-y-auto pr-2 bg-white/40 p-3 rounded-xl border border-[#C9B99A] ${isCJK ? 'font-sans leading-relaxed' : 'font-hind'}`}>
-                {selectedArtwork[activeModalTab]?.[currentLang] || selectedArtwork[activeModalTab]?.eng || "More information coming soon..."}
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 mb-3 flex-shrink-0">
-                <button 
-                  onClick={() => setActiveModalTab("origin")}
-                  className={`rounded-full py-2 font-daruma text-sm transition-colors border-2 border-artifact-border ${
-                    activeModalTab === "origin" 
-                    ? "bg-artifact-border text-artifact-card" 
-                    : "bg-transparent text-artifact-border hover:bg-gray-100"
-                  }`}
-                >
-                  {t.origin}
-                </button>
-                <button 
-                  onClick={() => setActiveModalTab("artist")}
-                  className={`rounded-full py-2 font-daruma text-sm transition-colors border-2 border-artifact-border ${
-                    activeModalTab === "artist" 
-                    ? "bg-artifact-border text-artifact-card" 
-                    : "bg-transparent text-artifact-border hover:bg-gray-100"
-                  }`}
-                >
-                  {t.artist}
-                </button>
-                <button 
-                  onClick={() => setActiveModalTab("art_element")}
-                  className={`rounded-full py-2 font-daruma text-sm transition-colors border-2 border-artifact-border ${
-                    activeModalTab === "art_element" 
-                    ? "bg-artifact-border text-artifact-card" 
-                    : "bg-transparent text-artifact-border hover:bg-gray-100"
-                  }`}
-                >
-                  {t.elements}
-                </button>
-              </div>
-
-              <button 
-                onClick={() => navigate('/quiz', { state: { artwork: selectedArtwork } })}
-                className={`w-full flex-shrink-0 bg-artifact-gold text-artifact-border rounded-full py-3 ${isCJK ? 'font-sans font-bold' : 'font-daruma'} text-lg tracking-wider shadow-md hover:brightness-110 transition-all`}>
-                {t.startQuiz}
+            <div className="mx-5 mb-6">
+              <button
+                onClick={() =>
+                  navigate("/quiz", { state: { artwork: selectedArtwork } })
+                }
+                className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] transition-colors font-serif rounded-xl py-2.5 text-lg"
+              >
+                {t.startQuiz || "Start Quiz"}
               </button>
             </div>
           </div>

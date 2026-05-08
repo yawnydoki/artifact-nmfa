@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
 const LoadingScreen = () => {
-  // Set to true to see the "Reconnecting" screen, false for the "Loading" screen
-  const [hasError, setHasError] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Simulate loading progress
   useEffect(() => {
     if (hasError) return;
     
     const interval = setInterval(() => {
       setProgress((oldProgress) => {
-        if (oldProgress === 100) {
+        if (oldProgress >= 100) {
           clearInterval(interval);
           return 100;
         }
@@ -23,34 +21,33 @@ const LoadingScreen = () => {
   }, [hasError]);
 
   return (
-    <div className="h-screen w-screen bg-artifact-bg flex flex-col items-center justify-center text-white font-arial">
+    <div className="h-[100dvh] w-screen bg-[#3B1514] flex flex-col items-center justify-center text-[#FDFBF7]">
       
       {!hasError ? (
-        /* --- STATE 1: LOADING SCREEN --- */
-        <div className="flex flex-col items-center w-full max-w-sm px-6 h-full justify-between py-24">
-          <div className="flex-grow flex flex-col justify-center items-center">
-            <h1 className="font-daruma text-5xl tracking-widest mb-2">ArtiFact</h1>
-            <p className="text-xs tracking-wide text-gray-300">National Museum of Fine Arts</p>
+        <div className="flex flex-col items-center w-full max-w-sm px-6 h-full justify-between py-24 animate-fade-in">
+          <div className="flex-grow flex flex-col justify-center items-center text-center">
+            <h1 className="font-serif text-5xl tracking-[0.10em] mb-4">ArtiFact</h1>
+            <p className="font-neohellenic text-[0.80rem] tracking-[0.15em] uppercase opacity-90">
+              National Museum of Fine Arts
+            </p>
           </div>
           
-          {/* Progress Bar */}
-          <div className="w-48 h-2 rounded-full border border-gray-400 overflow-hidden mb-12">
+          <div className="w-48 h-[10px] rounded-full border border-white/40 mb-12 p-[1px]">
             <div 
-              className="h-full bg-white rounded-full transition-all duration-300 ease-out"
+              className="h-full bg-[#FDFBF7] rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
         </div>
       ) : (
-        /* --- STATE 2: RECONNECTING (ERROR) SCREEN --- */
-        <div className="flex flex-col items-center w-full max-w-sm px-6 text-center">
-          {/* Alert Icon (SVG) */}
-          <div className="mb-6 border-2 border-white rounded-[10px] w-10 h-10 flex items-center justify-center">
-            <span className="font-bold text-lg font-arial">!</span>
+        <div className="flex flex-col items-center w-full max-w-sm px-6 text-center animate-fade-in-up">
+          <div className="mb-6 border-2 border-current rounded-xl w-10 h-10 flex items-center justify-center">
+            <span className="font-arial font-bold text-xl">!</span>
           </div>
 
-          <h2 className="font-daruma text-3xl mb-3 tracking-wider">Reconnecting...</h2>
-          <p className="text-xs text-gray-300 mb-8 max-w-[200px] leading-relaxed">
+          <h2 className="font-serif text-3xl mb-3 tracking-wide">Reconnecting...</h2>
+          
+          <p className="font-neohellenic text-base opacity-80 mb-8 max-w-[250px] leading-relaxed">
             The connection was interrupted while loading. Please try again.
           </p>
 
@@ -59,7 +56,7 @@ const LoadingScreen = () => {
               setHasError(false);
               setProgress(0);
             }}
-            className="bg-white text-black font-bold text-xs py-2 px-10 rounded-full hover:bg-gray-200 transition-colors"
+            className="font-arial bg-[#FDFBF7] text-[#3B1514] font-bold text-sm py-2 px-12 rounded-full hover:opacity-90 active:scale-95 transition-all tracking-wide"
           >
             Retry
           </button>

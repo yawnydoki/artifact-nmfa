@@ -2,7 +2,7 @@ export const uiDict = {
   eng: {
     scanPrompt: "Scan an Artwork",
     baseBadge: "Base Badge",
-    viewInfo: "View Info",
+    viewInfo: "Read More",
     startQuiz: "Start Quiz",
     passport: "Passport",
     unlocked: "Unlocked",
