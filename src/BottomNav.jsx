@@ -95,8 +95,8 @@ const BottomNav = () => {
         </div>
 
         <button 
-          onClick={() => handleNav('/end')}
-          className={`pointer-events-auto p-3 rounded-full transition-all duration-300 drop-shadow-lg ${isActive('/end') ? 'bg-museum-gold text-museum-brown' : 'bg-museum-brown/60 backdrop-blur-md text-white border border-white/20 hover:bg-museum-brown'}`}
+          onClick={() => handleNav('/end-prompt')}
+          className={`pointer-events-auto p-3 rounded-full transition-all duration-300 drop-shadow-lg ${isActive('/end-prompt') || isActive('/end') ? 'bg-museum-gold text-museum-brown' : 'bg-museum-brown/60 backdrop-blur-md text-white border border-white/20 hover:bg-museum-brown'}`}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
         </button>

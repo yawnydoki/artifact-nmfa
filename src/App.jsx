@@ -9,6 +9,7 @@ import Dashboard from './Dashboard';
 import MuseumMap from './MuseumMap';
 import QuizScreen from './QuizScreen';
 import Passport from './Passport';
+import EndPrompt from './EndPrompt';
 import EndSequence from './EndSequence';
 import BottomNav from './BottomNav';
 
@@ -21,6 +22,7 @@ const AnimatedRoutes = () => {
         <Route path="/map" element={<PageWrapper><MuseumMap /></PageWrapper>} />
         <Route path="/quiz" element={<PageWrapper><QuizScreen /></PageWrapper>} />
         <Route path="/passport" element={<PageWrapper><Passport /></PageWrapper>} />
+        <Route path="/end-prompt" element={<PageWrapper><EndPrompt /></PageWrapper>} />
         <Route path="/end" element={<PageWrapper><EndSequence /></PageWrapper>} />
       </Routes>
     </AnimatePresence>
