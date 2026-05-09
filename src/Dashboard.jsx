@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [isFetching, setIsFetching] = useState(false);
 
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [activeModalTab, setActiveModalTab] = useState("clues"); 
+  const [activeModalTab, setActiveModalTab] = useState("origin"); 
 
   const handleDetection = async (index) => {
     if (isFetching || (activeArtwork && activeArtwork.target_index === index)) return;
@@ -85,7 +85,7 @@ const Dashboard = () => {
             </div>
             
             <p className={`${isCJK ? 'font-sans' : 'font-neohellenic'} text-white/90 text-sm mb-4 leading-relaxed line-clamp-2`}>
-               {activeArtwork.clues?.[currentLang] || activeArtwork.clues?.eng || "Explore the details of this masterpiece..."}
+               {activeArtwork.origin?.[currentLang] || activeArtwork.origin?.eng || "Explore the details of this masterpiece..."}
             </p>
             
             <hr className="border-t-[1.5px] border-dotted border-white/40 mb-5" />
@@ -99,7 +99,7 @@ const Dashboard = () => {
               </button>
               <button 
                 onClick={() => {
-                  setActiveModalTab("clues");
+                  setActiveModalTab("origin");
                   setShowInfoModal(true);
                 }}
                 className="flex-1 bg-museum-gold text-artifact-bg py-2.5 rounded-full font-serif text-lg tracking-wide hover:brightness-110 transition-all shadow-md"

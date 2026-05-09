@@ -49,7 +49,7 @@ const MuseumMap = () => {
 
   const mapZones = [
     { id: 1, color: 'bg-[#C973A4]' }, // pink top one
-    { id: 2, color: 'bg-[#3E5D36]' }, // bbot left dark green
+    { id: 2, color: 'bg-[#3E5D36]' }, // bot left dark green
     { id: 3, color: 'bg-[#9F7657]' }, // bot mid brown
     { id: 4, color: 'bg-[#9AB053]' }  // bot right light green
   ];
@@ -67,22 +67,35 @@ const MuseumMap = () => {
         <div className="w-full bg-artifact-card p-3 rounded-[1.5rem] shadow-xl">
           <div className="flex flex-col gap-2 h-64">
             <div 
-              className={`w-full h-1/3 ${mapZones[0].color} rounded-lg flex items-center justify-center cursor-pointer transition-all ${activeZone === 1 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
+              className={`w-full h-1/3 ${mapZones[0].color} flex items-center justify-center cursor-pointer transition-all ${activeZone === 1 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
               onClick={() => setActiveZone(1)}
             >
-               <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
+              <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
             </div>
 
             <div className="w-full h-2/3 flex gap-2">
-              {[1, 2, 3].map((idx) => (
-                <div 
-                  key={mapZones[idx].id}
-                  className={`flex-1 ${mapZones[idx].color} rounded-lg flex items-center justify-center cursor-pointer transition-all ${activeZone === mapZones[idx].id ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`} 
-                  onClick={() => setActiveZone(mapZones[idx].id)}
-                >
-                  <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
-                </div>
-              ))}
+
+              <div 
+                className={`flex-1 ${mapZones[1].color} flex items-center justify-center cursor-pointer transition-all ${activeZone === 2 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
+                onClick={() => setActiveZone(2)}
+              >
+                <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
+              </div>
+
+              <div 
+                className={`flex-[3] ${mapZones[2].color} flex items-center justify-center cursor-pointer transition-all ${activeZone === 3 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
+                onClick={() => setActiveZone(3)}
+              >
+                <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
+              </div>
+
+              <div 
+                className={`flex-1 ${mapZones[3].color} flex items-center justify-center cursor-pointer transition-all ${activeZone === 4 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
+                onClick={() => setActiveZone(4)}
+              >
+                <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
+              </div>
+
             </div>
           </div>
         </div>
