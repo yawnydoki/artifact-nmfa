@@ -7,8 +7,8 @@ import InstallGate from './InstallGate.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <LanguageProvider> 
-    <InstallGate>
+    {/*<InstallGate>*/}
       <App />
-    </InstallGate>
+    {/*</InstallGate>*/}
   </LanguageProvider>
 )

@@ -32,7 +32,7 @@ const Passport = () => {
 
   const [activeTab, setActiveTab] = useState("badges");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
-  const [activeModalTab, setActiveModalTab] = useState("clues"); 
+  const [activeModalTab, setActiveModalTab] = useState("origin"); 
 
   const [passportStamps, setPassportStamps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,7 +86,7 @@ const Passport = () => {
 
   const handleOpenArtwork = (artwork) => {
     setSelectedArtwork(artwork);
-    setActiveModalTab("clues"); 
+    setActiveModalTab("origin"); 
   };
 
   return (
