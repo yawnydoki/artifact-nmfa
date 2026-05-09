@@ -4,6 +4,25 @@ import { supabase } from "./supabaseClient";
 import { useLanguage } from "./LanguageContext";
 import { uiDict } from "./translations";
 
+const style = document.createElement('style');
+style.innerHTML = `
+  @keyframes shimmer {
+    0% { transform: translateX(-150%) skewX(-20deg); }
+    20% { transform: translateX(150%) skewX(-20deg); } /* change [number]% to a number to change speed of the shimmer*/
+    100% { transform: translateX(150%) skewX(-20deg); }
+  }
+  .animate-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: shimmer 6.7s infinite; /* change second to change interval time of shimmer */
+  }
+`;
+if (typeof document !== 'undefined') {
+  document.head.appendChild(style);
+}
+
 const Passport = () => {
   const navigate = useNavigate();
   
@@ -13,7 +32,6 @@ const Passport = () => {
 
   const [activeTab, setActiveTab] = useState("badges");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
-  
   const [activeModalTab, setActiveModalTab] = useState("clues"); 
 
   const [passportStamps, setPassportStamps] = useState([]);
@@ -123,11 +141,11 @@ const Passport = () => {
                   onClick={() => stamp.isUnlocked && handleOpenArtwork(stamp)}
                 >
                   <div
-                    className={`w-[110px] h-[110px] rounded-full border-[5px] flex items-center justify-center mb-3 transition-transform hover:scale-105 shadow-md overflow-hidden relative
+                    className={`w-[110px] h-[110px] rounded-full border-[5px] flex items-center justify-center mb-3 transition-transform duration-300 hover:scale-105 shadow-md overflow-hidden relative
                     ${
                       !stamp.isUnlocked
                         ? "bg-[#9A7B5C] border-[#70563C]"
-                        : "bg-white border-[#F2C94C]" 
+                        : "bg-white border-[#F2C94C] animate-shimmer" 
                     }`}
                   >
                     {stamp.isUnlocked && stamp.badge_url ? (
@@ -143,7 +161,7 @@ const Passport = () => {
                   
                   <p className={`font-serif text-[15px] text-center leading-tight max-w-[100px] ${stamp.isUnlocked ? "text-[#8E431E]" : "text-[#A28464]"}`}>
                     {stamp.isUnlocked 
-                      ? (stamp.badge_name?.[currentLang] || stamp.badge_name?.eng || stamp.title?.eng) 
+                      ? (stamp.badge_name?.[currentLang] || stamp.badge_name?.eng || stamp.title?.[currentLang] || stamp.title?.eng) 
                       : "???"}
                   </p>
                 </div>
@@ -185,7 +203,7 @@ const Passport = () => {
               </div>
               
               <div className="absolute bottom-0 right-0 pt-4 bg-[#E0CCB6]">
-                <button className="bg-[#381111] text-white font-serif text-[1.1rem] px-6 py-2 rounded-xl shadow-md hover:brightness-110 transition-all">
+                <button className="bg-[#381111] text-white font-serif text-[1.1rem] px-6 py-2 rounded-xl shadow-md transition-all duration-150 active:scale-95">
                   Save Data
                 </button>
               </div>
@@ -221,25 +239,27 @@ const Passport = () => {
             </p>
 
             <div className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-36 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? 'font-sans text-sm' : 'font-neohellenic text-[15px]'} text-[#4A260F]/80 border border-[#E0CCB6]`}>
-              {selectedArtwork[activeModalTab]?.[currentLang] || selectedArtwork[activeModalTab]?.eng || "More information coming soon..."}
+              {typeof selectedArtwork[activeModalTab] === 'object' && selectedArtwork[activeModalTab] !== null
+                ? selectedArtwork[activeModalTab][currentLang] || selectedArtwork[activeModalTab].eng
+                : selectedArtwork[activeModalTab] || "More information coming soon..."}
             </div>
 
             <div className="mx-5 grid grid-cols-3 gap-3 mb-3">
               <button 
                 onClick={() => setActiveModalTab("origin")}
-                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors ${activeModalTab === "origin" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
+                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "origin" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
                 {t.origin || "Origin"}
               </button>
               <button 
                 onClick={() => setActiveModalTab("artist")}
-                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors ${activeModalTab === "artist" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
+                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "artist" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
                 {t.artist || "Artist"}
               </button>
               <button 
                 onClick={() => setActiveModalTab("art_element")}
-                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-[12px] transition-colors ${activeModalTab === "art_element" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
+                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-[12px] transition-colors duration-150 active:scale-95 ${activeModalTab === "art_element" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
                 {t.elements || "Art Elements"}
               </button>
@@ -248,7 +268,7 @@ const Passport = () => {
             <div className="mx-5 mb-6">
               <button 
                 onClick={() => navigate('/quiz', { state: { artwork: selectedArtwork } })}
-                className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] transition-colors font-serif rounded-xl py-2.5 text-lg"
+                className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
               >
                 {t.startQuiz || "Start Quiz"}
               </button>
