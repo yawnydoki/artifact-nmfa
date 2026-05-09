@@ -103,7 +103,7 @@ const Passport = () => {
 
       <div className="w-11/12 max-w-sm flex-1 flex flex-col relative z-0 min-h-0">
         
-        <div className="flex w-full mx-auto z-10 relative flex-shrink-0 px-2 gap-1">
+        <div className="flex w-full mx-auto z-10 relative flex-shrink-0 px-3 gap-1">
           <button
             onClick={() => setActiveTab("badges")}
             className={`flex-1 py-3 font-serif rounded-t-xl text-[1.1rem] transition-colors duration-200 ${
