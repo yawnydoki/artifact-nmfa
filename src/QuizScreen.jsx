@@ -91,8 +91,8 @@ const QuizScreen = () => {
 
       {gameState === 'playing' && (
         <div className="w-11/12 max-w-sm bg-[#381111] rounded-[1.5rem] shadow-2xl animate-fade-in-up mt-8 overflow-hidden flex flex-col border border-white/5">
-          <div className="pt-6 pb-8 px-6 flex flex-col items-center text-center">
-            <div className="flex gap-[5px] mb-4">
+          <div className="pt-6 px-6 flex flex-col items-center text-center">
+            <div className="flex gap-[5px] mb-2 justify-center">
                {[0, 1, 2, 3, 4].map(step => (
                  <div 
                    key={step} 
@@ -101,22 +101,22 @@ const QuizScreen = () => {
                ))}
             </div>
 
-            <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#FDFBF7] text-[1.35rem] leading-snug min-h-[60px] flex items-center justify-center`}>
+            <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#dfc4a7] text-[1.35rem] leading-snug min-h-[60px] flex items-center justify-center`}>
               {questionText}
             </h3>
           </div>
 
-          <div className="bg-[#E0CCB6] px-6 py-8 flex flex-col gap-4 border-t-2 border-[#2A0C0C]">
+          <div className="mb-8 bg-[#dfc4a7] px-6 py-6 flex flex-col gap-4">
             {choices.map((choice, index) => {
-              let buttonStyle = "bg-[#D4C3A3] border border-[#4A260F] text-[#4A260F] shadow-[0_3px_0_#4A260F] active:shadow-none active:translate-y-[3px]";
+              let buttonStyle = "bg-[#dfc4a7] border-2 border-[#4A260F] text-[#453128] shadow-[0_4px_0_rgba(0,0,0,0.25)] active:shadow-none active:translate-y-[4px]";
               
               if (selectedAnswer !== null) {
                 if (index === correctIndex) {
-                  buttonStyle = "bg-[#4C8C5C] border border-[#1B4B18] text-white shadow-[0_3px_0_#1B4B18] translate-y-0"; 
+                  buttonStyle = "bg-[#4C8C5C] border-2 border-[#1B4B18] text-white shadow-[0_4px_0_rgba(0,0,0,0.25)] translate-y-0";
                 } else if (index === selectedAnswer) {
-                  buttonStyle = "bg-[#A35252] border border-[#5A2020] text-white shadow-[0_3px_0_#5A2020] translate-y-[3px] shadow-none"; 
+                  buttonStyle = "bg-[#A35252] border-2 border-[#5A2020] text-white shadow-[0_4px_0_rgba(0,0,0,0.25)] shadow-none translate-y-[4px]";
                 } else {
-                  buttonStyle = "bg-[#D4C3A3]/50 border border-[#4A260F]/50 text-[#4A260F]/50 shadow-none translate-y-[3px]";
+                  buttonStyle = "bg-[#dfc4a7]/50 border-2 border-[#453128]/50 text-[#453128]/50 shadow-[0_4px_0_rgba(0,0,0,0.25)] shadow-none translate-y-[4px]";
                 }
               }
 
@@ -124,7 +124,7 @@ const QuizScreen = () => {
                 <button 
                   key={index}
                   onClick={() => handleAnswer(index)}
-                  className={`rounded-xl py-3 px-4 ${isCJK ? 'font-sans font-bold text-sm' : 'font-serif text-[1.1rem]'} transition-all ${buttonStyle}`}
+                  className={`rounded-xl py-2 ${isCJK ? 'font-sans text-sm' : 'font-serif text-[1.1rem]'} transition-all ${buttonStyle}`}
                 >
                   {choice}
                 </button>
@@ -140,11 +140,11 @@ const QuizScreen = () => {
             
             <div className="bg-[#E0CCB6] rounded-xl pt-6 pb-8 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
               
-              <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#4A260F] text-2xl mb-2`}>
+              <h3 className={`${isCJK ? 'font-sans' : 'font-serif'} text-[#4A260F] text-2xl`}>
                 {t.badgeUnlocked || "Badge Unlocked!"}
               </h3>
               
-              <div className="w-full h-[1px] bg-[#4A260F]/40 mb-6"></div>
+              <div className="w-full h-[4px] bg-[#8b7463]/40 mb-6"></div>
               
               <div className="w-28 h-28 bg-white rounded-full mb-4 border-[6px] border-[#E6BA39] shadow-md overflow-hidden flex items-center justify-center">
                 {artwork.badge_url ? (
