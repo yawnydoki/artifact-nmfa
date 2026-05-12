@@ -19,18 +19,31 @@ const QuizScreen = () => {
   const [gameState, setGameState] = useState('playing'); 
   const [selectedAnswer, setSelectedAnswer] = useState(null);
 
+  const [selectedQuestions] = useState(() => {
+    if (!artwork) return [];
+    const allQuestions = [artwork.q1, artwork.q2, artwork.q3, artwork.q4, artwork.q5].filter(Boolean);
+    const shuffled = allQuestions.sort(() => Math.random() - 0.5).slice(0, 3);
+
+    return shuffled.map(q => {
+      const langData = q[currentLang] || q.eng;
+      const choices = langData?.choices || [];
+      const correctAnswer = choices[q.correct_index];
+      const shuffledChoices = [...choices].sort(() => Math.random() - 0.5);
+      const newCorrectIndex = shuffledChoices.indexOf(correctAnswer);
+      return { ...q, _shuffledChoices: shuffledChoices, _newCorrectIndex: newCorrectIndex };
+    });
+  });
+
   useEffect(() => {
     if (!artwork) navigate('/');
   }, [artwork, navigate]);
 
   if (!artwork) return null;
 
-  const questions = [artwork.q1, artwork.q2, artwork.q3, artwork.q4, artwork.q5];
-  const currentQuestionData = questions[currentQIndex];
-  
+  const currentQuestionData = selectedQuestions[currentQIndex];
   const questionText = currentQuestionData?.[currentLang]?.question || currentQuestionData?.eng?.question;
-  const choices = currentQuestionData?.[currentLang]?.choices || currentQuestionData?.eng?.choices || [];
-  const correctIndex = currentQuestionData?.correct_index;
+  const choices = currentQuestionData?._shuffledChoices || [];
+  const correctIndex = currentQuestionData?._newCorrectIndex;
 
   const handleAnswer = async (index) => {
     if (selectedAnswer !== null) return; 
@@ -49,8 +62,8 @@ const QuizScreen = () => {
 
       if (!isCorrect && lives - 1 <= 0) {
         setGameState('failed');
-      } else if (currentQIndex === 4) {
-        if (score + (isCorrect ? 1 : 0) >= 3) {
+      } else if (currentQIndex === 2) {
+        if (score + (isCorrect ? 1 : 0) >= 2) {
           setGameState('passed');
           await awardBadge();
         } else {
@@ -93,15 +106,15 @@ const QuizScreen = () => {
         <div className="w-11/12 max-w-sm bg-[#381111] rounded-[1.5rem] shadow-2xl animate-fade-in-up mt-8 overflow-hidden flex flex-col border border-white/5">
           <div className="pt-6 px-6 flex flex-col items-center text-center">
             <div className="flex gap-[5px] mb-2 justify-center">
-               {[0, 1, 2, 3, 4].map(step => (
-                 <div 
-                   key={step} 
-                   className={`h-1.5 w-1.5 rounded-full ${step === currentQIndex ? 'bg-[#FDFBF7]' : step < currentQIndex ? 'bg-[#FDFBF7]/50' : 'bg-[#783713]'}`}
-                 ></div>
-               ))}
+              {[0, 1, 2].map(step => (
+                <div 
+                  key={step} 
+                  className={`h-1.5 w-1.5 rounded-full ${step === currentQIndex ? 'bg-[#FDFBF7]' : step < currentQIndex ? 'bg-[#FDFBF7]/50' : 'bg-[#783713]'}`}
+                ></div>
+              ))}
             </div>
 
-            <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#dfc4a7] text-[1.35rem] leading-snug min-h-[60px] flex items-center justify-center`}>
+            <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#dfc4a7] text-[1.35rem] leading-snug text-center min-h-[60px] flex items-center justify-center`}>
               {questionText}
             </h3>
           </div>
@@ -114,9 +127,9 @@ const QuizScreen = () => {
                 if (index === correctIndex) {
                   buttonStyle = "bg-[#4C8C5C] border-2 border-[#1B4B18] text-white shadow-[0_4px_0_rgba(0,0,0,0.25)] translate-y-0";
                 } else if (index === selectedAnswer) {
-                  buttonStyle = "bg-[#A35252] border-2 border-[#5A2020] text-white shadow-[0_4px_0_rgba(0,0,0,0.25)] shadow-none translate-y-[4px]";
+                  buttonStyle = "bg-[#A35252] border-2 border-[#5A2020] text-white shadow-none translate-y-[4px]";
                 } else {
-                  buttonStyle = "bg-[#dfc4a7]/50 border-2 border-[#453128]/50 text-[#453128]/50 shadow-[0_4px_0_rgba(0,0,0,0.25)] shadow-none translate-y-[4px]";
+                  buttonStyle = "bg-[#dfc4a7]/50 border-2 border-[#453128]/50 text-[#453128]/50 shadow-none translate-y-[4px]";
                 }
               }
 
@@ -137,7 +150,7 @@ const QuizScreen = () => {
       {gameState === 'passed' && (
         <div className="w-full flex flex-col items-center animate-fade-in-up">
           <div className="w-10/12 max-w-[300px] bg-[#381111] p-3 rounded-[1.5rem] shadow-2xl relative border border-white/5">
-            
+          
             <div className="bg-[#E0CCB6] rounded-xl pt-6 pb-8 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
               
               <h3 className={`${isCJK ? 'font-sans' : 'font-serif'} text-[#4A260F] text-2xl`}>
@@ -172,7 +185,7 @@ const QuizScreen = () => {
 
       {gameState === 'failed' && (
         <div className="w-10/12 max-w-sm bg-[#381111] p-3 rounded-[1.5rem] shadow-2xl animate-fade-in-up mt-8">
-           <div className="bg-[#E0CCB6] rounded-xl py-10 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
+          <div className="bg-[#E0CCB6] rounded-xl py-10 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
             
             <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#4A260F] text-3xl mb-3 leading-tight`}>
               {t.outOfLives || "Out of Lives!"}
