@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ArScanner from './ArScanner';
 import { supabase } from './supabaseClient'; 
@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [activeArtwork, setActiveArtwork] = useState(null); 
   const [isFetching, setIsFetching] = useState(false);
 
+  const [isTracking, setIsTracking] = useState(false); 
   const [isScanningSequence, setIsScanningSequence] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
 
@@ -23,7 +24,13 @@ const Dashboard = () => {
   const [activeModalTab, setActiveModalTab] = useState("clues"); 
 
   const handleDetection = async (index) => {
-    if (isFetching || isScanningSequence || paintingDetected || (activeArtwork && activeArtwork.target_index === index)) return;
+    setIsTracking(true); 
+
+    if (activeArtwork && activeArtwork.target_index === index) {
+      return;
+    }
+
+    if (isFetching || isScanningSequence) return;
     
     setIsFetching(true);
     try {
@@ -31,7 +38,6 @@ const Dashboard = () => {
       if (error) throw error;
       
       setActiveArtwork(data);
-      
       setIsScanningSequence(true);
       setScanProgress(0);
 
@@ -54,12 +60,25 @@ const Dashboard = () => {
     }
   };
 
+  const handleTargetLost = () => {
+    setIsTracking(false);
+  };
+
   return (
     <div className="relative h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center justify-center font-neohellenic">
-      <ArScanner onTargetFound={handleDetection} />
+      
+      <ArScanner 
+        onTargetFound={handleDetection} 
+        onTargetLost={handleTargetLost} 
+      />
 
       <div className="absolute top-12 left-0 w-full px-6 flex justify-between items-center z-40 pointer-events-none">
-        <div className={`backdrop-blur-sm text-white font-arial text-xs px-4 py-1.5 rounded-full border shadow-lg transition-colors ${isScanningSequence ? 'bg-[#381111]/80 border-[#E6BA39]/50 text-[#E6BA39]' : 'bg-black/60 border-white/10'}`}>
+        
+        <div className={`backdrop-blur-sm text-white font-arial text-xs px-4 py-1.5 rounded-full border shadow-lg transition-colors ${
+          isScanningSequence ? 'bg-[#381111]/80 border-[#E6BA39]/50 text-[#E6BA39]' : 
+          (!isTracking && paintingDetected) ? 'bg-black/40 border-white/5 opacity-80' :
+          'bg-black/60 border-white/10'
+        }`}>
           {paintingDetected && activeArtwork 
             ? `${activeArtwork.title?.[currentLang] || activeArtwork.title?.eng}` 
             : isScanningSequence 
@@ -67,15 +86,19 @@ const Dashboard = () => {
             : t.scanPrompt || "Scan an Artwork..."}
         </div>
         
-        <div className="bg-[#1B4B18]/90 backdrop-blur-sm text-white font-arial text-xs px-4 py-1.5 rounded-full border border-[#2D8029]/50 shadow-lg animate-pulse">
-          AR Ready
+        <div className={`backdrop-blur-sm text-white font-arial text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full border shadow-lg transition-colors ${
+          isTracking ? 'bg-[#1B4B18]/90 border-[#2D8029]/50 animate-pulse' :
+          paintingDetected ? 'bg-[#A35252]/90 border-[#5A2020]/50' : 
+          'bg-[#1B4B18]/90 border-[#2D8029]/50 animate-pulse'
+        }`}>
+          {isTracking ? "Tracking Active" : paintingDetected ? "Tracking Paused" : "AR Ready"}
         </div>
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
         <div className="relative w-72 h-72">
           
-          <div className={`transition-opacity duration-300 ${isScanningSequence ? 'opacity-0' : 'opacity-80'}`}>
+          <div className={`transition-opacity duration-300 ${isScanningSequence || paintingDetected ? 'opacity-0' : 'opacity-80'}`}>
             <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-artifact-card rounded-tl-3xl"></div>
             <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-artifact-card rounded-tr-3xl"></div>
             <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-artifact-card rounded-bl-3xl"></div>
@@ -85,7 +108,7 @@ const Dashboard = () => {
           <div className={`absolute inset-4 border rounded-[2rem] overflow-hidden transition-all duration-500 ${
             isScanningSequence 
               ? 'border-[#E6BA39]/80 shadow-[inset_0_0_50px_rgba(230,186,57,0.3)] backdrop-contrast-150 backdrop-saturate-[1.2]' 
-              : 'border-artifact-card/30'
+              : 'border-transparent'
           }`}>
             <div className={`absolute inset-0 bg-[#E6BA39]/10 transition-opacity duration-500 ${isScanningSequence ? 'opacity-100' : 'opacity-0'}`}></div>
           </div>
@@ -96,17 +119,7 @@ const Dashboard = () => {
 
           {isScanningSequence && (
             <svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-[0_0_8px_rgba(230,186,57,0.8)]" viewBox="0 0 288 288">
-              <circle
-                cx="144" 
-                cy="144" 
-                r="140" 
-                fill="none" 
-                stroke="#E6BA39" 
-                strokeWidth="3"
-                strokeDasharray="880"
-                strokeDashoffset={880 - (880 * scanProgress) / 100}
-                className="transition-all duration-75 ease-linear"
-              />
+              <circle cx="144" cy="144" r="140" fill="none" stroke="#E6BA39" strokeWidth="3" strokeDasharray="880" strokeDashoffset={880 - (880 * scanProgress) / 100} className="transition-all duration-75 ease-linear"/>
             </svg>
           )}
 
@@ -115,9 +128,20 @@ const Dashboard = () => {
 
       {paintingDetected && activeArtwork && !showInfoModal && (
         <div className="absolute inset-0 z-50 flex flex-col justify-end items-center pb-[120px] pointer-events-none">
-          <div className="w-11/12 max-w-sm bg-artifact-bg/95 backdrop-blur-md border border-artifact-card/30 rounded-[2rem] p-6 shadow-2xl animate-fade-in-up pointer-events-auto">
+          <div className="w-11/12 max-w-sm bg-artifact-bg/95 backdrop-blur-md border border-artifact-card/30 rounded-[2rem] p-6 shadow-2xl animate-fade-in-up pointer-events-auto relative">
             
-            <div className="flex justify-between items-start mb-4">
+            <button 
+              onClick={() => {
+                setPaintingDetected(false);
+                setActiveArtwork(null);
+                setIsTracking(false);
+              }}
+              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center bg-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/20 transition-colors z-10"
+            >
+              ✕
+            </button>
+
+            <div className="flex justify-between items-start mb-4 pr-6">
               <div>
                 <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-museum-gold text-2xl tracking-wide`}>
                   {activeArtwork.title?.[currentLang] || activeArtwork.title?.eng}
@@ -126,10 +150,6 @@ const Dashboard = () => {
                   {activeArtwork.artist?.[currentLang] || activeArtwork.artist?.eng} • 1884
                 </p>
               </div>
-              
-              <span className="bg-artifact-border/80 text-artifact-card font-daruma text-[11px] font-bold px-3 py-1.5 rounded-full tracking-widest border border-artifact-card/20 animate-pulse shadow-inner">
-                {t.baseBadge || "Badge Ready"}
-              </span>
             </div>
             
             <p className={`${isCJK ? 'font-sans' : 'font-neohellenic'} text-white/90 text-sm mb-4 leading-relaxed line-clamp-2`}>
@@ -198,9 +218,10 @@ const Dashboard = () => {
               >
                 {t.origin || "Origin"}
               </button>
+              
               <button 
-                onClick={() => setActiveModalTab("artist")}
-                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "artist" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
+                onClick={() => setActiveModalTab("artist_description")}
+                className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "artist_description" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
                 {t.artist || "Artist"}
               </button>
