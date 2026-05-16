@@ -22,10 +22,20 @@ style.innerHTML = `
     40% { transform: translateX(-4px) scale(1.1); }
     60% { transform: translateX(4px) scale(1.1); }
     80% { transform: translateX(-2px) scale(1.05); }
-    100% { transform: translateX(0) scale(1); background-color: #1B4B18; border-color: #2D8029; }
+    100% { transform: scale(1); background-color: #1B4B18; border-color: #2D8029; }
   }
   .animate-life-damage {
     animation: life-damage 0.5s ease-in-out;
+  }
+
+  @keyframes ink-stamp {
+    0% { transform: scale(3.5) rotate(calc(var(--stamp-tilt) - 15deg)); opacity: 0; filter: blur(2px); }
+    50% { transform: scale(0.9) rotate(calc(var(--stamp-tilt) + 2deg)); opacity: 1; filter: blur(0px); }
+    75% { transform: scale(1.05) rotate(var(--stamp-tilt)); }
+    100% { transform: scale(1) rotate(var(--stamp-tilt)); }
+  }
+  .animate-ink-stamp {
+    animation: ink-stamp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 `;
 if (typeof document !== 'undefined') {
@@ -49,6 +59,8 @@ const QuizScreen = () => {
   const [gameState, setGameState] = useState('playing'); 
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [damageAnim, setDamageAnim] = useState(false); 
+  
+  const [stampRotation] = useState(() => Math.floor(Math.random() * 16) - 8);
 
   const [selectedQuestions] = useState(() => {
     if (!artwork) return [];
@@ -102,6 +114,7 @@ const QuizScreen = () => {
       } else if (currentQIndex === 2) {
         if (score + (isCorrect ? 1 : 0) >= 2) {
           setGameState('passed');
+          if (navigator.vibrate) navigator.vibrate([150, 50, 150]); 
           await awardBadge();
         } else {
           setGameState('failed');
@@ -119,7 +132,6 @@ const QuizScreen = () => {
         await supabase.from('unlocked_badges').insert([
           { visitor_id: visitorId, artwork_id: artwork.id, badge_type: 'Gold' }
         ]);
-        
         await refreshBadges();
       } catch (error) {
         console.error("Error saving badge:", error.message);
@@ -135,11 +147,8 @@ const QuizScreen = () => {
           <h2 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-[1.4rem] tracking-wide drop-shadow-sm`}>
             {t.testYourself || "Test yourself!"}
           </h2>
-          
           <div className={`text-white text-[10px] font-bold px-3 py-1.5 rounded-full border tracking-wider shadow-sm transition-all duration-200 ${
-            damageAnim 
-              ? 'animate-life-damage' 
-              : 'bg-[#1B4B18] border-[#2D8029]'
+            damageAnim ? 'animate-life-damage' : 'bg-[#1B4B18] border-[#2D8029]'
           }`}>
             {damageAnim ? "💔" : "♡"} {lives}/3 {t.lives || "LIVES"}
           </div>
@@ -151,13 +160,9 @@ const QuizScreen = () => {
           <div className="pt-6 px-6 flex flex-col items-center text-center">
             <div className="flex gap-[5px] mb-2 justify-center">
               {[0, 1, 2].map(step => (
-                <div 
-                  key={step} 
-                  className={`h-1.5 w-1.5 rounded-full ${step === currentQIndex ? 'bg-[#FDFBF7]' : step < currentQIndex ? 'bg-[#FDFBF7]/50' : 'bg-[#783713]'}`}
-                ></div>
+                <div key={step} className={`h-1.5 w-1.5 rounded-full ${step === currentQIndex ? 'bg-[#FDFBF7]' : step < currentQIndex ? 'bg-[#FDFBF7]/50' : 'bg-[#783713]'}`}></div>
               ))}
             </div>
-
             <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#dfc4a7] text-[1.35rem] leading-snug text-center min-h-[60px] flex items-center justify-center`}>
               {questionText}
             </h3>
@@ -173,18 +178,14 @@ const QuizScreen = () => {
                   buttonStyle = "bg-[#4C8C5C] border-2 border-[#1B4B18] text-white shadow-[0_4px_0_rgba(0,0,0,0.25)] translate-y-0";
                 } else if (index === selectedAnswer) {
                   buttonStyle = "bg-[#A35252] border-2 border-[#5A2020] text-white shadow-none translate-y-[4px]";
-                  shakeClass = "animate-error-shake";  
+                  shakeClass = "animate-error-shake"; 
                 } else {
                   buttonStyle = "bg-[#dfc4a7]/50 border-2 border-[#453128]/50 text-[#453128]/50 shadow-none translate-y-[4px]";
                 }
               }
 
               return (
-                <button 
-                  key={index}
-                  onClick={() => handleAnswer(index)}
-                  className={`rounded-xl py-2 ${isCJK ? 'font-sans text-sm' : 'font-serif text-[1.1rem]'} transition-all ${buttonStyle} ${shakeClass}`}
-                >
+                <button key={index} onClick={() => handleAnswer(index)} className={`rounded-xl py-2 ${isCJK ? 'font-sans text-sm' : 'font-serif text-[1.1rem]'} transition-all ${buttonStyle} ${shakeClass}`}>
                   {choice}
                 </button>
               );
@@ -196,7 +197,6 @@ const QuizScreen = () => {
       {gameState === 'passed' && (
         <div className="w-full flex flex-col items-center animate-fade-in-up">
           <div className="w-10/12 max-w-[300px] bg-[#381111] p-3 rounded-[1.5rem] shadow-2xl relative border border-white/5">
-          
             <div className="bg-[#E0CCB6] rounded-xl pt-6 pb-8 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
               
               <h3 className={`${isCJK ? 'font-sans' : 'font-serif'} text-[#4A260F] text-2xl`}>
@@ -205,7 +205,10 @@ const QuizScreen = () => {
               
               <div className="w-full h-[4px] bg-[#8b7463]/40 mb-6"></div>
               
-              <div className="w-28 h-28 bg-white rounded-full mb-4 border-[6px] border-[#E6BA39] shadow-md overflow-hidden flex items-center justify-center">
+              <div 
+                style={{ '--stamp-tilt': `${stampRotation}deg` }}
+                className="w-28 h-28 bg-white rounded-full mb-4 border-[6px] border-[#E6BA39] shadow-md overflow-hidden flex items-center justify-center animate-ink-stamp"
+              >
                 {artwork.badge_url ? (
                   <img src={artwork.badge_url} alt="Unlocked Badge" className="w-full h-full object-cover" />
                 ) : (
@@ -217,7 +220,6 @@ const QuizScreen = () => {
                 {artwork.badge_name?.[currentLang] || artwork.badge_name?.eng || `${artwork.title?.eng} Badge`}
               </p>
             </div>
-
           </div>
 
           <button 
@@ -232,25 +234,12 @@ const QuizScreen = () => {
       {gameState === 'failed' && (
         <div className="w-10/12 max-w-sm bg-[#381111] p-3 rounded-[1.5rem] shadow-2xl animate-fade-in-up mt-8">
           <div className="bg-[#E0CCB6] rounded-xl py-10 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
-            
-            <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#4A260F] text-3xl mb-3 leading-tight`}>
-              {t.outOfLives || "Out of Lives!"}
-            </h3>
-            
-            <p className={`${isCJK ? 'font-sans' : 'font-neohellenic'} text-[#4A260F]/80 mb-8`}>
-              {t.reviewAndTry || "Review the clues and try again."}
-            </p>
-            
-            <button 
-              onClick={() => navigate('/')}
-              className={`w-full bg-[#4A260F] text-[#E0CCB6] py-3 rounded-xl ${isCJK ? 'font-sans font-bold' : 'font-serif text-[1.1rem]'} shadow-md hover:brightness-110 transition-all`}
-            >
-              {t.returnToCamera || "Return to Camera"}
-            </button>
+            <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-[#4A260F] text-3xl mb-3 leading-tight`}>{t.outOfLives || "Out of Lives!"}</h3>
+            <p className={`${isCJK ? 'font-sans' : 'font-neohellenic'} text-[#4A260F]/80 mb-8`}>{t.reviewAndTry || "Review the clues and try again."}</p>
+            <button onClick={() => navigate('/')} className={`w-full bg-[#4A260F] text-[#E0CCB6] py-3 rounded-xl ${isCJK ? 'font-sans font-bold' : 'font-serif text-[1.1rem]'} shadow-md hover:brightness-110 transition-all`}>{t.returnToCamera || "Return to Camera"}</button>
           </div>
         </div>
       )}
-
     </div>
   );
 };
