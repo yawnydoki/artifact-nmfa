@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from './supabaseClient';
+import { useData } from './DataContext';
 
 import LoadingScreen from './LoadingScreen';
 import Dashboard from './Dashboard';
@@ -43,6 +44,7 @@ const PageWrapper = ({ children }) => (
 
 function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
+  const { loadInitialData } = useData();
 
   useEffect(() => {
     const initializeVisitor = async () => {
@@ -79,6 +81,8 @@ function App() {
       } else {
         console.log("Welcome back, visitor:", visitorId);
       }
+
+      await loadInitialData(visitorId);
     };
 
     initializeVisitor();

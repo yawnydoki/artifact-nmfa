@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import { useLanguage } from './LanguageContext'; 
 import { uiDict } from './translations';         
+import { useData } from './DataContext'; 
 
 const QuizScreen = () => {
   const location = useLocation();
@@ -12,6 +13,8 @@ const QuizScreen = () => {
   const { currentLang } = useLanguage();
   const t = uiDict[currentLang] || uiDict.eng;
   const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
+
+  const { refreshBadges } = useData();
 
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -82,6 +85,8 @@ const QuizScreen = () => {
         await supabase.from('unlocked_badges').insert([
           { visitor_id: visitorId, artwork_id: artwork.id, badge_type: 'Gold' }
         ]);
+        
+        await refreshBadges();
       } catch (error) {
         console.error("Error saving badge:", error.message);
       }

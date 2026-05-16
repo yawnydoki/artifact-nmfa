@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
 import { useLanguage } from "./LanguageContext";
 import { uiDict } from "./translations";
+import { useData } from "./DataContext";
 
 const style = document.createElement('style');
 style.innerHTML = `
   @keyframes shimmer {
     0% { transform: translateX(-150%) skewX(-20deg); }
-    20% { transform: translateX(150%) skewX(-20deg); } /* change [number]% to a number to change speed of the shimmer*/
+    20% { transform: translateX(150%) skewX(-20deg); } 
     100% { transform: translateX(150%) skewX(-20deg); }
   }
   .animate-shimmer::after {
@@ -16,7 +16,7 @@ style.innerHTML = `
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-    animation: shimmer 6.7s infinite; /* change second to change interval time of shimmer */
+    animation: shimmer 6.7s infinite; 
   }
 `;
 if (typeof document !== 'undefined') {
@@ -34,51 +34,17 @@ const Passport = () => {
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [activeModalTab, setActiveModalTab] = useState("origin"); 
 
-  const [passportStamps, setPassportStamps] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { artworks, unlockedBadges, isDataLoading } = useData();
 
-  useEffect(() => {
-    const fetchPassportData = async () => {
-      const visitorId = localStorage.getItem("artifact_visitor_id");
-      if (!visitorId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const { data: artworksData, error: artworksError } = await supabase
-          .from("artworks")
-          .select("*")
-          .order("id", { ascending: true });
-          
-        if (artworksError) throw artworksError;
-
-        const { data: badgesData, error: badgesError } = await supabase
-          .from("unlocked_badges")
-          .select("artwork_id, badge_type, created_at")
-          .eq("visitor_id", visitorId);
-          
-        if (badgesError) throw badgesError;
-
-        const mergedData = artworksData.map((artwork) => {
-          const unlockedBadge = badgesData.find((b) => b.artwork_id === artwork.id);
-          return {
-            ...artwork,
-            isUnlocked: !!unlockedBadge,
-            badgeType: unlockedBadge ? unlockedBadge.badge_type : null,
-            unlockDate: unlockedBadge ? new Date(unlockedBadge.created_at).toLocaleDateString() : null
-          };
-        });
-
-        setPassportStamps(mergedData);
-      } catch (error) {
-        console.error("Error fetching passport data:", error.message);
-      } finally {
-        setIsLoading(false);
-      }
+  const passportStamps = artworks.map((artwork) => {
+    const unlockedBadge = unlockedBadges.find((b) => b.artwork_id === artwork.id);
+    return {
+      ...artwork,
+      isUnlocked: !!unlockedBadge,
+      badgeType: unlockedBadge ? unlockedBadge.badge_type : null,
+      unlockDate: unlockedBadge ? new Date(unlockedBadge.created_at).toLocaleDateString() : null
     };
-    fetchPassportData();
-  }, []);
+  });
 
   const unlockedCount = passportStamps.filter((s) => s.isUnlocked).length;
   const totalCount = passportStamps.length || 10;
@@ -127,7 +93,7 @@ const Passport = () => {
         </div>
 
         <div className="bg-[#E0CCB6] flex-1 rounded-[1.5rem] p-6 shadow-2xl relative z-20 overflow-y-auto hide-scrollbar flex flex-col -mt-1">
-          {isLoading ? (
+          {isDataLoading ? (
             <div className="w-full h-full flex flex-col items-center justify-center">
               <p className="font-serif text-[#5A3B22] animate-pulse text-lg">{t.loading || "Loading..."}</p>
             </div>

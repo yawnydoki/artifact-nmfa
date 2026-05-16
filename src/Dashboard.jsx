@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ArScanner from './ArScanner';
-import { supabase } from './supabaseClient'; 
 import { useLanguage } from './LanguageContext'; 
 import { uiDict } from './translations'; 
+import { useData } from './DataContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -11,6 +11,8 @@ const Dashboard = () => {
   const { currentLang } = useLanguage(); 
   const t = uiDict[currentLang] || uiDict.eng;
   const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
+
+  const { artworks } = useData(); 
 
   const [paintingDetected, setPaintingDetected] = useState(false);
   const [activeArtwork, setActiveArtwork] = useState(null); 
@@ -34,8 +36,8 @@ const Dashboard = () => {
     
     setIsFetching(true);
     try {
-      const { data, error } = await supabase.from('artworks').select('*').eq('target_index', index).single();
-      if (error) throw error;
+      const data = artworks.find(a => a.target_index === index);
+      if (!data) throw new Error("Artwork data not found in cache");
       
       setActiveArtwork(data);
       setIsScanningSequence(true);

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from './LanguageContext';
 import { uiDict } from './translations';
-import { supabase } from './supabaseClient';
+import { useData } from './DataContext';
 
 const MuseumMap = () => {
   const { currentLang } = useLanguage();
@@ -10,48 +10,22 @@ const MuseumMap = () => {
   const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
 
   const [activeZone, setActiveZone] = useState(null); 
-  const [artworks, setArtworks] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
   const [isExpanded, setIsExpanded] = useState(false); 
 
-  useEffect(() => {
-    const fetchMapData = async () => {
-      const visitorId = localStorage.getItem('artifact_visitor_id');
-      if (!visitorId) return;
+  const { artworks, unlockedBadges, isDataLoading } = useData();
 
-      try {
-        const { data: artworksData, error: artworksError } = await supabase.from('artworks').select('*');
-        if (artworksError) throw artworksError;
+  const mergedArtworks = artworks.map(artwork => ({
+    ...artwork,
+    isUnlocked: unlockedBadges.some(b => b.artwork_id === artwork.id)
+  }));
 
-        const { data: badgesData, error: badgesError } = await supabase
-          .from('unlocked_badges')
-          .select('artwork_id')
-          .eq('visitor_id', visitorId);
-        if (badgesError) throw badgesError;
-
-        const mergedData = artworksData.map(artwork => ({
-          ...artwork,
-          isUnlocked: badgesData.some(b => b.artwork_id === artwork.id)
-        }));
-
-        setArtworks(mergedData);
-      } catch (error) {
-        console.error("Error fetching map data:", error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchMapData();
-  }, []);
-
-  const activeClues = artworks.filter(art => art.zone === activeZone);
+  const activeClues = mergedArtworks.filter(art => art.zone === activeZone);
 
   const mapZones = [
-    { id: 1, color: 'bg-[#C973A4]' }, // pink top one
-    { id: 2, color: 'bg-[#3E5D36]' }, // bot left dark green
-    { id: 3, color: 'bg-[#9F7657]' }, // bot mid brown
-    { id: 4, color: 'bg-[#9AB053]' }  // bot right light green
+    { id: 1, color: 'bg-[#C973A4]' }, 
+    { id: 2, color: 'bg-[#3E5D36]' }, 
+    { id: 3, color: 'bg-[#9F7657]' }, 
+    { id: 4, color: 'bg-[#9AB053]' }  
   ];
 
   return (
@@ -124,7 +98,7 @@ const MuseumMap = () => {
         <div className="bg-[#1D0C09] p-3 rounded-[2rem] shadow-2xl flex-1 flex flex-col min-h-0 border border-white/5">
           <div className="bg-artifact-card rounded-[1.4rem] p-4 flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-4 relative">
             
-            {isLoading ? (
+            {isDataLoading ? (
               <div className="flex-1 flex items-center justify-center text-artifact-border font-serif animate-pulse text-lg italic">
                 {t.loading || "Accessing archives..."}
               </div>
