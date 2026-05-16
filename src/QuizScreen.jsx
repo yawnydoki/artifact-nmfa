@@ -5,6 +5,33 @@ import { useLanguage } from './LanguageContext';
 import { uiDict } from './translations';         
 import { useData } from './DataContext'; 
 
+const style = document.createElement('style');
+style.innerHTML = `
+  @keyframes error-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  .animate-error-shake {
+    animation: error-shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  @keyframes life-damage {
+    0% { transform: scale(1); background-color: #1B4B18; border-color: #2D8029; }
+    20% { transform: scale(1.15); background-color: #A35252; border-color: #ff4d4d; color: #ffcccc; }
+    40% { transform: translateX(-4px) scale(1.1); }
+    60% { transform: translateX(4px) scale(1.1); }
+    80% { transform: translateX(-2px) scale(1.05); }
+    100% { transform: translateX(0) scale(1); background-color: #1B4B18; border-color: #2D8029; }
+  }
+  .animate-life-damage {
+    animation: life-damage 0.5s ease-in-out;
+  }
+`;
+if (typeof document !== 'undefined') {
+  document.head.appendChild(style);
+}
+
 const QuizScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -14,13 +41,14 @@ const QuizScreen = () => {
   const t = uiDict[currentLang] || uiDict.eng;
   const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
 
-  const { refreshBadges } = useData();
+  const { refreshBadges } = useData(); 
 
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [gameState, setGameState] = useState('playing'); 
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [damageAnim, setDamageAnim] = useState(false); 
 
   const [selectedQuestions] = useState(() => {
     if (!artwork) return [];
@@ -56,8 +84,14 @@ const QuizScreen = () => {
     
     if (isCorrect) {
       setScore(score + 1);
+      if (navigator.vibrate) navigator.vibrate([50]);
     } else {
       setLives(prev => prev - 1);
+      
+      setDamageAnim(true);
+      setTimeout(() => setDamageAnim(false), 500);
+
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
     }
 
     setTimeout(async () => {
@@ -101,8 +135,13 @@ const QuizScreen = () => {
           <h2 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-[1.4rem] tracking-wide drop-shadow-sm`}>
             {t.testYourself || "Test yourself!"}
           </h2>
-          <div className="bg-[#1B4B18] text-white text-[10px] font-bold px-3 py-1.5 rounded-full border border-[#2D8029] tracking-wider shadow-sm">
-            ♡ {lives}/3 {t.lives || "LIVES"}
+          
+          <div className={`text-white text-[10px] font-bold px-3 py-1.5 rounded-full border tracking-wider shadow-sm transition-all duration-200 ${
+            damageAnim 
+              ? 'animate-life-damage' 
+              : 'bg-[#1B4B18] border-[#2D8029]'
+          }`}>
+            {damageAnim ? "💔" : "♡"} {lives}/3 {t.lives || "LIVES"}
           </div>
         </div>
       )}
@@ -127,12 +166,14 @@ const QuizScreen = () => {
           <div className="mb-8 bg-[#dfc4a7] px-6 py-6 flex flex-col gap-4">
             {choices.map((choice, index) => {
               let buttonStyle = "bg-[#dfc4a7] border-2 border-[#4A260F] text-[#453128] shadow-[0_4px_0_rgba(0,0,0,0.25)] active:shadow-none active:translate-y-[4px]";
+              let shakeClass = ""; 
               
               if (selectedAnswer !== null) {
                 if (index === correctIndex) {
                   buttonStyle = "bg-[#4C8C5C] border-2 border-[#1B4B18] text-white shadow-[0_4px_0_rgba(0,0,0,0.25)] translate-y-0";
                 } else if (index === selectedAnswer) {
                   buttonStyle = "bg-[#A35252] border-2 border-[#5A2020] text-white shadow-none translate-y-[4px]";
+                  shakeClass = "animate-error-shake";  
                 } else {
                   buttonStyle = "bg-[#dfc4a7]/50 border-2 border-[#453128]/50 text-[#453128]/50 shadow-none translate-y-[4px]";
                 }
@@ -142,7 +183,7 @@ const QuizScreen = () => {
                 <button 
                   key={index}
                   onClick={() => handleAnswer(index)}
-                  className={`rounded-xl py-2 ${isCJK ? 'font-sans text-sm' : 'font-serif text-[1.1rem]'} transition-all ${buttonStyle}`}
+                  className={`rounded-xl py-2 ${isCJK ? 'font-sans text-sm' : 'font-serif text-[1.1rem]'} transition-all ${buttonStyle} ${shakeClass}`}
                 >
                   {choice}
                 </button>
