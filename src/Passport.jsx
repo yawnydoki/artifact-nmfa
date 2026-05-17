@@ -6,22 +6,10 @@ import { useData } from "./DataContext";
 
 const style = document.createElement("style");
 style.innerHTML = `
-  @keyframes shimmer {
-    0% { transform: translateX(-150%) skewX(-20deg); }
-    20% { transform: translateX(150%) skewX(-20deg); } 
-    100% { transform: translateX(150%) skewX(-20deg); }
-  }
-  .animate-shimmer::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-    animation: shimmer 6.7s infinite; 
-  }
+  @keyframes shimmer { 0% { transform: translateX(-150%) skewX(-20deg); } 20% { transform: translateX(150%) skewX(-20deg); } 100% { transform: translateX(150%) skewX(-20deg); } }
+  .animate-shimmer::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation: shimmer 6.7s infinite; }
 `;
-if (typeof document !== "undefined") {
-  document.head.appendChild(style);
-}
+if (typeof document !== "undefined") document.head.appendChild(style);
 
 const Passport = () => {
   const navigate = useNavigate();
@@ -43,10 +31,7 @@ const Passport = () => {
     return {
       ...artwork,
       isUnlocked: !!unlockedBadge,
-      badgeType: unlockedBadge ? unlockedBadge.badge_type : null,
-      unlockDate: unlockedBadge
-        ? new Date(unlockedBadge.created_at).toLocaleDateString()
-        : null,
+      badgeType: unlockedBadge ? unlockedBadge.badge_type || "Base" : null,
     };
   });
 
@@ -57,6 +42,20 @@ const Passport = () => {
   const handleOpenArtwork = (artwork) => {
     setSelectedArtwork(artwork);
     setActiveModalTab("origin");
+  };
+
+  const getBadgeStyles = (type) => {
+    if (type === "Gold")
+      return "bg-white border-[#E6BA39] shadow-[0_0_15px_rgba(230,186,57,0.5)] animate-shimmer";
+    if (type === "Silver")
+      return "bg-[#F3F4F6] border-[#C0C0C0] shadow-[0_0_10px_rgba(192,192,192,0.4)]";
+    return "bg-[#FFF0E0] border-[#CD7F32] shadow-[0_0_8px_rgba(205,127,50,0.5)]";
+  };
+
+  const getTierName = (type) => {
+    if (type === "Gold") return "Gold";
+    if (type === "Silver") return "Silver";
+    return "Bronze";
   };
 
   return (
@@ -118,18 +117,14 @@ const Passport = () => {
                         ? `rotate(${((stamp.id * 137) % 15) - 7}deg)`
                         : "rotate(0deg)",
                     }}
-                    className={`w-[110px] h-[110px] rounded-full border-[5px] flex items-center justify-center mb-3 shadow-md overflow-hidden relative
-                    ${
-                      !stamp.isUnlocked
-                        ? "bg-[#9A7B5C] border-[#70563C]"
-                        : "bg-white border-[#F2C94C] animate-shimmer"
-                    }`}
+                    className={`w-[110px] h-[110px] rounded-full border-[5px] flex items-center justify-center mb-3 overflow-hidden relative
+                    ${!stamp.isUnlocked ? "bg-[#9A7B5C] border-[#70563C]" : getBadgeStyles(stamp.badgeType)}`}
                   >
                     {stamp.isUnlocked && stamp.badge_url ? (
                       <img
                         src={stamp.badge_url}
                         alt="Badge"
-                        className="w-full h-full object-cover animate-fade-in"
+                        className="w-full h-full object-cover animate-fade-in saturate-100"
                       />
                     ) : !stamp.isUnlocked ? (
                       <span className="text-[#70563C] text-4xl font-serif font-bold opacity-40">
@@ -165,12 +160,20 @@ const Passport = () => {
                       onClick={() => handleOpenArtwork(item)}
                       className="bg-white p-4 rounded-3xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors"
                     >
-                      <div className="w-[60px] h-[60px] bg-[#BBA58F] rounded-2xl flex-shrink-0 overflow-hidden border border-[#E0CCB6]">
+                      <div
+                        className={`w-[60px] h-[60px] bg-[#BBA58F] rounded-2xl flex-shrink-0 overflow-hidden border ${
+                          item.badgeType === "Gold"
+                            ? "border-[#E6BA39]"
+                            : item.badgeType === "Silver"
+                              ? "border-[#C0C0C0]"
+                              : "border-[#CD7F32]"
+                        }`}
+                      >
                         {item.badge_url && (
                           <img
                             src={item.badge_url}
                             alt="thumbnail"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover saturate-100"
                           />
                         )}
                       </div>
@@ -181,10 +184,21 @@ const Passport = () => {
                         >
                           {item.title?.[currentLang] || item.title?.eng}
                         </h3>
-                        <p className="font-serif text-[#783713] text-sm italic">
+                        <p className="font-serif text-[#783713] text-sm italic mb-1">
                           {item.artist?.[currentLang] || item.artist?.eng} •
                           1884
                         </p>
+                        <span
+                          className={`text-[9px] uppercase tracking-[0.1em] font-bold px-2 py-0.5 rounded-sm w-fit ${
+                            item.badgeType === "Gold"
+                              ? "bg-[#E6BA39]/20 text-[#B8860B]"
+                              : item.badgeType === "Silver"
+                                ? "bg-gray-200 text-gray-600"
+                                : "bg-[#CD7F32]/20 text-[#8B4513]"
+                          }`}
+                        >
+                          {getTierName(item.badgeType)} Tier
+                        </span>
                       </div>
                     </div>
                   ))
@@ -219,7 +233,7 @@ const Passport = () => {
                 <img
                   src={selectedArtwork.badge_url}
                   alt="Artwork"
-                  className="w-full h-full object-cover opacity-80"
+                  className="w-full h-full object-cover opacity-90 saturate-100"
                 />
               ) : (
                 "img"
@@ -256,19 +270,36 @@ const Passport = () => {
               >
                 {t.origin || "Origin"}
               </button>
-
               <button
                 onClick={() => setActiveModalTab("artist_description")}
                 className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "artist_description" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
                 {t.artist || "Artist"}
               </button>
-
               <button
                 onClick={() => setActiveModalTab("art_element")}
                 className={`border border-[#783713] rounded-xl font-serif py-1.5 text-[12px] transition-colors duration-150 active:scale-95 ${activeModalTab === "art_element" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
                 {t.elements || "Art Elements"}
+              </button>
+            </div>
+
+            <div className="mx-5 mb-6">
+              <button
+                onClick={() =>
+                  navigate("/quiz", { state: { artwork: selectedArtwork } })
+                }
+                className={`w-full border transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg ${
+                  selectedArtwork.badgeType === "Gold"
+                    ? "border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6]"
+                    : "bg-[#4C8C5C] border-[#1B4B18] text-white shadow-md hover:brightness-110"
+                }`}
+              >
+                {selectedArtwork.badgeType === "Gold"
+                  ? t.startQuiz || "Replay Quiz"
+                  : selectedArtwork.badgeType === "Silver"
+                    ? "Retake Quiz (Upgrade to Gold!)"
+                    : "Take Quiz (Earn Silver/Gold!)"}
               </button>
             </div>
           </div>
