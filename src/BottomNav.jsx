@@ -26,6 +26,12 @@ const BottomNav = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const getBubbleTransform = () => {
+    if (isActive('/map')) return 'translate-x-[-80px] scale-x-125 scale-y-125'; 
+    if (isActive('/passport')) return 'translate-x-[80px] scale-x-125 scale-y-125';
+    return 'translate-x-0 scale-x-125 scale-y-125';
+  };
+
   return (
     <>
       {isLangOpen && (
@@ -35,6 +41,7 @@ const BottomNav = () => {
         ></div>
       )}
       
+      {/* Language Selection Drawer */}
       <div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-museum-brown rounded-[2rem] p-6 shadow-2xl z-[100] transition-all duration-300 border border-museum-gold/30 ${isLangOpen ? 'translate-y-0 opacity-100' : 'translate-y-[120%] opacity-0 pointer-events-none'}`}>
         <div className="flex justify-between items-center mb-6">
           <h3 className="font-serif text-museum-gold text-2xl tracking-wide">Select Language</h3>
@@ -65,40 +72,50 @@ const BottomNav = () => {
         
         <button 
           onClick={() => setIsLangOpen(!isLangOpen)}
-          className={`pointer-events-auto p-3 rounded-full transition-all duration-300 drop-shadow-lg ${isLangOpen ? 'bg-museum-gold text-museum-brown' : 'bg-museum-brown/60 backdrop-blur-md text-white border border-white/20 hover:bg-museum-brown'}`}
+          className="pointer-events-auto p-3 rounded-full transition-all duration-300 text-white hover:bg-white/5 active:scale-95"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
         </button>
 
-        <div className="pointer-events-auto relative flex items-center bg-museum-brown/60 backdrop-blur-md border border-white/20 rounded-full h-14 px-5 gap-7 shadow-xl">
-          
-          <button 
-            onClick={() => handleNav('/map')}
-            className={`transition-colors duration-300 ${isActive('/map') ? 'text-museum-gold' : 'text-white opacity-70 hover:opacity-100'}`}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          </button>
+        <div className="pointer-events-auto relative flex items-center justify-center bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-full h-16 px-4 w-[240px] shadow-[0_15px_35px_rgba(0,0,0,0.4),_inset_0_1px_3px_rgba(255,255,255,0.3)] isolation-isolate">
 
-          <button 
-            onClick={() => handleNav('/')}
-            className={`relative -top-4 w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] border ${isActive('/') ? 'bg-museum-gold border-museum-gold text-museum-brown scale-105' : 'bg-museum-brown/90 backdrop-blur-xl border-white/30 text-white hover:bg-museum-brown'}`}
-          >
-            <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" strokeWidth="2"/></svg>
-          </button>
+          <div 
+            className={`absolute w-16 h-16 rounded-full bg-gradient-to-b from-white/20 to-white/5 border border-white/40 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.3),_inset_0_2px_4px_rgba(255,255,255,0.4)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${getBubbleTransform()}`}
+          />
 
-          <button 
-            onClick={() => handleNav('/passport')}
-            className={`transition-colors duration-300 ${isActive('/passport') ? 'text-museum-gold' : 'text-white opacity-70 hover:opacity-100'}`}
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-          </button>
+          <div className="absolute inset-0 flex justify-between items-center px-4 z-10">
+            <button 
+              onClick={() => handleNav('/map')}
+              className={`w-12 h-12 flex items-center justify-center transition-all duration-300 active:scale-90 ${isActive('/map') ? 'text-museum-gold' : 'text-white/70 hover:text-white'}`}
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </button>
+
+            <button 
+              onClick={() => handleNav('/')}
+              className={`w-12 h-12 flex items-center justify-center transition-all duration-300 active:scale-90 ${isActive('/') ? 'text-museum-gold' : 'text-white/70 hover:text-white'}`}
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+              </svg>          
+            </button>
+
+            <button 
+              onClick={() => handleNav('/passport')}
+              className={`w-12 h-12 flex items-center justify-center transition-all duration-300 active:scale-90 ${isActive('/passport') ? 'text-museum-gold' : 'text-white/70 hover:text-white'}`}
+            >
+              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+            </button>
+          </div>
+
         </div>
 
         <button 
           onClick={() => handleNav('/end-prompt')}
-          className={`pointer-events-auto p-3 rounded-full transition-all duration-300 drop-shadow-lg ${isActive('/end-prompt') || isActive('/end') ? 'bg-museum-gold text-museum-brown' : 'bg-museum-brown/60 backdrop-blur-md text-white border border-white/20 hover:bg-museum-brown'}`}
+          className="pointer-events-auto p-3 rounded-full transition-all duration-300 text-white hover:bg-white/5 active:scale-95"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
         </button>
 
       </div>
