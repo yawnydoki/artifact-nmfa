@@ -46,16 +46,16 @@ const Passport = () => {
 
   const getBadgeStyles = (type) => {
     if (type === "Gold")
-      return "bg-white border-[#E6BA39] shadow-[0_0_15px_rgba(230,186,57,0.5)] animate-shimmer";
+      return "bg-white border-[#E6BA39] shadow-[0_0_15px_rgba(230,186,57,0.5)] animate-shimmer saturate-100";
     if (type === "Silver")
       return "bg-[#F3F4F6] border-[#C0C0C0] shadow-[0_0_10px_rgba(192,192,192,0.4)]";
     return "bg-[#FFF0E0] border-[#CD7F32] shadow-[0_0_8px_rgba(205,127,50,0.5)]";
   };
 
-  const getTierName = (type) => {
-    if (type === "Gold") return "Gold";
-    if (type === "Silver") return "Silver";
-    return "Bronze";
+  const getImageFilter = (type) => {
+    if (type === "Gold") return "saturate-100";
+    if (type === "Silver") return "grayscale contrast-125";
+    return "sepia-[.4] contrast-110 hue-rotate-15";
   };
 
   return (
@@ -124,7 +124,7 @@ const Passport = () => {
                       <img
                         src={stamp.badge_url}
                         alt="Badge"
-                        className="w-full h-full object-cover animate-fade-in saturate-100"
+                        className={`w-full h-full object-cover animate-fade-in ${getImageFilter(stamp.badgeType)}`}
                       />
                     ) : !stamp.isUnlocked ? (
                       <span className="text-[#70563C] text-4xl font-serif font-bold opacity-40">
@@ -173,7 +173,7 @@ const Passport = () => {
                           <img
                             src={item.badge_url}
                             alt="thumbnail"
-                            className="w-full h-full object-cover saturate-100"
+                            className={`w-full h-full object-cover ${getImageFilter(item.badgeType)}`}
                           />
                         )}
                       </div>
@@ -188,17 +188,6 @@ const Passport = () => {
                           {item.artist?.[currentLang] || item.artist?.eng} •
                           1884
                         </p>
-                        <span
-                          className={`text-[9px] uppercase tracking-[0.1em] font-bold px-2 py-0.5 rounded-sm w-fit ${
-                            item.badgeType === "Gold"
-                              ? "bg-[#E6BA39]/20 text-[#B8860B]"
-                              : item.badgeType === "Silver"
-                                ? "bg-gray-200 text-gray-600"
-                                : "bg-[#CD7F32]/20 text-[#8B4513]"
-                          }`}
-                        >
-                          {getTierName(item.badgeType)} Tier
-                        </span>
                       </div>
                     </div>
                   ))
@@ -233,7 +222,7 @@ const Passport = () => {
                 <img
                   src={selectedArtwork.badge_url}
                   alt="Artwork"
-                  className="w-full h-full object-cover opacity-90 saturate-100"
+                  className={`w-full h-full object-cover opacity-90 ${getImageFilter(selectedArtwork.badgeType)}`}
                 />
               ) : (
                 "img"
@@ -289,17 +278,9 @@ const Passport = () => {
                 onClick={() =>
                   navigate("/quiz", { state: { artwork: selectedArtwork } })
                 }
-                className={`w-full border transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg ${
-                  selectedArtwork.badgeType === "Gold"
-                    ? "border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6]"
-                    : "bg-[#4C8C5C] border-[#1B4B18] text-white shadow-md hover:brightness-110"
-                }`}
+                className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
               >
-                {selectedArtwork.badgeType === "Gold"
-                  ? t.startQuiz || "Replay Quiz"
-                  : selectedArtwork.badgeType === "Silver"
-                    ? "Retake Quiz (Upgrade to Gold!)"
-                    : "Take Quiz (Earn Silver/Gold!)"}
+                Take Quiz?
               </button>
             </div>
           </div>
