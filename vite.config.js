@@ -21,7 +21,7 @@ export default defineConfig({
         "pwa-512x512.png",
       ],
       manifest: {
-        name: "ArtiFact: NMFA Guide",
+        name: "ArtiFact",
         short_name: "ArtiFact",
         theme_color: "#16120c",
         background_color: "#16120c",
@@ -67,6 +67,21 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+
+          {
+            urlPattern: /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "artifact-supabase-images",
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
               },
               cacheableResponse: {
                 statuses: [0, 200],
