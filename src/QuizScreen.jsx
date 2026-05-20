@@ -200,55 +200,66 @@ const QuizScreen = () => {
       )}
 
       {gameState === "playing" && (
-        <div className="w-11/12 max-w-sm bg-[#381111] rounded-[1.5rem] shadow-2xl animate-fade-in-up mt-8 overflow-hidden flex flex-col border border-white/5">
-          <div className="pt-6 px-6 flex flex-col items-center text-center">
-            <div className="flex gap-[5px] mb-2 justify-center">
-              {[0, 1, 2].map((step) => (
-                <div
-                  key={step}
-                  className={`h-1.5 w-1.5 rounded-full ${step === currentQIndex ? "bg-[#FDFBF7]" : step < currentQIndex ? "bg-[#FDFBF7]/50" : "bg-[#783713]"}`}
-                ></div>
-              ))}
+        <>
+          <div className="w-11/12 max-w-sm bg-[#381111] rounded-[1.5rem] shadow-2xl animate-fade-in-up mt-8 overflow-hidden flex flex-col border border-white/5">
+            <div className="pt-6 px-6 flex flex-col items-center text-center">
+              <div className="flex gap-[5px] mb-2 justify-center">
+                {[0, 1, 2].map((step) => (
+                  <div
+                    key={step}
+                    className={`h-1.5 w-1.5 rounded-full ${step === currentQIndex ? "bg-[#FDFBF7]" : step < currentQIndex ? "bg-[#FDFBF7]/50" : "bg-[#783713]"}`}
+                  ></div>
+                ))}
+              </div>
+              <h3
+                className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-[#dfc4a7] text-[1.35rem] leading-snug text-center min-h-[60px] flex items-center justify-center`}
+              >
+                {questionText}
+              </h3>
             </div>
-            <h3
-              className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-[#dfc4a7] text-[1.35rem] leading-snug text-center min-h-[60px] flex items-center justify-center`}
-            >
-              {questionText}
-            </h3>
-          </div>
 
-          <div className="mb-8 bg-[#dfc4a7] px-6 py-6 flex flex-col gap-4">
-            {choices.map((choice, index) => {
-              let buttonStyle =
-                "bg-[#dfc4a7] border-2 border-[#4A260F] text-[#453128] shadow-[0_4px_0_rgba(0,0,0,0.25)] active:shadow-none active:translate-y-[4px]";
-              let shakeClass = "";
+            <div className="mb-8 bg-[#dfc4a7] px-6 py-6 flex flex-col gap-4">
+              {choices.map((choice, index) => {
+                let buttonStyle =
+                  "bg-[#dfc4a7] border-2 border-[#4A260F] text-[#453128] shadow-[0_4px_0_rgba(0,0,0,0.25)] active:shadow-none active:translate-y-[4px]";
+                let shakeClass = "";
 
-              if (selectedAnswer !== null) {
-                if (index === correctIndex) {
-                  buttonStyle =
-                    "bg-[#4C8C5C] border-2 border-[#1B4B18] text-white shadow-[0_4px_0_rgba(0,0,0,0.25)] translate-y-0";
-                } else if (index === selectedAnswer) {
-                  buttonStyle =
-                    "bg-[#A35252] border-2 border-[#5A2020] text-white shadow-none translate-y-[4px]";
-                  shakeClass = "animate-error-shake";
-                } else {
-                  buttonStyle =
-                    "bg-[#dfc4a7]/50 border-2 border-[#453128]/50 text-[#453128]/50 shadow-none translate-y-[4px]";
+                if (selectedAnswer !== null) {
+                  if (index === correctIndex) {
+                    buttonStyle =
+                      "bg-[#4C8C5C] border-2 border-[#1B4B18] text-white shadow-[0_4px_0_rgba(0,0,0,0.25)] translate-y-0";
+                  } else if (index === selectedAnswer) {
+                    buttonStyle =
+                      "bg-[#A35252] border-2 border-[#5A2020] text-white shadow-none translate-y-[4px]";
+                    shakeClass = "animate-error-shake";
+                  } else {
+                    buttonStyle =
+                      "bg-[#dfc4a7]/50 border-2 border-[#453128]/50 text-[#453128]/50 shadow-none translate-y-[4px]";
+                  }
                 }
-              }
 
-              return (
-                <button
-                  key={index}
-                  onClick={() => handleAnswer(index)}
-                  className={`rounded-xl py-2 ${isCJK ? "font-sans text-sm" : "font-serif text-[1.1rem]"} transition-all ${buttonStyle} ${shakeClass}`}
-                >
-                  {choice}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswer(index)}
+                    className={`rounded-xl py-2 ${isCJK ? "font-sans text-sm" : "font-serif text-[1.1rem]"} transition-all ${buttonStyle} ${shakeClass}`}
+                  >
+                    {choice}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+
+          <div className="absolute bottom-12 w-full flex justify-center z-20 animate-fade-in-up">
+            <button
+              onClick={() => navigate("/")}
+              className={`px-8 py-2.5 rounded-full bg-[#381111]/90 backdrop-blur-md border border-[#C4AB8F]/50 text-[#E0CCB6] shadow-xl hover:bg-[#4A260F] transition-all active:scale-95 ${isCJK ? "font-sans" : "font-serif"} text-[1.1rem] tracking-wide`}
+            >
+              {t.exitQuiz || "Exit Quiz"}
+            </button>
+          </div>
+        </>
       )}
 
       {gameState === "passed" && (
