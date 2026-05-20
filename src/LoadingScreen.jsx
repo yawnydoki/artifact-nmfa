@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const LoadingScreen = () => {
-  const [hasError, setHasError] = useState(false);
+const LoadingScreen = ({ hasError, onRetry }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -9,13 +8,12 @@ const LoadingScreen = () => {
     
     const interval = setInterval(() => {
       setProgress((oldProgress) => {
-        if (oldProgress >= 100) {
-          clearInterval(interval);
-          return 100;
+        if (oldProgress >= 90) {
+          return 90;
         }
-        return Math.min(oldProgress + 10, 100);
+        return oldProgress + Math.floor(Math.random() * 15) + 5;
       });
-    }, 500);
+    }, 300);
 
     return () => clearInterval(interval);
   }, [hasError]);
@@ -53,8 +51,8 @@ const LoadingScreen = () => {
 
           <button 
             onClick={() => {
-              setHasError(false);
               setProgress(0);
+              if (onRetry) onRetry(); 
             }}
             className="font-arial bg-[#FDFBF7] text-[#3B1514] font-bold text-sm py-2 px-12 rounded-full hover:opacity-90 active:scale-95 transition-all tracking-wide"
           >

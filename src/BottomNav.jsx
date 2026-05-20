@@ -9,6 +9,11 @@ const BottomNav = () => {
   const { currentLang, setCurrentLang } = useLanguage(); 
   const [isLangOpen, setIsLangOpen] = useState(false);
 
+  const hideNavPaths = ['/quiz', '/end', '/end-prompt'];
+  if (hideNavPaths.includes(location.pathname)) {
+    return null;
+  }
+
   const languages = [
     { code: 'eng', label: 'English' },
     { code: 'tag', label: 'Tagalog' },
@@ -35,7 +40,6 @@ const BottomNav = () => {
         ></div>
       )}
       
-      {/* Language Selection Drawer */}
       <div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-museum-brown rounded-[2rem] p-6 shadow-2xl z-[100] transition-all duration-300 border border-museum-gold/30 ${isLangOpen ? 'translate-y-0 opacity-100' : 'translate-y-[120%] opacity-0 pointer-events-none'}`}>
         <div className="flex justify-between items-center mb-6">
           <h3 className="font-serif text-museum-gold text-2xl tracking-wide">Select Language</h3>
