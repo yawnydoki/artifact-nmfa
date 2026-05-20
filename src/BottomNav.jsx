@@ -31,6 +31,12 @@ const BottomNav = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const getBubbleTransform = () => {
+    if (isActive('/map')) return 'translate-x-[-80px] scale-x-125 scale-y-125'; 
+    if (isActive('/passport')) return 'translate-x-[80px] scale-x-125 scale-y-125';
+    return 'translate-x-0 scale-x-125 scale-y-125';
+  };
+
   return (
     <>
       {isLangOpen && (
@@ -55,7 +61,7 @@ const BottomNav = () => {
                 setTimeout(() => setIsLangOpen(false), 200); 
               }}
               className={`py-3.5 px-5 rounded-xl font-neohellenic text-lg text-left transition-all tracking-wide border ${
-                currentLang === lang.code n
+                currentLang === lang.code 
                   ? 'bg-museum-gold/10 border-museum-gold text-museum-gold shadow-md pl-6' 
                   : 'bg-white/5 border-transparent text-white hover:bg-white/10'
               }`}
@@ -77,14 +83,8 @@ const BottomNav = () => {
 
         <div className="pointer-events-auto relative flex items-center justify-center bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-full h-16 px-4 w-[240px] shadow-[0_15px_35px_rgba(0,0,0,0.4),_inset_0_1px_3px_rgba(255,255,255,0.3)] isolation-isolate">
 
-          <div className="absolute w-20 h-20 rounded-full bg-gradient-to-b from-white/20 to-white/5 border border-white/40 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.3),_inset_0_2px_4px_rgba(255,255,255,0.4)] pointer-events-none top-1/2 -translate-y-1/2 -translate-x-1/2 transition-[left] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]"
-            style={{
-              left: isActive('/map')
-                ? 'calc(16px + 24px)'
-                : isActive('/passport')
-                ? 'calc(100% - 16px - 24px)'
-                : '50%',
-            }}
+          <div 
+            className={`absolute w-16 h-16 rounded-full bg-gradient-to-b from-white/20 to-white/5 border border-white/40 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.3),_inset_0_2px_4px_rgba(255,255,255,0.4)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${getBubbleTransform()}`}
           />
 
           <div className="absolute inset-0 flex justify-between items-center px-4 z-10">
