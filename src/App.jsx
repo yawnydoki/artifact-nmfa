@@ -44,10 +44,14 @@ const PageWrapper = ({ children }) => (
 
 function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
+  const [initError, setInitError] = useState(false); 
   const { loadInitialData } = useData();
 
-  useEffect(() => {
-    const initializeVisitor = async () => {
+  const initializeApp = async () => {
+    setInitError(false);
+    setIsAppLoading(true);
+
+    try {
       let visitorId = localStorage.getItem('artifact_visitor_id');
 
       if (visitorId) {
@@ -66,32 +70,32 @@ function App() {
 
       if (!visitorId) {
         visitorId = uuidv4();
-        try {
-          const { error } = await supabase
-            .from('visitors')
-            .insert([{ id: visitorId }]);
-            
-          if (error) throw error;
+        const { error } = await supabase
+          .from('visitors')
+          .insert([{ id: visitorId }]);
           
-          localStorage.setItem('artifact_visitor_id', visitorId);
-          console.log("New anonymous visitor registered:", visitorId);
-        } catch (err) {
-          console.error("Error registering visitor:", err.message);
-        }
+        if (error) throw error;
+        
+        localStorage.setItem('artifact_visitor_id', visitorId);
+        console.log("New anonymous visitor registered:", visitorId);
       } else {
         console.log("Welcome back, visitor:", visitorId);
       }
 
       await loadInitialData(visitorId);
-    };
+      setIsAppLoading(false); 
 
-    initializeVisitor();
+    } catch (err) {
+      console.error("Error initializing app:", err.message);
+      setInitError(true); 
+    }
+  };
 
-    const timer = setTimeout(() => setIsAppLoading(false), 5000);
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    initializeApp();
   }, []);
 
-  if (isAppLoading) return <LoadingScreen />;
+  if (isAppLoading) return <LoadingScreen hasError={initError} onRetry={initializeApp} />;
 
   return (
     <BrowserRouter>
