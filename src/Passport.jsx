@@ -124,7 +124,7 @@ const Passport = () => {
                       <img
                         src={stamp.badge_url}
                         alt="Badge"
-                        className={`w-full h-full object-cover animate-fade-in ${getImageFilter(stamp.badgeType)}`}
+                        className={`w-full h-full object-cover scale-[1.07] animate-fade-in ${getImageFilter(stamp.badgeType)}`}
                       />
                     ) : !stamp.isUnlocked ? (
                       <span className="text-[#70563C] text-4xl font-serif font-bold opacity-40">
@@ -148,7 +148,7 @@ const Passport = () => {
             </div>
           ) : (
             <div className="flex flex-col flex-1 relative">
-              <div className="flex flex-col gap-4 mt-2 pb-16 overflow-y-auto hide-scrollbar">
+              <div className="flex flex-col gap-4 mt-2 pb-6 overflow-y-auto hide-scrollbar">
                 {unlockedHistory.length === 0 ? (
                   <p className="font-serif text-center text-[#9A7B5C] mt-4 italic text-lg">
                     {t.areaEmpty || "Scan paintings to start your history!"}
@@ -173,7 +173,7 @@ const Passport = () => {
                           <img
                             src={item.badge_url}
                             alt="thumbnail"
-                            className={`w-full h-full object-cover ${getImageFilter(item.badgeType)}`}
+                            className={`w-full h-full object-cover scale-[1.03] ${getImageFilter(item.badgeType)}`}
                           />
                         )}
                       </div>
@@ -192,12 +192,6 @@ const Passport = () => {
                     </div>
                   ))
                 )}
-              </div>
-
-              <div className="absolute bottom-0 right-0 pt-4 bg-[#E0CCB6]">
-                <button className="bg-[#381111] text-white font-serif text-[1.1rem] px-6 py-2 rounded-xl shadow-md transition-all duration-150 active:scale-95">
-                  Save Data
-                </button>
               </div>
             </div>
           )}
@@ -222,7 +216,7 @@ const Passport = () => {
                 <img
                   src={selectedArtwork.badge_url}
                   alt="Artwork"
-                  className={`w-full h-full object-cover opacity-90 ${getImageFilter(selectedArtwork.badgeType)}`}
+                  className={`w-full h-full object-cover opacity-90 scale-[1.03] ${getImageFilter(selectedArtwork.badgeType)}`}
                 />
               ) : (
                 "img"
