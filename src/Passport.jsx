@@ -213,7 +213,6 @@ const Passport = () => {
 
             <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl overflow-hidden rounded-lg relative">
               {activeModalTab === "artist_description" ? (
-
                 selectedArtwork.artist_image_url ? (
                   <img
                     src={selectedArtwork.artist_image_url}
@@ -221,10 +220,11 @@ const Passport = () => {
                     className="w-full h-full object-cover opacity-90 scale-[1.03]"
                   />
                 ) : (
-                  <span className="text-[#998670] text-sm font-serif italic">Image Unavailable</span>
+                  <span className="text-[#998670] text-sm font-serif italic">
+                    Image Unavailable
+                  </span>
                 )
               ) : selectedArtwork.badge_url ? (
-
                 <img
                   src={selectedArtwork.badge_url}
                   alt="Artwork Badge"
@@ -248,7 +248,7 @@ const Passport = () => {
             </p>
 
             <div
-              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-36 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6]`}
+              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-36 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6] text-justify`}
             >
               {typeof selectedArtwork[activeModalTab] === "object" &&
               selectedArtwork[activeModalTab] !== null
