@@ -211,11 +211,23 @@ const Passport = () => {
               </button>
             </div>
 
-            <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl overflow-hidden rounded-lg">
-              {selectedArtwork.badge_url ? (
+            <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl overflow-hidden rounded-lg relative">
+              {activeModalTab === "artist_description" ? (
+
+                selectedArtwork.artist_image_url ? (
+                  <img
+                    src={selectedArtwork.artist_image_url}
+                    alt="Artist Photograph"
+                    className="w-full h-full object-cover opacity-90 scale-[1.03]"
+                  />
+                ) : (
+                  <span className="text-[#998670] text-sm font-serif italic">Image Unavailable</span>
+                )
+              ) : selectedArtwork.badge_url ? (
+
                 <img
                   src={selectedArtwork.badge_url}
-                  alt="Artwork"
+                  alt="Artwork Badge"
                   className={`w-full h-full object-cover opacity-90 scale-[1.03] ${getImageFilter(selectedArtwork.badgeType)}`}
                 />
               ) : (
