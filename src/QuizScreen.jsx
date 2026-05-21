@@ -130,21 +130,25 @@ const QuizScreen = () => {
 
     try {
       if (existingBadge) {
-        if (
-          tierValues[newTier] > tierValues[existingBadge.badge_type || "Base"]
-        ) {
-          await supabase
+        const currentTier = existingBadge.badge_type || "Base";
+        const currentTierValue = tierValues[currentTier] || 1;
+
+        if (tierValues[newTier] > currentTierValue) {
+          
+          const { error } = await supabase
             .from("unlocked_badges")
             .update({ badge_type: newTier })
             .eq("visitor_id", visitorId)
             .eq("artwork_id", artwork.id);
+            
+          if (error) throw error;
 
           showToast(`${newTier} Badge Upgraded!`);
         } else {
           showToast(`Score: ${finalScore}/3`);
         }
       } else {
-        await supabase
+        const { error } = await supabase
           .from("unlocked_badges")
           .insert([
             {
@@ -153,11 +157,16 @@ const QuizScreen = () => {
               badge_type: newTier,
             },
           ]);
+          
+        if (error) throw error;
         showToast(`${newTier} Badge Unlocked!`);
       }
+      
       await refreshBadges();
+      
     } catch (error) {
-      console.error("Error saving badge:", error.message);
+      console.error("Supabase Error saving badge:", error.message);
+      showToast("Error updating database!"); 
     }
   };
 
@@ -173,8 +182,8 @@ const QuizScreen = () => {
     <div className="h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center justify-center font-neohellenic relative pt-10 pb-[100px] box-border">
       {toastMessage && (
         <div className="absolute top-28 left-0 w-full flex justify-center z-[100] animate-fade-in-up pointer-events-none">
-          <div className="bg-[#4C8C5C] text-white px-6 py-3 rounded-full shadow-2xl border-2 border-[#1B4B18] font-serif flex items-center gap-3">
-            <span className="text-2xl drop-shadow-md">🏆</span>
+          <div className={`text-white px-6 py-3 rounded-full shadow-2xl border-2 font-serif flex items-center gap-3 ${toastMessage.includes("Error") ? "bg-[#A35252] border-[#5A2020]" : "bg-[#4C8C5C] border-[#1B4B18]"}`}>
+            <span className="text-2xl drop-shadow-md">{toastMessage.includes("Error") ? "⚠️" : "🏆"}</span>
             <span className="text-lg tracking-wide">{toastMessage}</span>
           </div>
         </div>
