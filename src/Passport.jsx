@@ -46,16 +46,10 @@ const Passport = () => {
 
   const getBadgeStyles = (type) => {
     if (type === "Gold")
-      return "bg-white border-[#E6BA39] shadow-[0_0_15px_rgba(230,186,57,0.5)] animate-shimmer saturate-100";
+      return "bg-white border-[#E6BA39] shadow-[0_0_15px_rgba(230,186,57,0.5)] animate-shimmer";
     if (type === "Silver")
       return "bg-[#F3F4F6] border-[#C0C0C0] shadow-[0_0_10px_rgba(192,192,192,0.4)]";
     return "bg-[#FFF0E0] border-[#CD7F32] shadow-[0_0_8px_rgba(205,127,50,0.5)]";
-  };
-
-  const getImageFilter = (type) => {
-    if (type === "Gold") return "saturate-100";
-    if (type === "Silver") return "grayscale contrast-125";
-    return "sepia-[.4] contrast-110 hue-rotate-15";
   };
 
   return (
@@ -124,7 +118,7 @@ const Passport = () => {
                       <img
                         src={stamp.badge_url}
                         alt="Badge"
-                        className={`w-full h-full object-cover scale-[1.07] animate-fade-in ${getImageFilter(stamp.badgeType)}`}
+                        className="w-full h-full object-cover scale-[1.07] animate-fade-in"
                       />
                     ) : !stamp.isUnlocked ? (
                       <span className="text-[#70563C] text-4xl font-serif font-bold opacity-40">
@@ -173,7 +167,7 @@ const Passport = () => {
                           <img
                             src={item.badge_url}
                             alt="thumbnail"
-                            className={`w-full h-full object-cover scale-[1.03] ${getImageFilter(item.badgeType)}`}
+                            className="w-full h-full object-cover scale-[1.03]"
                           />
                         )}
                       </div>
@@ -228,7 +222,7 @@ const Passport = () => {
                 <img
                   src={selectedArtwork.badge_url}
                   alt="Artwork Badge"
-                  className={`w-full h-full object-cover opacity-90 scale-[1.03] ${getImageFilter(selectedArtwork.badgeType)}`}
+                  className="w-full h-full object-cover opacity-90 scale-[1.03]"
                 />
               ) : (
                 "img"
