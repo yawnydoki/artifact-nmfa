@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
 
 const BottomNav = () => {
@@ -32,28 +31,10 @@ const BottomNav = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const getActiveState = () => {
-    if (isActive('/map')) return 'map';
-    if (isActive('/passport')) return 'passport';
-    return 'home';
-  };
-
-  const bubbleVariants = {
-    map: {
-      x: -80,
-      scaleX: [1.25, 1.7, 1.25],
-      scaleY: [1.25, 0.8, 1.25],
-    },
-    home: {
-      x: 0,
-      scaleX: [1.25, 1.7, 1.25],
-      scaleY: [1.25, 0.8, 1.25],
-    },
-    passport: {
-      x: 80,
-      scaleX: [1.25, 1.7, 1.25],
-      scaleY: [1.25, 0.8, 1.25],
-    }
+  const getBubbleTransform = () => {
+    if (isActive('/map')) return 'translate-x-[-80px] scale-x-125 scale-y-125'; 
+    if (isActive('/passport')) return 'translate-x-[80px] scale-x-125 scale-y-125';
+    return 'translate-x-0 scale-x-125 scale-y-125';
   };
 
   return (
@@ -65,7 +46,7 @@ const BottomNav = () => {
         ></div>
       )}
       
-      <div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-museum-brown rounded-[2rem] p-6 shadow-2xl z-[100] transition-all duration-300 border border-museum-gold/30 ${isLangOpen ? 'translate-y-0 opacity-100' : 'translate-y-[120%] opacity-0 pointer-events-none'}`}>
+      <div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-gradient-to-b from-white/20 to-white/5  backdrop-blur-xl rounded-[2rem] p-6 shadow-2xl z-[100] transition-all duration-300 border border-museum-gold/30 ${isLangOpen ? 'translate-y-0 opacity-100' : 'translate-y-[120%] opacity-0 pointer-events-none'}`}>
         <div className="flex justify-between items-center mb-6">
           <h3 className="font-serif text-museum-gold text-2xl tracking-wide">Select Language</h3>
           <button onClick={() => setIsLangOpen(false)} className="text-white/50 hover:text-white font-bold text-xl transition-colors">✕</button>
@@ -101,18 +82,17 @@ const BottomNav = () => {
         </button>
 
         <div className="pointer-events-auto relative flex items-center justify-center bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-full h-16 px-4 w-[240px] shadow-[0_15px_35px_rgba(0,0,0,0.4),_inset_0_1px_3px_rgba(255,255,255,0.3)] isolation-isolate">
-
-          <motion.div 
-            initial={false}
-            animate={getActiveState()}
-            variants={bubbleVariants}
-            transition={{
-              x: { type: "spring", stiffness: 400, damping: 25 },
-              scaleX: { duration: 0.35, ease: "easeInOut" },
-              scaleY: { duration: 0.35, ease: "easeInOut" }
+            
+          <div className="absolute w-20 h-20 rounded-full bg-gradient-to-b from-white/20 to-white/5 border border-white/40 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.3),_inset_0_2px_4px_rgba(255,255,255,0.4)] pointer-events-none top-1/2 -translate-y-1/2 -translate-x-1/2 transition-[left] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]"
+            style={{
+              left: isActive('/map')
+                ? 'calc(16px + 24px)'
+                : isActive('/passport')
+                ? 'calc(100% - 16px - 24px)'
+                : '50%',
             }}
-            className="absolute w-16 h-16 rounded-full bg-gradient-to-b from-white/20 to-white/5 border border-white/40 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.3),_inset_0_2px_4px_rgba(255,255,255,0.4)] pointer-events-none origin-center"
           />
+
 
           <div className="absolute inset-0 flex justify-between items-center px-4 z-10">
             <button 
