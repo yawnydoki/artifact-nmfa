@@ -71,7 +71,10 @@ const BottomNav = () => {
       <div className={`fixed bottom-28 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-xl rounded-[2rem] p-6 shadow-2xl z-[100] transition-all duration-300 border border-museum-gold/30 ${isLangOpen ? 'translate-y-0 opacity-100' : 'translate-y-[120%] opacity-0 pointer-events-none'}`}>
         <div className="flex justify-between items-center mb-6">
           <h3 className="font-serif text-museum-gold text-2xl tracking-wide">Select Language</h3>
-          <button onClick={() => setIsLangOpen(false)} className="text-white/50 hover:text-white font-bold text-xl transition-colors">✕</button>
+          <button onClick={() => setIsLangOpen(false)} 
+          className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center bg-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/20 transition-colors z-10"
+          > ✕ 
+          </button>
         </div>
         
         <div className="flex flex-col gap-3">
@@ -139,7 +142,8 @@ const BottomNav = () => {
               onClick={() => handleNav('/passport')}
               className={`w-12 h-12 flex items-center justify-center transition-all duration-300 active:scale-90 ${isActive('/passport') ? 'text-museum-gold' : 'text-white/70 hover:text-white'}`}
             >
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15,6H9A1,1,0,0,0,8,7v4a1,1,0,0,0,1,1h6a1,1,0,0,0,1-1V7A1,1,0,0,0,15,6Zm-1,4H10V8h4Zm3-8H5A1,1,0,0,0,4,3V21a1,1,0,0,0,1,1H17a3,3,0,0,0,3-3V5A3,3,0,0,0,17,2Zm1,17a1,1,0,0,1-1,1H6V4H17a1,1,0,0,1,1,1Z" fill="currentColor"/></svg>
             </button>
           </div>
 

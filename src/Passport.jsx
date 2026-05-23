@@ -199,9 +199,9 @@ const Passport = () => {
               <span className="text-2xl">About</span>
               <button
                 onClick={() => setSelectedArtwork(null)}
-                className="text-xl opacity-80 hover:opacity-100 transition-opacity"
+                className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center bg-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/20 transition-colors z-10"
               >
-                [x]
+                ✕
               </button>
             </div>
 
@@ -241,17 +241,6 @@ const Passport = () => {
               • 1884
             </p>
 
-            <div
-              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-36 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6] text-justify`}
-            >
-              {typeof selectedArtwork[activeModalTab] === "object" &&
-              selectedArtwork[activeModalTab] !== null
-                ? selectedArtwork[activeModalTab][currentLang] ||
-                  selectedArtwork[activeModalTab].eng
-                : selectedArtwork[activeModalTab] ||
-                  "More information coming soon..."}
-            </div>
-
             <div className="mx-5 grid grid-cols-3 gap-3 mb-3">
               <button
                 onClick={() => setActiveModalTab("origin")}
@@ -273,12 +262,23 @@ const Passport = () => {
               </button>
             </div>
 
+            <div
+              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-36 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6] text-justify`}
+            >
+              {typeof selectedArtwork[activeModalTab] === "object" &&
+              selectedArtwork[activeModalTab] !== null
+                ? selectedArtwork[activeModalTab][currentLang] ||
+                  selectedArtwork[activeModalTab].eng
+                : selectedArtwork[activeModalTab] ||
+                  "More information coming soon..."}
+            </div>
+
             <div className="mx-5 mb-6">
               <button
                 onClick={() =>
                   navigate("/quiz", { state: { artwork: selectedArtwork } })
                 }
-                className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
+                className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] shadow-[0_8px_20px_rgba(0,0,0,0.3)] pointer-events-none top-1/2 origin-center transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
               >
                 Take Quiz?
               </button>

@@ -243,7 +243,7 @@ const Dashboard = () => {
                 onClick={() =>
                   navigate("/quiz", { state: { artwork: activeArtwork } })
                 }
-                className="flex-1 bg-museum-gold text-artifact-bg py-2.5 rounded-full font-serif text-lg tracking-wide hover:brightness-110 transition-all shadow-md active:scale-95"
+                className="flex-1 bg-museum-gold text-artifact-bg py-2.5 rounded-full font-serif text-lg tracking-wide hover:brightness-110 transition-all active:scale-95"
               >
                 {t.startQuiz || "Start Quiz"}
               </button>
