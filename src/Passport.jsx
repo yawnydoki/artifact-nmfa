@@ -172,9 +172,9 @@ const Passport = () => {
                         )}
                       </div>
 
-                      <div className="flex flex-col">
+                      <div className="flex flex-col flex-1 text-left">
                         <h3
-                          className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-[#1A0F0A] text-lg leading-none mb-1`}
+                          className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-[#1A0F0A] text-lg leading-tight mb-1`}
                         >
                           {item.title?.[currentLang] || item.title?.eng}
                         </h3>
