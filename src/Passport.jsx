@@ -263,14 +263,44 @@ const Passport = () => {
             </div>
 
             <div
-              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-36 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6] text-justify`}
+              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-48 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6] text-justify`}
             >
-              {typeof selectedArtwork[activeModalTab] === "object" &&
-              selectedArtwork[activeModalTab] !== null
-                ? selectedArtwork[activeModalTab][currentLang] ||
-                  selectedArtwork[activeModalTab].eng
-                : selectedArtwork[activeModalTab] ||
-                  "More information coming soon..."}
+              <div className="mb-2">
+                {typeof selectedArtwork[activeModalTab] === "object" &&
+                selectedArtwork[activeModalTab] !== null
+                  ? selectedArtwork[activeModalTab][currentLang] ||
+                    selectedArtwork[activeModalTab].eng
+                  : selectedArtwork[activeModalTab] ||
+                    "More information coming soon..."}
+              </div>
+
+              {activeModalTab === "artist_description" && (
+                <div className="mt-5 pt-4 border-t border-[#C4AB8F]/50">
+                  <h4 className="font-serif font-bold text-[#783713] mb-3 text-base text-left">
+                    Related Works
+                  </h4>
+                  <div className="flex overflow-x-auto gap-3 pb-2 hide-scrollbar">
+                    {selectedArtwork.related_arts && selectedArtwork.related_arts.length > 0 ? (
+                      selectedArtwork.related_arts.map((art, idx) => (
+                        <div key={idx} className="w-24 shrink-0 flex flex-col gap-1">
+                          <img 
+                            src={art.image_url} 
+                            alt={art.title} 
+                            className="w-24 h-24 object-cover rounded-lg border border-[#C4AB8F] shadow-sm" 
+                          />
+                          <span className="text-xs font-serif leading-tight text-center truncate text-[#4A260F]">
+                            {art.title}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs italic text-[#783713]/60 w-full text-center">
+                        More works coming soon...
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="mx-5 mb-6">
@@ -278,7 +308,7 @@ const Passport = () => {
                 onClick={() =>
                   navigate("/quiz", { state: { artwork: selectedArtwork } })
                 }
-                className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] shadow-[0_8px_20px_rgba(0,0,0,0.3)] pointer-events-none top-1/2 origin-center transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
+                className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
               >
                 Take Quiz?
               </button>
