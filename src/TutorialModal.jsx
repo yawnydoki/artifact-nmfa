@@ -1,19 +1,34 @@
 import React, { useState, useEffect } from "react";
+import './App.css';
 
 const TutorialModal = ({ onClose }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [expandedMode, setExpandedMode] = useState(null);
-
   const [isSplashActive, setIsSplashActive] = useState(true);
+  
+  const [showSubtext, setShowSubtext] = useState(false);
 
+  // Splash timer logic
   useEffect(() => {
     if (isSplashActive) {
       const timer = setTimeout(() => {
         setIsSplashActive(false);
-      }, 3500);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [isSplashActive]);
+
+  useEffect(() => {
+    if (currentSlide === 0) {
+      const timer = setTimeout(() => {
+        setShowSubtext(true);
+      }, 3500);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowSubtext(false);
+    }
+  }, [currentSlide]);
 
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -52,26 +67,28 @@ const TutorialModal = ({ onClose }) => {
 
   if (isSplashActive) {
     return (
-      <div className="fixed inset-0 z-[200] bg-[#361313] text-[#F5EAD4] flex flex-col items-center justify-center font-serif h-[100dvh] overflow-hidden">
+      <div className="fixed inset-0 z-[200] bg-[#430d0d] text-white flex flex-col items-center justify-center font-serif h-[100dvh] overflow-hidden">
         <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in pb-10">
-          <LogoIcon customClass="mb-6 w-28 h-28 animate-pulse" />
-          <h1 className="text-5xl sm:text-6xl tracking-tight mb-2 leading-none">
-            welcome
-          </h1>
-          <div className="flex items-center gap-2">
-            <span className="font-script text-4xl sm:text-5xl -rotate-6 italic">
-              to
-            </span>
-            <h1 className="text-4xl sm:text-5xl tracking-wide">ArtiFact!</h1>
+            <LogoIcon customClass="w-28 h-28 sm:w-20 sm:h-20" />
+              <p className="font-serif font-bold text-7xl sm:text-8xl tracking-tight mb-1 leading-none">
+                welcome
+              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-script text-8xl sm:text-8xl -rotate-6 italic">
+                  to
+                </span>
+                <p className="font-serif font-bold text-5xl sm:text-2xl tracking-wide">
+                  ArtiFact!
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
     );
   }
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-[#361313] text-[#F5EAD4] flex flex-col items-center justify-between font-serif h-[100dvh] overflow-hidden animate-fade-in"
+      className="fixed inset-0 z-[200] bg-[#430d0d] text-[#F5EAD4] flex flex-col items-center justify-between font-serif h-[100dvh] overflow-hidden animate-fade-in"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -79,57 +96,80 @@ const TutorialModal = ({ onClose }) => {
       <div className="w-full flex justify-end p-5 z-10 flex-shrink-0">
         <button
           onClick={onClose}
-          className="text-[#F5EAD4] text-3xl font-bold hover:scale-110 active:scale-95 transition-transform"
+          className="text-white text-3xl font-bold hover:scale-110 active:scale-95 transition-transform"
         >
           X
         </button>
       </div>
 
-      <div className="flex-1 w-full max-w-sm px-6 flex flex-col items-center overflow-y-auto hide-scrollbar pb-24">
+      <div className="text-white flex-1 w-full max-w-sm px-6 flex flex-col items-center overflow-y-auto hide-scrollbar pb-24">
         {currentSlide === 0 && (
-          <div className="flex flex-col items-center h-full text-center animate-fade-in w-full">
-            <LogoIcon customClass="mb-2 w-16 h-16 sm:w-20 sm:h-20" />
-            <h1 className="text-4xl sm:text-5xl tracking-tight mb-1 leading-none">
-              welcome
-            </h1>
-            <div className="flex items-center gap-2 mb-6 sm:mb-8">
-              <span className="font-script text-3xl sm:text-4xl -rotate-6 italic">
-                to
-              </span>
-              <h1 className="text-3xl sm:text-4xl tracking-wide">ArtiFact!</h1>
+          <div className="flex flex-col items-center justify-center min-h-full text-center w-full overflow-hidden">
+            
+            <div 
+              className={`flex flex-col items-center transition-all duration-1000 ease-in-out transform ${
+                showSubtext 
+                  ? "translate-y-0 mb-4" 
+                  : "sm:translate-y-[15dvh]"
+              }`}
+            >
+              <LogoIcon customClass="w-28 h-28 sm:w-20 sm:h-20" />
+              <p className="font-serif font-bold text-7xl sm:text-8xl tracking-tight mb-1 leading-none">
+                welcome
+              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-script text-8xl sm:text-8xl -rotate-6 italic">
+                  to
+                </span>
+                <p className="font-serif font-bold text-5xl sm:text-2xl tracking-wide">
+                  ArtiFact!
+                </p>
+              </div>
             </div>
-            <p className="text-[15px] sm:text-base mb-4 leading-relaxed font-sans px-2 text-center">
-              ArtiFact is an undergraduate thesis project in Beta.
-            </p>
-            <p className="text-[15px] sm:text-base mb-6 leading-relaxed font-sans px-1 text-center">
-              Thank you for exploring and testing our system. We hope you enjoy
-              experiencing art in a more interactive way.
-            </p>
-            <div className="mt-auto pt-4 text-right w-full pr-4 text-base sm:text-lg font-sans italic opacity-90">
-              <p>Sincerely,</p>
-              <p>The Researchers</p>
+            
+            <div 
+              className={`w-full select-none pointer-events-none transition-all duration-1000 ease-in-out transform ${
+                showSubtext 
+                  ? "opacity-100 translate-y-0 max-h-[500px]" 
+                  : "opacity-0 translate-y-10 max-h-0 overflow-hidden"
+              }`}
+            >
+              <p className="font-serif text-[15px] sm:text-base mb-4 leading-relaxed px-2 text-center">
+                ArtiFact is an undergraduate thesis project in Beta.
+              </p>
+              <p className="font-serif text-[15px] sm:text-base mb-6 leading-relaxed px-1 text-center">
+                Thank you for exploring and testing our system. We hope you enjoy
+                experiencing art in a more interactive way.
+              </p>
+              <div className="font-serif text-right w-full pr-4 text-base sm:text-lg italic">
+                <p>Sincerely,<br/>
+                The Researchers
+                </p>
+              </div>
             </div>
+
           </div>
         )}
 
-        {currentSlide === 1 && (
+        {/* ... Slides 1 and 2 remain exactly the same ... */}
+        {currentSlide === 1 && ( 
           <div className="flex flex-col w-full h-full animate-fade-in">
             <div className="flex flex-col items-center mb-4 flex-shrink-0 text-center">
               <LogoIcon customClass="mb-2 w-16 h-16" />
-              <h2 className="text-3xl sm:text-4xl mb-1">How to Use</h2>
-              <h1 className="text-5xl sm:text-6xl tracking-wide">ArtiFact:</h1>
+              <p className="font-serif text-4xl sm:text-4xl mb-1">How to Use</p>
+              <p className="font-serif text-5xl sm:text-6xl tracking-wide">ArtiFact:</p>
             </div>
 
             <div className="flex-1 w-full flex flex-col gap-3 overflow-y-auto hide-scrollbar">
-              <div className="w-full flex flex-col gap-1.5">
-                <p className="text-xs sm:text-sm font-sans pl-1 text-left">
+              <div className="w-full flex flex-col">
+                <p className="text-xs text-[#F5EAD4] sm:text-sm font-sans pb-2 pl-1 text-left">
                   Scan Paintings and Learn!
                 </p>
                 <button
                   onClick={() =>
                     setExpandedMode(expandedMode === "info" ? null : "info")
                   }
-                  className={`w-full bg-[#F5EAD4] text-[#4A1515] py-2.5 px-4 rounded-lg flex justify-between items-center text-base sm:text-lg shadow-md transition-all active:scale-95 ${expandedMode === "info" ? "rounded-b-none border-b border-[#D6C5A9]" : ""}`}
+                  className={`w-full bg-[#F5EAD4] text-[#4A1515] py-2.5 px-2 rounded-lg flex justify-between items-center text-base sm:text-lg shadow-md transition-all active:scale-100 ${expandedMode === "info" ? "rounded-b-none" : ""}`}
                 >
                   Informational Mode
                   <svg
@@ -147,7 +187,7 @@ const TutorialModal = ({ onClose }) => {
                 <div
                   className={`w-full bg-[#F5EAD4] rounded-b-lg flex flex-col gap-2 p-2 shadow-md overflow-hidden transition-all duration-300 ${expandedMode === "info" ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0 p-0 m-0 border-none"}`}
                 >
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <svg
                       className="w-8 h-8 sm:w-10 sm:h-10 text-[#7A2323] flex-shrink-0"
                       fill="none"
@@ -177,7 +217,7 @@ const TutorialModal = ({ onClose }) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center justify-between gap-2">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center justify-between gap-2 shadow-lg">
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
                         SCAN Paintings
@@ -191,7 +231,7 @@ const TutorialModal = ({ onClose }) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <svg
                       className="w-8 h-8 sm:w-10 sm:h-10 text-[#7A2323] flex-shrink-0"
                       viewBox="0 0 24 24"
@@ -214,7 +254,7 @@ const TutorialModal = ({ onClose }) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
                         Earn your digital certificate
@@ -240,15 +280,15 @@ const TutorialModal = ({ onClose }) => {
                 </div>
               </div>
 
-              <div className="w-full flex flex-col gap-1.5 mt-1">
-                <p className="text-xs sm:text-sm font-sans pl-1 text-left">
+              <div className="w-full flex flex-col mt-1">
+                <p className="text-xs sm:text-sm text-[#F5EAD4] font-sans pb-2 pl-1 text-left">
                   Challenge Yourself and Earn Rewards!
                 </p>
                 <button
                   onClick={() =>
                     setExpandedMode(expandedMode === "game" ? null : "game")
                   }
-                  className={`w-full bg-[#F5EAD4] text-[#4A1515] py-2.5 px-4 rounded-lg flex justify-between items-center text-base sm:text-lg shadow-md transition-all active:scale-95 ${expandedMode === "game" ? "rounded-b-none border-b border-[#D6C5A9]" : ""}`}
+                  className={`w-full bg-[#F5EAD4] text-[#4A1515] py-2.5 px-4 rounded-lg flex justify-between items-center text-base sm:text-lg shadow-md transition-all active:scale-100 ${expandedMode === "game" ? "rounded-b-none" : ""}`}
                 >
                   Gamified Mode
                   <svg
@@ -266,7 +306,7 @@ const TutorialModal = ({ onClose }) => {
                 <div
                   className={`w-full bg-[#F5EAD4] rounded-b-lg flex flex-col gap-2 p-2 shadow-md overflow-hidden transition-all duration-300 ${expandedMode === "game" ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0 p-0 m-0 border-none"}`}
                 >
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <svg
                       className="w-8 h-8 sm:w-10 sm:h-10 text-[#7A2323] flex-shrink-0"
                       fill="none"
@@ -296,7 +336,7 @@ const TutorialModal = ({ onClose }) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center justify-between gap-2">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center justify-between gap-2 shadow-lg">
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
                         SCAN Paintings
@@ -310,7 +350,7 @@ const TutorialModal = ({ onClose }) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <svg
                       className="w-8 h-8 sm:w-10 sm:h-10 text-[#7A2323] flex-shrink-0"
                       fill="none"
@@ -326,7 +366,7 @@ const TutorialModal = ({ onClose }) => {
                       <line x1="15" y1="13" x2="15.01" y2="13" />
                       <line x1="18" y1="11" x2="18.01" y2="11" />
                     </svg>
-                    <div className="flex flex-col text-left">
+                    <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
                         CHALLENGE yourself
                       </span>
@@ -337,7 +377,7 @@ const TutorialModal = ({ onClose }) => {
                     </div>
                   </div>
 
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
                         Check your PASSPORT
@@ -360,7 +400,7 @@ const TutorialModal = ({ onClose }) => {
                     </svg>
                   </div>
 
-                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3">
+                  <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <svg
                       className="w-8 h-8 sm:w-10 sm:h-10 text-[#7A2323] flex-shrink-0"
                       fill="none"
@@ -399,12 +439,12 @@ const TutorialModal = ({ onClose }) => {
           <div className="flex flex-col h-full animate-fade-in text-center">
             <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-4">
               <LogoIcon customClass="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0" />
-              <h2 className="text-3xl sm:text-4xl tracking-wide">
+              <h2 className="font-serif font-bold text-3xl sm:text-4xl tracking-wide">
                 Short Disclaimer
               </h2>
             </div>
             <div className="flex-1 overflow-y-auto hide-scrollbar font-sans text-[14px] sm:text-[15px] leading-relaxed opacity-95 text-left">
-              <p className="mb-4">
+              <p className="font-serif text-justify mb-4">
                 ArtiFact currently only includes 10 selected paintings as the
                 system is presently intended for research and educational
                 project purposes. Due to the limited number of artworks, users
@@ -412,7 +452,7 @@ const TutorialModal = ({ onClose }) => {
                 from the Gamified Educational Mode, such as using the Map icon
                 to help locate paintings more easily.
               </p>
-              <p className="mb-4">
+              <p className="font-serif text-justify mb-4">
                 Users may also revisit the tutorial anytime through the Passport
                 and History section by selecting the "How to Play" bar for
                 guidance and navigation instructions. If you would like to
@@ -444,6 +484,7 @@ const TutorialModal = ({ onClose }) => {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    transform="translate(0, 0)"
                     d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
                   />
                   <path
@@ -458,12 +499,12 @@ const TutorialModal = ({ onClose }) => {
         )}
       </div>
 
-      <div className="absolute bottom-8 left-0 w-full flex justify-center gap-3 z-10 bg-gradient-to-t from-[#361313] pt-6 pb-2">
+      <div className="absolute bottom-8 left-0 w-full flex justify-center gap-1 z-10 bg-gradient-to-t from-[#430d0d] pt-6 pb-2">
         {[0, 1, 2].map((idx) => (
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? "w-8 bg-[#F5EAD4]" : "w-8 bg-[#F5EAD4]/30 hover:bg-[#F5EAD4]/50"}`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? "w-10 bg-white" : "w-10 bg-gray-400/50 hover:bg-[#F5EAD4]/50"}`}
           />
         ))}
       </div>

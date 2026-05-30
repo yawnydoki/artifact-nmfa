@@ -23,6 +23,7 @@ export default {
         serif: ['"Times New Roman"', "serif"],
         neohellenic: ['"GFS Neohellenic"', "sans-serif"],
         arial: ["Arial", "Helvetica", "sans-serif"],
+        script: ['Allura', 'cursive'],
       },
       keyframes: {
         "fade-in-up": {
