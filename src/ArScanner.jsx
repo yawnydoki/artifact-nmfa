@@ -1,26 +1,23 @@
 import React, { useEffect, useRef } from 'react';
 
-// Map each painting index to its sound file
 const PAINTING_SOUNDS = {
   0: '/sounds/painting-0.mp3',
   1: '/sounds/painting-1.mp3',
   2: '/sounds/painting-2.mp3',
-  // add more sounds yeah (public/sounds)
 };
 
-const ArScanner = ({ onTargetFound, onTargetLost }) => {
+const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   const sceneRef = useRef(null);
   const callbacksRef = useRef({ onTargetFound, onTargetLost });
-  const audioRef = useRef(null); // Tracks currently playing audio
- 
-  // Keep callbacks ref in sync without re-running the effect
+  const audioRef = useRef(null);
+
   useEffect(() => {
     callbacksRef.current = { onTargetFound, onTargetLost };
   }, [onTargetFound, onTargetLost]);
- 
+
   useEffect(() => {
     const targets = document.querySelectorAll('[mindar-image-target]');
- 
+
     const stopCurrentAudio = () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -28,15 +25,13 @@ const ArScanner = ({ onTargetFound, onTargetLost }) => {
         audioRef.current = null;
       }
     };
- 
+
     const handleTargetFound = (event) => {
       const index = parseInt(event.target.dataset.index);
       console.log(`Painting Detected! Index: ${index}`);
- 
-      // Stop any currently playing sound first
+
       stopCurrentAudio();
- 
-      // Play the sound mapped to this specific painting
+
       const soundSrc = PAINTING_SOUNDS[index];
       if (soundSrc) {
         const audio = new Audio(soundSrc);
@@ -44,53 +39,46 @@ const ArScanner = ({ onTargetFound, onTargetLost }) => {
           console.warn(`Audio play failed for painting ${index}:`, err)
         );
         audioRef.current = audio;
- 
-        // Clean up ref when audio finishes naturally
+
         audio.addEventListener('ended', () => {
           audioRef.current = null;
         });
       }
- 
+
       if (callbacksRef.current.onTargetFound) {
         callbacksRef.current.onTargetFound(index);
       }
     };
- 
+
     const handleTargetLost = () => {
       console.log('Target Lost!');
- 
-      // Stop sound when painting goes out of frame
       stopCurrentAudio();
- 
+
       if (callbacksRef.current.onTargetLost) {
         callbacksRef.current.onTargetLost();
       }
     };
- 
+
     targets.forEach((target) => {
       target.addEventListener('targetFound', handleTargetFound);
       target.addEventListener('targetLost', handleTargetLost);
     });
- 
+
     return () => {
-      // Remove event listeners
       targets.forEach((target) => {
         target.removeEventListener('targetFound', handleTargetFound);
         target.removeEventListener('targetLost', handleTargetLost);
       });
- 
-      // Stop any playing audio on unmount
+
       stopCurrentAudio();
- 
-      // Stop camera tracks
+
       const videoElements = document.querySelectorAll('video');
       videoElements.forEach((video) => {
         if (video.srcObject) {
           video.srcObject.getTracks().forEach((track) => track.stop());
         }
       });
- 
-      // Stop MindAR system
+
       if (
         sceneRef.current &&
         sceneRef.current.systems['mindar-image-system']
@@ -122,20 +110,21 @@ const ArScanner = ({ onTargetFound, onTargetLost }) => {
             data-index={i} 
             mindar-image-target={`targetIndex: ${i}`}
           >
-            <a-plane 
-              color="#E6BA39" 
-              opacity="0.2" 
-              position="0 0 0" 
-              height="0.552" 
-              width="1" 
-              rotation="0 0 0"
-            ></a-plane>
+            {(!unlockedByIndex || !unlockedByIndex[i]) && (
+              <>
+                <a-text value="???" position="0.015 0.015 0" align="center" anchor="center" color="#000000" width="4" scale="3 3 3"></a-text>
+                <a-text value="???" position="-0.015 0.015 0" align="center" anchor="center" color="#000000" width="4" scale="3 3 3"></a-text>
+                <a-text value="???" position="0.015 -0.015 0" align="center" anchor="center" color="#000000" width="4" scale="3 3 3"></a-text>
+                <a-text value="???" position="-0.015 -0.015 0" align="center" anchor="center" color="#000000" width="4" scale="3 3 3"></a-text>
+                
+                <a-text value="???" position="0 0 0.02" align="center" anchor="center" color="#FFFFFF" width="4" scale="3 3 3"></a-text>
+              </>
+            )}
           </a-entity>
         ))}
-
       </a-scene>
     </div>
   );
 };
 
-export default ArScanner;
+export default React.memo(ArScanner);
