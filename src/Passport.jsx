@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "./LanguageContext";
 import { uiDict } from "./translations";
 import { useData } from "./DataContext";
+import TutorialModal from "./TutorialModal";
 
 const style = document.createElement("style");
 style.innerHTML = `
@@ -21,6 +22,8 @@ const Passport = () => {
   const [activeTab, setActiveTab] = useState("badges");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [activeModalTab, setActiveModalTab] = useState("origin");
+
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const { artworks, unlockedBadges, isDataLoading } = useData();
 
@@ -143,6 +146,35 @@ const Passport = () => {
           ) : (
             <div className="flex flex-col flex-1 relative">
               <div className="flex flex-col gap-4 mt-2 pb-6 overflow-y-auto hide-scrollbar">
+                <div
+                  onClick={() => setShowTutorial(true)}
+                  className="bg-white p-3.5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors border border-[#E0CCB6]/50"
+                >
+                  <div className="w-[50px] h-[50px] bg-[#C4AB8F] rounded-2xl flex-shrink-0 flex items-center justify-center">
+                    <svg
+                      className="w-7 h-7 text-white/90"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex flex-col flex-1 text-left">
+                    <h3 className="font-serif text-[#381111] text-[18px] leading-tight mb-0.5">
+                      Instructions: How to play?
+                    </h3>
+                    <p className="font-serif text-[#783713] text-[14px] leading-tight opacity-90">
+                      A guide to ArtiFact NMFA
+                    </p>
+                  </div>
+                </div>
+
                 {unlockedHistory.length === 0 ? (
                   <p className="font-serif text-center text-[#9A7B5C] mt-4 italic text-lg">
                     {t.areaEmpty || "Scan paintings to start your history!"}
@@ -280,13 +312,17 @@ const Passport = () => {
                     Related Works
                   </h4>
                   <div className="flex overflow-x-auto gap-3 pb-2 hide-scrollbar">
-                    {selectedArtwork.related_arts && selectedArtwork.related_arts.length > 0 ? (
+                    {selectedArtwork.related_arts &&
+                    selectedArtwork.related_arts.length > 0 ? (
                       selectedArtwork.related_arts.map((art, idx) => (
-                        <div key={idx} className="w-24 shrink-0 flex flex-col gap-1">
-                          <img 
-                            src={art.image_url} 
-                            alt={art.title} 
-                            className="w-24 h-24 object-cover rounded-lg border border-[#C4AB8F] shadow-sm" 
+                        <div
+                          key={idx}
+                          className="w-24 shrink-0 flex flex-col gap-1"
+                        >
+                          <img
+                            src={art.image_url}
+                            alt={art.title}
+                            className="w-24 h-24 object-cover rounded-lg border border-[#C4AB8F] shadow-sm"
                           />
                           <span className="text-xs font-serif leading-tight text-center truncate text-[#4A260F]">
                             {art.title}
@@ -316,6 +352,8 @@ const Passport = () => {
           </div>
         </div>
       )}
+
+      {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
     </div>
   );
 };

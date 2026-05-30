@@ -1,30 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import { v4 as uuidv4 } from 'uuid';
-import { supabase } from './supabaseClient';
-import { useData } from './DataContext';
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { v4 as uuidv4 } from "uuid";
+import { supabase } from "./supabaseClient";
+import { useData } from "./DataContext";
 
-import LoadingScreen from './LoadingScreen';
-import Dashboard from './Dashboard';
-import MuseumMap from './MuseumMap';
-import QuizScreen from './QuizScreen';
-import Passport from './Passport';
-import EndPrompt from './EndPrompt';
-import EndSequence from './EndSequence';
-import BottomNav from './BottomNav';
+import LoadingScreen from "./LoadingScreen";
+import Dashboard from "./Dashboard";
+import MuseumMap from "./MuseumMap";
+import QuizScreen from "./QuizScreen";
+import Passport from "./Passport";
+import EndPrompt from "./EndPrompt";
+import EndSequence from "./EndSequence";
+import BottomNav from "./BottomNav";
+import TutorialModal from "./TutorialModal";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageWrapper><Dashboard /></PageWrapper>} />
-        <Route path="/map" element={<PageWrapper><MuseumMap /></PageWrapper>} />
-        <Route path="/quiz" element={<PageWrapper><QuizScreen /></PageWrapper>} />
-        <Route path="/passport" element={<PageWrapper><Passport /></PageWrapper>} />
-        <Route path="/end-prompt" element={<PageWrapper><EndPrompt /></PageWrapper>} />
-        <Route path="/end" element={<PageWrapper><EndSequence /></PageWrapper>} />
+        <Route
+          path="/"
+          element={
+            <PageWrapper>
+              <Dashboard />
+            </PageWrapper>
+          }
+        />
+        <Route
+          path="/map"
+          element={
+            <PageWrapper>
+              <MuseumMap />
+            </PageWrapper>
+          }
+        />
+        <Route
+          path="/quiz"
+          element={
+            <PageWrapper>
+              <QuizScreen />
+            </PageWrapper>
+          }
+        />
+        <Route
+          path="/passport"
+          element={
+            <PageWrapper>
+              <Passport />
+            </PageWrapper>
+          }
+        />
+        <Route
+          path="/end-prompt"
+          element={
+            <PageWrapper>
+              <EndPrompt />
+            </PageWrapper>
+          }
+        />
+        <Route
+          path="/end"
+          element={
+            <PageWrapper>
+              <EndSequence />
+            </PageWrapper>
+          }
+        />
       </Routes>
     </AnimatePresence>
   );
@@ -44,64 +87,80 @@ const PageWrapper = ({ children }) => (
 
 function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
-  const [initError, setInitError] = useState(false); 
+  const [initError, setInitError] = useState(false);
   const { loadInitialData } = useData();
+
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const initializeApp = async () => {
     setInitError(false);
     setIsAppLoading(true);
 
     try {
-      let visitorId = localStorage.getItem('artifact_visitor_id');
+      let visitorId = localStorage.getItem("artifact_visitor_id");
 
       if (visitorId) {
         const { data, error } = await supabase
-          .from('visitors')
-          .select('id')
-          .eq('id', visitorId)
+          .from("visitors")
+          .select("id")
+          .eq("id", visitorId)
           .single();
 
         if (error || !data) {
-          console.warn("Ghost ID detected! Wiping local storage and resetting...");
-          visitorId = null; 
-          localStorage.removeItem('artifact_visitor_id');
+          console.warn(
+            "Ghost ID detected! Wiping local storage and resetting...",
+          );
+          visitorId = null;
+          localStorage.removeItem("artifact_visitor_id");
         }
       }
 
       if (!visitorId) {
         visitorId = uuidv4();
         const { error } = await supabase
-          .from('visitors')
+          .from("visitors")
           .insert([{ id: visitorId }]);
-          
+
         if (error) throw error;
-        
-        localStorage.setItem('artifact_visitor_id', visitorId);
+
+        localStorage.setItem("artifact_visitor_id", visitorId);
         console.log("New anonymous visitor registered:", visitorId);
       } else {
         console.log("Welcome back, visitor:", visitorId);
       }
 
       await loadInitialData(visitorId);
-      setIsAppLoading(false); 
-
+      setIsAppLoading(false);
     } catch (err) {
       console.error("Error initializing app:", err.message);
-      setInitError(true); 
+      setInitError(true);
     }
   };
 
   useEffect(() => {
     initializeApp();
+
+    const hasSeenTutorial = localStorage.getItem("artifact_has_seen_tutorial");
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+    }
   }, []);
 
-  if (isAppLoading) return <LoadingScreen hasError={initError} onRetry={initializeApp} />;
+  const handleCloseTutorial = () => {
+    setShowTutorial(false);
+    localStorage.setItem("artifact_has_seen_tutorial", "true");
+  };
+
+  if (isAppLoading)
+    return <LoadingScreen hasError={initError} onRetry={initializeApp} />;
 
   return (
     <BrowserRouter>
       <div className="relative w-screen h-[100dvh] overflow-hidden bg-artifact-bg">
         <AnimatedRoutes />
         <BottomNav />
+
+        {showTutorial && <TutorialModal onClose={handleCloseTutorial} />}
       </div>
     </BrowserRouter>
   );
