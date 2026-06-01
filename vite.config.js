@@ -19,6 +19,7 @@ export default defineConfig({
         "apple-touch-icon.png",
         "pwa-192x192.png",
         "pwa-512x512.png",
+        "targets.mind" 
       ],
       manifest: {
         name: "ArtiFact",
@@ -43,7 +44,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg}"],
+        maximumFileSizeToCacheInBytes: 15000000, 
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,mind}"], 
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -73,7 +75,6 @@ export default defineConfig({
               },
             },
           },
-
           {
             urlPattern: /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
             handler: "CacheFirst",
@@ -93,7 +94,6 @@ export default defineConfig({
     }),
   ],
   server: {
-    //allowedHosts: ['.ngrok-free.app']
     host: true,
   },
 });

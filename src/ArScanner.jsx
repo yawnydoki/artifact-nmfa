@@ -1,15 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 
-const PAINTING_SOUNDS = {
-  0: '/sounds/painting-0.mp3',
-  1: '/sounds/painting-1.mp3',
-  2: '/sounds/painting-2.mp3',
-};
-
 const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   const sceneRef = useRef(null);
   const callbacksRef = useRef({ onTargetFound, onTargetLost });
-  const audioRef = useRef(null);
 
   useEffect(() => {
     callbacksRef.current = { onTargetFound, onTargetLost };
@@ -18,32 +11,9 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   useEffect(() => {
     const targets = document.querySelectorAll('[mindar-image-target]');
 
-    const stopCurrentAudio = () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        audioRef.current = null;
-      }
-    };
-
     const handleTargetFound = (event) => {
       const index = parseInt(event.target.dataset.index);
       console.log(`Painting Detected! Index: ${index}`);
-
-      stopCurrentAudio();
-
-      const soundSrc = PAINTING_SOUNDS[index];
-      if (soundSrc) {
-        const audio = new Audio(soundSrc);
-        audio.play().catch((err) =>
-          console.warn(`Audio play failed for painting ${index}:`, err)
-        );
-        audioRef.current = audio;
-
-        audio.addEventListener('ended', () => {
-          audioRef.current = null;
-        });
-      }
 
       if (callbacksRef.current.onTargetFound) {
         callbacksRef.current.onTargetFound(index);
@@ -52,7 +22,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
 
     const handleTargetLost = () => {
       console.log('Target Lost!');
-      stopCurrentAudio();
 
       if (callbacksRef.current.onTargetLost) {
         callbacksRef.current.onTargetLost();
@@ -69,8 +38,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
         target.removeEventListener('targetFound', handleTargetFound);
         target.removeEventListener('targetLost', handleTargetLost);
       });
-
-      stopCurrentAudio();
 
       const videoElements = document.querySelectorAll('video');
       videoElements.forEach((video) => {
