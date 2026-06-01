@@ -93,7 +93,6 @@ function App() {
   const [showTutorial, setShowTutorial] = useState(false);
 
   const syncOfflineQueue = async () => {
-    
     if (!navigator.onLine) return; 
 
     const queue = JSON.parse(localStorage.getItem('artifact_offline_queue') || '[]');
@@ -111,9 +110,11 @@ function App() {
         badge_type: b.badge_type
       }));
 
-      const { error } = await supabase.from('unlocked_badges').insert(insertData);
+      const { error } = await supabase
+        .from('unlocked_badges')
+        .upsert(insertData, { onConflict: 'visitor_id, artwork_id' });
       
-      if (error && error.code !== '23505') throw error; 
+      if (error) throw error; 
 
       localStorage.removeItem('artifact_offline_queue');
       console.log("Offline queue synced successfully!");

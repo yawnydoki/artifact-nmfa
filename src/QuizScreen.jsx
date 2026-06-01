@@ -25,7 +25,7 @@ const QuizScreen = () => {
   const t = uiDict[currentLang] || uiDict.eng;
   const isCJK = ["chi", "jap", "kor"].includes(currentLang);
 
-  const { unlockedBadges, refreshBadges } = useData();
+  const { refreshBadges } = useData();
 
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -124,49 +124,69 @@ const QuizScreen = () => {
     setAchievedTier(newTier);
 
     const tierValues = { Base: 1, Silver: 2, Gold: 3 };
-    const existingBadge = unlockedBadges.find(
-      (b) => b.artwork_id === artwork.id,
-    );
+    
+    let currentCache = JSON.parse(localStorage.getItem('artifact_cached_badges') || '[]');
+    const existingBadgeIndex = currentCache.findIndex(b => b.artwork_id === artwork.id);
+    
+    let shouldUpdate = true;
+    let existingTier = "Base";
+
+    if (existingBadgeIndex >= 0) {
+      existingTier = currentCache[existingBadgeIndex].badge_type || "Base";
+      const currentTierValue = tierValues[existingTier] || 1;
+      
+      if (tierValues[newTier] <= currentTierValue) {
+        shouldUpdate = false;
+      }
+    }
+
+    if (!shouldUpdate) {
+      showToast(`Score: ${finalScore}/3`);
+      return; 
+    }
+
+    const badgeData = {
+      visitor_id: visitorId,
+      artwork_id: artwork.id,
+      badge_type: newTier,
+      created_at: new Date().toISOString()
+    };
+
+    if (existingBadgeIndex >= 0) {
+      currentCache[existingBadgeIndex].badge_type = newTier;
+    } else {
+      currentCache.push(badgeData);
+    }
+    localStorage.setItem('artifact_cached_badges', JSON.stringify(currentCache));
+
+    let offlineQueue = JSON.parse(localStorage.getItem('artifact_offline_queue') || '[]');
+    offlineQueue = offlineQueue.filter(b => b.artwork_id !== artwork.id);
+    offlineQueue.push(badgeData);
+    localStorage.setItem('artifact_offline_queue', JSON.stringify(offlineQueue));
+
+    if (existingBadgeIndex >= 0) {
+      showToast(`${newTier} Badge Upgraded!`);
+    } else {
+      showToast(`${newTier} Badge Unlocked!`);
+    }
 
     try {
-      if (existingBadge) {
-        const currentTier = existingBadge.badge_type || "Base";
-        const currentTierValue = tierValues[currentTier] || 1;
+      const { error } = await supabase
+        .from("unlocked_badges")
+        .upsert([
+          { visitor_id: visitorId, artwork_id: artwork.id, badge_type: newTier }
+        ], { onConflict: 'visitor_id, artwork_id' });
 
-        if (tierValues[newTier] > currentTierValue) {
-          
-          const { error } = await supabase
-            .from("unlocked_badges")
-            .update({ badge_type: newTier })
-            .eq("visitor_id", visitorId)
-            .eq("artwork_id", artwork.id);
-            
-          if (error) throw error;
+      if (error) throw error;
 
-          showToast(`${newTier} Badge Upgraded!`);
-        } else {
-          showToast(`Score: ${finalScore}/3`);
-        }
-      } else {
-        const { error } = await supabase
-          .from("unlocked_badges")
-          .insert([
-            {
-              visitor_id: visitorId,
-              artwork_id: artwork.id,
-              badge_type: newTier,
-            },
-          ]);
-          
-        if (error) throw error;
-        showToast(`${newTier} Badge Unlocked!`);
-      }
-      
-      await refreshBadges();
+      let updatedQueue = JSON.parse(localStorage.getItem('artifact_offline_queue') || '[]');
+      updatedQueue = updatedQueue.filter(b => b.artwork_id !== artwork.id);
+      localStorage.setItem('artifact_offline_queue', JSON.stringify(updatedQueue));
       
     } catch (error) {
-      console.error("Supabase Error saving badge:", error.message);
-      showToast("Error updating database!"); 
+      console.warn("Offline! Quiz score saved locally. Will sync later.", error.message);
+    } finally {
+      await refreshBadges();
     }
   };
 
