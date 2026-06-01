@@ -19,7 +19,11 @@ export const DataProvider = ({ children }) => {
         .order('id', { ascending: true });
         
       if (artworksError) throw artworksError;
-      if (artworksData) setArtworks(artworksData);
+      
+      if (artworksData) {
+        setArtworks(artworksData);
+        localStorage.setItem('artifact_cached_artworks', JSON.stringify(artworksData));
+      }
 
       if (visitorId) {
         const { data: badgesData, error: badgesError } = await supabase
@@ -28,10 +32,33 @@ export const DataProvider = ({ children }) => {
           .eq('visitor_id', visitorId);
           
         if (badgesError) throw badgesError;
-        if (badgesData) setUnlockedBadges(badgesData);
+        
+        if (badgesData) {
+          setUnlockedBadges(badgesData);
+          
+          localStorage.setItem('artifact_cached_badges', JSON.stringify(badgesData));
+        }
       }
     } catch (err) {
-      console.error("Error loading cache:", err.message);
+      console.warn("Network or Supabase error. Defaulting to offline cache:", err.message);
+      
+      const cachedArtworks = localStorage.getItem('artifact_cached_artworks');
+      if (cachedArtworks) {
+        try {
+          setArtworks(JSON.parse(cachedArtworks));
+        } catch (e) {
+          console.error("Failed to parse cached artworks", e);
+        }
+      }
+
+      const cachedBadges = localStorage.getItem('artifact_cached_badges');
+      if (cachedBadges) {
+        try {
+          setUnlockedBadges(JSON.parse(cachedBadges));
+        } catch (e) {
+          console.error("Failed to parse cached badges", e);
+        }
+      }
     } finally {
       setIsDataLoading(false);
     }
@@ -41,13 +68,29 @@ export const DataProvider = ({ children }) => {
     const visitorId = localStorage.getItem('artifact_visitor_id');
     if (!visitorId) return;
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('unlocked_badges')
         .select('artwork_id, badge_type, created_at')
         .eq('visitor_id', visitorId);
-      if (data) setUnlockedBadges(data);
+        
+      if (error) throw error;
+      
+      if (data) {
+        setUnlockedBadges(data);
+        
+        localStorage.setItem('artifact_cached_badges', JSON.stringify(data));
+      }
     } catch (err) {
-      console.error("Error refreshing badges:", err.message);
+      console.warn("Error refreshing badges from server. Checking local cache:", err.message);
+      
+      const cachedBadges = localStorage.getItem('artifact_cached_badges');
+      if (cachedBadges) {
+        try {
+          setUnlockedBadges(JSON.parse(cachedBadges));
+        } catch (e) {
+          console.error("Failed to parse cached badges", e);
+        }
+      }
     }
   };
 

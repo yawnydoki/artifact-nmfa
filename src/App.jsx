@@ -92,6 +92,39 @@ function App() {
 
   const [showTutorial, setShowTutorial] = useState(false);
 
+  const syncOfflineQueue = async () => {
+    
+    if (!navigator.onLine) return; 
+
+    const queue = JSON.parse(localStorage.getItem('artifact_offline_queue') || '[]');
+    if (queue.length === 0) return; 
+
+    console.log(`Network restored! Attempting to sync ${queue.length} offline badges...`);
+    const visitorId = localStorage.getItem('artifact_visitor_id');
+    
+    if (!visitorId) return;
+
+    try {
+      const insertData = queue.map(b => ({
+        visitor_id: visitorId,
+        artwork_id: b.artwork_id,
+        badge_type: b.badge_type
+      }));
+
+      const { error } = await supabase.from('unlocked_badges').insert(insertData);
+      
+      if (error && error.code !== '23505') throw error; 
+
+      localStorage.removeItem('artifact_offline_queue');
+      console.log("Offline queue synced successfully!");
+      
+      await loadInitialData(visitorId); 
+      
+    } catch (err) {
+      console.error("Failed to sync offline queue:", err.message);
+    }
+  };
+
   const initializeApp = async () => {
     setInitError(false);
     setIsAppLoading(true);
@@ -133,7 +166,14 @@ function App() {
       setIsAppLoading(false);
     } catch (err) {
       console.error("Error initializing app:", err.message);
-      setInitError(true);
+      
+      let visitorId = localStorage.getItem("artifact_visitor_id");
+      if (visitorId) {
+        await loadInitialData(visitorId);
+        setIsAppLoading(false);
+      } else {
+        setInitError(true);
+      }
     }
   };
 
@@ -144,6 +184,14 @@ function App() {
     if (!hasSeenTutorial) {
       setShowTutorial(true);
     }
+
+    syncOfflineQueue();
+
+    window.addEventListener('online', syncOfflineQueue);
+
+    return () => {
+      window.removeEventListener('online', syncOfflineQueue);
+    };
   }, []);
 
   const handleCloseTutorial = () => {

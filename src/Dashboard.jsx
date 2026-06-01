@@ -141,7 +141,7 @@ const Dashboard = () => {
       setShowTapToScanBtn(false);
 
       let startTime = null;
-      const duration = 1500; // 1.5 seconds
+      const duration = 1500; 
 
       const animateScan = (timestamp) => {
         if (!startTime) startTime = timestamp;
@@ -156,14 +156,39 @@ const Dashboard = () => {
           (async () => {
             const visitorId = localStorage.getItem("artifact_visitor_id");
             if (visitorId && !unlockedSet.has(data.id)) {
+              
+              const newBadge = { 
+                visitor_id: visitorId, 
+                artwork_id: data.id, 
+                badge_type: "Base",
+                created_at: new Date().toISOString()
+              };
+
+              const currentCache = JSON.parse(localStorage.getItem('artifact_cached_badges') || '[]');
+              currentCache.push(newBadge);
+              localStorage.setItem('artifact_cached_badges', JSON.stringify(currentCache));
+
+              const offlineQueue = JSON.parse(localStorage.getItem('artifact_offline_queue') || '[]');
+              offlineQueue.push(newBadge);
+              localStorage.setItem('artifact_offline_queue', JSON.stringify(offlineQueue));
+
+              showToast(t.badgeUnlocked || "Bronze Badge Unlocked!");
+
               try {
-                await supabase.from("unlocked_badges").insert([
-                  { visitor_id: visitorId, artwork_id: data.id, badge_type: "Base" },
+                const { error } = await supabase.from("unlocked_badges").insert([
+                  { visitor_id: visitorId, artwork_id: data.id, badge_type: "Base" }
                 ]);
-                await refreshBadges();
-                showToast(t.badgeUnlocked || "Bronze Badge Unlocked!");
+                
+                if (error) throw error;
+
+                const updatedQueue = JSON.parse(localStorage.getItem('artifact_offline_queue') || '[]')
+                  .filter(b => b.artwork_id !== data.id);
+                localStorage.setItem('artifact_offline_queue', JSON.stringify(updatedQueue));
+
               } catch (err) {
-                console.error("Failed to grant base badge:", err);
+                console.warn("Network offline. Badge saved locally and will sync later.", err.message);
+              } finally {
+                await refreshBadges(); 
               }
             }
           })();
