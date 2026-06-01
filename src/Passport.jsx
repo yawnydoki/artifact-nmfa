@@ -211,8 +211,8 @@ const Passport = () => {
                           {item.title?.[currentLang] || item.title?.eng}
                         </h3>
                         <p className="font-serif text-[#783713] text-sm italic mb-1">
-                          {item.artist?.[currentLang] || item.artist?.eng} •
-                          1884
+                          {item.artist?.[currentLang] || item.artist?.eng}{" "}
+                          {item.artist_year ? `• ${item.artist_year}` : ""}
                         </p>
                       </div>
                     </div>
@@ -270,7 +270,9 @@ const Passport = () => {
             <p className="text-center font-serif italic text-[#783713] text-sm mb-4">
               {selectedArtwork.artist?.[currentLang] ||
                 selectedArtwork.artist?.eng}{" "}
-              • 1884
+              {selectedArtwork.artist_year
+                ? `• ${selectedArtwork.artist_year}`
+                : ""}
             </p>
 
             <div className="mx-5 grid grid-cols-3 gap-3 mb-3">
