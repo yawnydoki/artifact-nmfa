@@ -1,25 +1,42 @@
 import React, { useState, useEffect } from 'react';
 
-const LoadingScreen = ({ hasError, onRetry }) => {
+const LoadingScreen = ({ hasError, isDataReady, onComplete, onRetry }) => {
   const [progress, setProgress] = useState(0);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
     if (hasError) return;
     
-    const interval = setInterval(() => {
-      setProgress((oldProgress) => {
-        if (oldProgress >= 90) {
-          return 90;
-        }
-        return oldProgress + Math.floor(Math.random() * 15) + 5;
-      });
-    }, 300);
+    let interval;
+    
+    if (!isDataReady) {
+      interval = setInterval(() => {
+        setProgress((oldProgress) => {
+          if (oldProgress >= 90) return 90;
+          return oldProgress + Math.floor(Math.random() * 15) + 5;
+        });
+      }, 300);
+    } else {
+
+      setProgress(100);
+      
+      const fadeTimer = setTimeout(() => {
+        setIsFadingOut(true);
+        
+        setTimeout(() => {
+          if (onComplete) onComplete();
+        }, 500); 
+        
+      }, 500);
+
+      return () => clearTimeout(fadeTimer);
+    }
 
     return () => clearInterval(interval);
-  }, [hasError]);
+  }, [hasError, isDataReady, onComplete]);
 
   return (
-    <div className="h-[100dvh] w-screen bg-[#3B1514] flex flex-col items-center justify-center text-[#FDFBF7]">
+    <div className={`h-[100dvh] w-screen bg-[#3B1514] flex flex-col items-center justify-center text-[#FDFBF7] transition-opacity duration-500 ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
       
       {!hasError ? (
         <div className="flex flex-col items-center w-full max-w-sm px-6 h-full justify-between py-24 animate-fade-in">
@@ -30,7 +47,7 @@ const LoadingScreen = ({ hasError, onRetry }) => {
             </p>
           </div>
           
-          <div className="w-48 h-[10px] rounded-full border border-white/40 mb-12 p-[1px]">
+          <div className="w-48 h-[10px] rounded-full border border-white/40 mb-12 p-[1px] relative overflow-hidden">
             <div 
               className="h-full bg-[#FDFBF7] rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}

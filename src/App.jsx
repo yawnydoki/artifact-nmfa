@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
@@ -6,69 +6,72 @@ import { supabase } from "./supabaseClient";
 import { useData } from "./DataContext";
 
 import LoadingScreen from "./LoadingScreen";
-import Dashboard from "./Dashboard";
-import MuseumMap from "./MuseumMap";
-import QuizScreen from "./QuizScreen";
-import Passport from "./Passport";
-import EndPrompt from "./EndPrompt";
-import EndSequence from "./EndSequence";
 import BottomNav from "./BottomNav";
 import TutorialModal from "./TutorialModal";
+
+const Dashboard = lazy(() => import("./Dashboard"));
+const MuseumMap = lazy(() => import("./MuseumMap"));
+const QuizScreen = lazy(() => import("./QuizScreen"));
+const Passport = lazy(() => import("./Passport"));
+const EndPrompt = lazy(() => import("./EndPrompt"));
+const EndSequence = lazy(() => import("./EndSequence"));
 
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route
-          path="/"
-          element={
-            <PageWrapper>
-              <Dashboard />
-            </PageWrapper>
-          }
-        />
-        <Route
-          path="/map"
-          element={
-            <PageWrapper>
-              <MuseumMap />
-            </PageWrapper>
-          }
-        />
-        <Route
-          path="/quiz"
-          element={
-            <PageWrapper>
-              <QuizScreen />
-            </PageWrapper>
-          }
-        />
-        <Route
-          path="/passport"
-          element={
-            <PageWrapper>
-              <Passport />
-            </PageWrapper>
-          }
-        />
-        <Route
-          path="/end-prompt"
-          element={
-            <PageWrapper>
-              <EndPrompt />
-            </PageWrapper>
-          }
-        />
-        <Route
-          path="/end"
-          element={
-            <PageWrapper>
-              <EndSequence />
-            </PageWrapper>
-          }
-        />
-      </Routes>
+      <Suspense fallback={null}>
+        <Routes location={location} key={location.pathname}>
+          <Route
+            path="/"
+            element={
+              <PageWrapper>
+                <Dashboard />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/map"
+            element={
+              <PageWrapper>
+                <MuseumMap />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/quiz"
+            element={
+              <PageWrapper>
+                <QuizScreen />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/passport"
+            element={
+              <PageWrapper>
+                <Passport />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/end-prompt"
+            element={
+              <PageWrapper>
+                <EndPrompt />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/end"
+            element={
+              <PageWrapper>
+                <EndSequence />
+              </PageWrapper>
+            }
+          />
+        </Routes>
+      </Suspense>
     </AnimatePresence>
   );
 };
@@ -87,40 +90,44 @@ const PageWrapper = ({ children }) => (
 
 function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [initError, setInitError] = useState(false);
   const { loadInitialData } = useData();
 
   const [showTutorial, setShowTutorial] = useState(false);
 
   const syncOfflineQueue = async () => {
-    if (!navigator.onLine) return; 
+    if (!navigator.onLine) return;
 
-    const queue = JSON.parse(localStorage.getItem('artifact_offline_queue') || '[]');
-    if (queue.length === 0) return; 
+    const queue = JSON.parse(
+      localStorage.getItem("artifact_offline_queue") || "[]",
+    );
+    if (queue.length === 0) return;
 
-    console.log(`Network restored! Attempting to sync ${queue.length} offline badges...`);
-    const visitorId = localStorage.getItem('artifact_visitor_id');
-    
+    console.log(
+      `Network restored! Attempting to sync ${queue.length} offline badges...`,
+    );
+    const visitorId = localStorage.getItem("artifact_visitor_id");
+
     if (!visitorId) return;
 
     try {
-      const insertData = queue.map(b => ({
+      const insertData = queue.map((b) => ({
         visitor_id: visitorId,
         artwork_id: b.artwork_id,
-        badge_type: b.badge_type
+        badge_type: b.badge_type,
       }));
 
       const { error } = await supabase
-        .from('unlocked_badges')
-        .upsert(insertData, { onConflict: 'visitor_id, artwork_id' });
-      
-      if (error) throw error; 
+        .from("unlocked_badges")
+        .upsert(insertData, { onConflict: "visitor_id, artwork_id" });
 
-      localStorage.removeItem('artifact_offline_queue');
+      if (error) throw error;
+
+      localStorage.removeItem("artifact_offline_queue");
       console.log("Offline queue synced successfully!");
-      
-      await loadInitialData(visitorId); 
-      
+
+      await loadInitialData(visitorId);
     } catch (err) {
       console.error("Failed to sync offline queue:", err.message);
     }
@@ -164,10 +171,10 @@ function App() {
       }
 
       await loadInitialData(visitorId);
-      setIsAppLoading(false);
+      setIsAppLoading(false); 
     } catch (err) {
       console.error("Error initializing app:", err.message);
-      
+
       let visitorId = localStorage.getItem("artifact_visitor_id");
       if (visitorId) {
         await loadInitialData(visitorId);
@@ -187,11 +194,10 @@ function App() {
     }
 
     syncOfflineQueue();
-
-    window.addEventListener('online', syncOfflineQueue);
+    window.addEventListener("online", syncOfflineQueue);
 
     return () => {
-      window.removeEventListener('online', syncOfflineQueue);
+      window.removeEventListener("online", syncOfflineQueue);
     };
   }, []);
 
@@ -200,9 +206,17 @@ function App() {
     localStorage.setItem("artifact_has_seen_tutorial", "true");
   };
 
-  if (isAppLoading)
-    return <LoadingScreen hasError={initError} onRetry={initializeApp} />;
-
+  if (showLoadingScreen) {
+    return (
+      <LoadingScreen
+        hasError={initError}
+        isDataReady={!isAppLoading}
+        onComplete={() => setShowLoadingScreen(false)}
+        onRetry={initializeApp}
+      />
+    );
+  }
+  
   return (
     <BrowserRouter>
       <div className="relative w-screen h-[100dvh] overflow-hidden bg-artifact-bg">

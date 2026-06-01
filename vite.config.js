@@ -9,7 +9,7 @@ export default defineConfig({
     basicSsl(),
     VitePWA({
       registerType: "autoUpdate",
-      
+
       devOptions: {
         //enabled: true,
       },
@@ -19,7 +19,7 @@ export default defineConfig({
         "apple-touch-icon.png",
         "pwa-192x192.png",
         "pwa-512x512.png",
-        "targets.mind" 
+        "targets.mind",
       ],
       manifest: {
         name: "ArtiFact",
@@ -27,7 +27,7 @@ export default defineConfig({
         theme_color: "#16120c",
         background_color: "#16120c",
         display: "standalone",
-        start_url: '/?mode=standalone',
+        start_url: "/?mode=standalone",
         orientation: "portrait",
         icons: [
           {
@@ -44,8 +44,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 15000000, 
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,mind}"], 
+        maximumFileSizeToCacheInBytes: 15000000,
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,mind}"],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -76,7 +76,8 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
+            urlPattern:
+              /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
             handler: "CacheFirst",
             options: {
               cacheName: "artifact-supabase-images",
@@ -95,5 +96,21 @@ export default defineConfig({
   ],
   server: {
     host: true,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("framer-motion")) return "vendor-framer";
+            if (id.includes("@supabase")) return "vendor-supabase";
+            if (id.includes("react-router-dom") || id.includes("react-router"))
+              return "vendor-router";
+
+            return "vendor";
+          }
+        },
+      },
+    },
   },
 });
