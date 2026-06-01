@@ -31,7 +31,7 @@ export default defineConfig({
         orientation: "portrait",
         icons: [
           {
-            src: "/pwa-192x192.png",
+            src: "/logo_trans.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any maskable",
