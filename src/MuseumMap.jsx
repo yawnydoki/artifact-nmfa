@@ -29,17 +29,17 @@ const MuseumMap = () => {
   };
 
   return (
-    <div className="h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center pt-8 pb-[100px] relative box-border transition-colors duration-500">
+    <div className="h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center pt-6 pb-[100px] relative box-border transition-colors duration-500">
       
-      <div className={`w-11/12 max-w-sm mb-3 pl-2 flex-shrink-0 transition-opacity duration-300 ${isExpanded ? 'opacity-0 h-0 overflow-hidden mb-0' : 'opacity-100'}`}>
+      <div className={`w-11/12 max-w-sm mb-2 pl-2 flex-shrink-0 transition-opacity duration-300 ${isExpanded ? 'opacity-0 h-0 overflow-hidden mb-0' : 'opacity-100'}`}>
         <h2 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-3xl tracking-wide`}>
           {t.museumMap || "Museum Map"}
         </h2>
       </div>
 
-      <div className={`w-11/12 max-w-sm flex-shrink-0 flex flex-col transition-all duration-500 ease-in-out overflow-hidden ${isExpanded ? 'max-h-0 opacity-0 mb-0' : 'max-h-[520px] opacity-100 mb-4'}`}>
+      <div className={`w-11/12 max-w-sm flex-shrink-0 flex flex-col transition-all duration-500 ease-in-out overflow-hidden ${isExpanded ? 'max-h-0 opacity-0 mb-0' : 'max-h-[70vh] opacity-100 mb-3'}`}>
         
-        <div className="w-full flex flex-col items-center mb-3 text-center font-serif flex-shrink-0">
+        <div className="w-full flex flex-col items-center mb-2.5 text-center font-serif flex-shrink-0">
           <div className="w-full bg-[#E8D1B5] border-2 border-[#240B06] rounded-2xl py-2 px-4 shadow-md flex flex-col items-center text-[#240B06]">
             <span className="text-[0.9rem] font-medium tracking-wide mb-1">Color Codes:</span>
             <div className="flex gap-6 text-[0.8rem]">
@@ -59,7 +59,7 @@ const MuseumMap = () => {
           </p>
         </div>
         
-        <div className="w-full bg-[#32130C] p-1 rounded-[2rem] border-4 border-[#240B06] shadow-2xl aspect-[14/12.5] relative overflow-hidden box-border flex-shrink-0">
+        <div className="w-full bg-[#32130C] p-3 rounded-[2rem] border-4 border-[#240B06] shadow-2xl h-64 sm:h-72 relative overflow-hidden box-border flex-shrink-0">
           <div className="w-full h-full bg-[#E8D1B5] rounded-[1.2rem] p-2.5 flex flex-col justify-between relative box-border">
             
             <div className="w-full h-[18%] flex gap-[3%] relative">
@@ -126,16 +126,16 @@ const MuseumMap = () => {
         </div>
       </div>
 
-      <div className="w-11/12 max-w-sm flex-1 flex flex-col min-h-0 basis-0 transition-all duration-500">
+      <div className="w-11/12 max-w-sm flex-1 min-h-[160px] flex flex-col box-border min-w-0">
         
         <div className="flex justify-between items-end mb-2.5 px-2 flex-shrink-0">
-          <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-[1.15rem] drop-shadow-sm`}>
+          <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-[1.1rem] drop-shadow-sm`}>
             {t.clueBehind || "Clues in the selected area"}
           </h3>
           
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-museum-gold text-[10px] uppercase tracking-[0.2em] font-bold flex items-center gap-2 mb-0.5 hover:brightness-110 transition-all bg-white/10 px-4 py-2 rounded-full border border-white/20 backdrop-blur-md"
+            className="text-museum-gold text-[10px] uppercase tracking-[0.2em] font-bold flex items-center gap-2 mb-0.5 hover:brightness-110 transition-all bg-white/10 px-4 py-2 rounded-full border border-white/20 backdrop-blur-md flex-shrink-0"
           >
             {isExpanded ? "Show Map" : "Full View"}
             <svg 
@@ -147,15 +147,15 @@ const MuseumMap = () => {
           </button>
         </div>
 
-        <div className="bg-[#1D0C09] p-3 rounded-[2rem] shadow-2xl flex-1 flex flex-col min-h-0 border border-white/5">
-          <div className="bg-artifact-card rounded-[1.4rem] p-4 flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-4 relative">
+        <div className="bg-[#1D0C09] p-3 rounded-[2rem] shadow-2xl flex-1 flex flex-col min-h-0 border border-white/5 overflow-hidden">
+          <div className="bg-artifact-card rounded-[1.4rem] p-4 flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-4">
             
             {isDataLoading ? (
-              <div className="flex-1 flex items-center justify-center text-artifact-border font-serif animate-pulse text-lg italic">
+              <div className="flex-1 flex items-center justify-center text-artifact-border font-serif animate-pulse text-base italic">
                 {t.loading || "Accessing archives..."}
               </div>
             ) : !activeZone ? (
-              <div className="flex-1 flex items-center justify-center text-center text-artifact-border/60 font-serif italic p-6 text-sm leading-relaxed">
+              <div className="flex-1 flex items-center justify-center text-center text-artifact-border/60 font-serif italic p-4 text-sm leading-relaxed">
                 {t.selectArea || "Select a colored wing on the map to reveal the hidden masterpieces."}
               </div>
             ) : activeClues.length === 0 ? (
@@ -166,19 +166,19 @@ const MuseumMap = () => {
               activeClues.map((art) => (
                 <div 
                   key={art.id} 
-                  className="p-5 rounded-2xl border border-artifact-border/30 bg-artifact-card/40 shadow-sm flex flex-col items-center justify-center text-center flex-shrink-0 min-h-[110px] h-auto animate-fade-in-up"
+                  className="p-5 rounded-2xl border border-artifact-border/30 bg-artifact-card/40 shadow-sm flex flex-col items-center justify-center text-center flex-shrink-0 min-h-[90px] h-auto animate-fade-in-up"
                 >
                   {art.isUnlocked ? (
                     <div className="flex flex-col items-center justify-center gap-2 w-full">
-                      <span className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-artifact-border text-xl leading-snug tracking-tight break-words max-w-full`}>
+                      <span className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-artifact-border text-lg leading-snug tracking-tight break-words max-w-full`}>
                         {art.title?.[currentLang] || art.title?.eng}
                       </span>
-                      <span className="bg-[#3E5D36] text-white text-[9px] font-bold px-3 py-0.5 rounded-full uppercase tracking-[0.2em] shadow-md animate-pulse">
+                      <span className="bg-[#3E5D36] text-white text-[9px] font-bold px-3 py-0.5 rounded-full uppercase tracking-[0.2em] shadow-md">
                         {t.found || "Collected"}
                       </span>
                     </div>
                   ) : (
-                    <span className={`${isCJK ? 'font-sans' : 'font-serif'} text-artifact-border text-[1rem] leading-relaxed italic opacity-90 break-words max-w-full`}>
+                    <span className={`${isCJK ? 'font-sans' : 'font-serif'} text-artifact-border text-[0.95rem] leading-relaxed italic opacity-90 break-words max-w-full`}>
                       "{art.clues?.[currentLang] || art.clues?.eng}"
                     </span>
                   )}
