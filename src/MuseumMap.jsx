@@ -21,65 +21,116 @@ const MuseumMap = () => {
 
   const activeClues = mergedArtworks.filter(art => art.zone === activeZone);
 
-  const mapZones = [
-    { id: 1, color: 'bg-[#C973A4]' }, 
-    { id: 2, color: 'bg-[#3E5D36]' }, 
-    { id: 3, color: 'bg-[#9F7657]' }, 
-    { id: 4, color: 'bg-[#9AB053]' }  
-  ];
+  const mapZones = {
+    green: { id: 2, hex: '#9AB053' },    
+    purple: { id: 1, hex: '#C973A4' }, 
+    orange: { id: 3, hex: '#FA9E59' },   
+    darkGreen: { id: 4, hex: '#165C3B' } 
+  };
 
   return (
-    <div className="h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center pt-12 pb-[120px] relative box-border transition-colors duration-500">
+    <div className="h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center pt-8 pb-[100px] relative box-border transition-colors duration-500">
       
-      <div className={`w-11/12 max-w-sm mb-4 pl-2 flex-shrink-0 transition-opacity duration-300 ${isExpanded ? 'opacity-0 h-0 overflow-hidden mb-0' : 'opacity-100'}`}>
+      <div className={`w-11/12 max-w-sm mb-3 pl-2 flex-shrink-0 transition-opacity duration-300 ${isExpanded ? 'opacity-0 h-0 overflow-hidden mb-0' : 'opacity-100'}`}>
         <h2 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-3xl tracking-wide`}>
           {t.museumMap || "Museum Map"}
         </h2>
       </div>
 
-      <div className={`w-11/12 max-w-sm flex-shrink-0 transition-all duration-500 ease-in-out overflow-hidden flex flex-col items-center ${isExpanded ? 'max-h-0 opacity-0 mb-0' : 'max-h-[500px] opacity-100 mb-6'}`}>
-        <div className="w-full bg-artifact-card p-3 rounded-[1.5rem] shadow-xl">
-          <div className="flex flex-col gap-2 h-64">
-            <div 
-              className={`w-full h-1/3 ${mapZones[0].color} flex items-center justify-center cursor-pointer transition-all ${activeZone === 1 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
-              onClick={() => setActiveZone(1)}
-            >
-              <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
+      <div className={`w-11/12 max-w-sm flex-shrink-0 flex flex-col transition-all duration-500 ease-in-out overflow-hidden ${isExpanded ? 'max-h-0 opacity-0 mb-0' : 'max-h-[520px] opacity-100 mb-4'}`}>
+        
+        <div className="w-full flex flex-col items-center mb-3 text-center font-serif flex-shrink-0">
+          <div className="w-full bg-[#E8D1B5] border-2 border-[#240B06] rounded-2xl py-2 px-4 shadow-md flex flex-col items-center text-[#240B06]">
+            <span className="text-[0.9rem] font-medium tracking-wide mb-1">Color Codes:</span>
+            <div className="flex gap-6 text-[0.8rem]">
+              <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 bg-[#755D50] rounded-sm"></div>
+                <span>Other Rooms</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 bg-[#875e47] rounded-sm"></div>
+                <span>Hallway</span>
+              </div>
+            </div>
+          </div>
+          <p className="text-white text-[11px] opacity-90 tracking-wide leading-tight mt-1.5 px-2">
+            Colored Rooms have Unlockable paintings.<br />
+            Current paintings are only found within the second floor
+          </p>
+        </div>
+        
+        <div className="w-full bg-[#32130C] p-1 rounded-[2rem] border-4 border-[#240B06] shadow-2xl aspect-[14/12.5] relative overflow-hidden box-border flex-shrink-0">
+          <div className="w-full h-full bg-[#E8D1B5] rounded-[1.2rem] p-2.5 flex flex-col justify-between relative box-border">
+            
+            <div className="w-full h-[18%] flex gap-[3%] relative">
+              <button 
+                onClick={() => setActiveZone(mapZones.green.id)}
+                className={`w-[22%] h-full rounded-sm flex items-center justify-center transition-all relative ${activeZone === mapZones.green.id ? 'ring-4 ring-white z-10' : 'hover:brightness-110'}`}
+                style={{ backgroundColor: mapZones.green.hex }}
+              >
+                <PinIcon className="text-white drop-shadow-md w-5 h-5" />
+              </button>
+              
+              <div className="w-[14%] h-full bg-[#755D50] rounded-sm"></div>
+              <div className="w-[24%] h-full bg-[#755D50] rounded-sm"></div>
+              
+              <button 
+                onClick={() => setActiveZone(mapZones.purple.id)}
+                className={`w-[22%] h-full rounded-sm flex items-center justify-center transition-all relative ${activeZone === mapZones.purple.id ? 'ring-4 ring-white z-10' : 'hover:brightness-110'}`}
+                style={{ backgroundColor: mapZones.purple.hex }}
+              >
+                <PinIcon className="text-white drop-shadow-md w-5 h-5" />
+              </button>
+              
+              <div className="w-[11%] h-full bg-[#755D50] rounded-sm"></div>
             </div>
 
-            <div className="w-full h-2/3 flex gap-2">
-
-              <div 
-                className={`flex-1 ${mapZones[1].color} flex items-center justify-center cursor-pointer transition-all ${activeZone === 2 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
-                onClick={() => setActiveZone(2)}
-              >
-                <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
-              </div>
-
-              <div 
-                className={`flex-[3] ${mapZones[2].color} flex items-center justify-center cursor-pointer transition-all ${activeZone === 3 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
-                onClick={() => setActiveZone(3)}
-              >
-                <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
-              </div>
-
-              <div 
-                className={`flex-1 ${mapZones[3].color} flex items-center justify-center cursor-pointer transition-all ${activeZone === 4 ? 'ring-4 ring-white z-10 scale-[1.02]' : 'hover:brightness-110'}`}
-                onClick={() => setActiveZone(4)}
-              >
-                <div className="text-white drop-shadow-md"><PinIcon size="w-8 h-8" /></div>
-              </div>
-
+            <div className="w-full h-[12%] bg-[#875e47] my-[1%] rounded-sm flex items-center justify-center">
+              <span className="text-[#E8D1B5] font-serif text-sm tracking-wide select-none">
+                Hallway
+              </span>
             </div>
+
+            <div className="w-full h-[53%] flex justify-between relative">
+              <div className="w-[9%] h-full bg-[#755D50] rounded-sm"></div>
+              <div className="w-[9%] h-full bg-[#875e47] rounded-sm"></div>
+              <div className="w-[12%] h-full bg-[#755D50] rounded-sm"></div>
+              
+              <button 
+                onClick={() => setActiveZone(mapZones.orange.id)}
+                className={`w-[28%] h-full rounded-sm flex items-center justify-center transition-all relative ${activeZone === mapZones.orange.id ? 'ring-4 ring-white z-10' : 'hover:brightness-110'}`}
+                style={{ backgroundColor: mapZones.orange.hex }}
+              >
+                <PinIcon className="text-white drop-shadow-md w-6 h-6" />
+              </button>
+
+              <button 
+                onClick={() => setActiveZone(mapZones.darkGreen.id)}
+                className={`w-[14%] h-full rounded-sm flex items-center justify-center transition-all relative ${activeZone === mapZones.darkGreen.id ? 'ring-4 ring-white z-10' : 'hover:brightness-110'}`}
+                style={{ backgroundColor: mapZones.darkGreen.hex }}
+              >
+                <PinIcon className="text-white drop-shadow-md w-5 h-5" />
+              </button>
+
+              <div className="w-[9%] h-full bg-[#875e47] rounded-sm"></div> 
+              <div className="w-[10%] h-full bg-[#755D50] rounded-sm"></div>
+            </div>
+
+            <div className="w-full h-[13%] bg-[#875e47] mt-[1%] rounded-sm flex items-center justify-center">
+              <span className="text-[#E8D1B5] font-serif text-sm tracking-wide select-none">
+                Entrance
+              </span>
+            </div>
+
           </div>
         </div>
       </div>
 
-      <div className="w-11/12 max-w-sm flex-1 flex flex-col min-h-0 transition-all duration-500">
+      <div className="w-11/12 max-w-sm flex-1 flex flex-col min-h-0 basis-0 transition-all duration-500">
         
-        <div className="flex justify-between items-end mb-3 px-2 flex-shrink-0">
-          <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-[1.2rem] drop-shadow-sm`}>
-            {t.clueBehind || "Clues in the Area"}
+        <div className="flex justify-between items-end mb-2.5 px-2 flex-shrink-0">
+          <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-[1.15rem] drop-shadow-sm`}>
+            {t.clueBehind || "Clues in the selected area"}
           </h3>
           
           <button 
@@ -95,6 +146,7 @@ const MuseumMap = () => {
             </svg>
           </button>
         </div>
+
         <div className="bg-[#1D0C09] p-3 rounded-[2rem] shadow-2xl flex-1 flex flex-col min-h-0 border border-white/5">
           <div className="bg-artifact-card rounded-[1.4rem] p-4 flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-4 relative">
             
@@ -103,30 +155,30 @@ const MuseumMap = () => {
                 {t.loading || "Accessing archives..."}
               </div>
             ) : !activeZone ? (
-              <div className="flex-1 flex items-center justify-center text-center text-artifact-border/60 font-serif italic p-10">
+              <div className="flex-1 flex items-center justify-center text-center text-artifact-border/60 font-serif italic p-6 text-sm leading-relaxed">
                 {t.selectArea || "Select a colored wing on the map to reveal the hidden masterpieces."}
               </div>
             ) : activeClues.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center text-center text-artifact-border/60 font-serif italic">
+              <div className="flex-1 flex items-center justify-center text-center text-artifact-border/60 font-serif italic text-sm">
                 {t.areaEmpty || "This gallery currently holds no secrets."}
               </div>
             ) : (
               activeClues.map((art) => (
                 <div 
                   key={art.id} 
-                  className="p-5 rounded-2xl border border-artifact-border/30 bg-artifact-card/40 shadow-sm flex flex-col items-center justify-center text-center flex-shrink-0 min-h-[140px] animate-fade-in-up"
+                  className="p-5 rounded-2xl border border-artifact-border/30 bg-artifact-card/40 shadow-sm flex flex-col items-center justify-center text-center flex-shrink-0 min-h-[110px] h-auto animate-fade-in-up"
                 >
                   {art.isUnlocked ? (
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <span className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-artifact-border text-2xl leading-tight tracking-tight`}>
+                    <div className="flex flex-col items-center justify-center gap-2 w-full">
+                      <span className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-artifact-border text-xl leading-snug tracking-tight break-words max-w-full`}>
                         {art.title?.[currentLang] || art.title?.eng}
                       </span>
-                      <span className="bg-[#3E5D36] text-white text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-[0.2em] shadow-md animate-pulse">
+                      <span className="bg-[#3E5D36] text-white text-[9px] font-bold px-3 py-0.5 rounded-full uppercase tracking-[0.2em] shadow-md animate-pulse">
                         {t.found || "Collected"}
                       </span>
                     </div>
                   ) : (
-                    <span className={`${isCJK ? 'font-sans' : 'font-serif'} text-artifact-border text-[1.15rem] leading-relaxed italic opacity-90`}>
+                    <span className={`${isCJK ? 'font-sans' : 'font-serif'} text-artifact-border text-[1rem] leading-relaxed italic opacity-90 break-words max-w-full`}>
                       "{art.clues?.[currentLang] || art.clues?.eng}"
                     </span>
                   )}
@@ -142,8 +194,8 @@ const MuseumMap = () => {
   );
 };
 
-const PinIcon = ({ size }) => (
-  <svg className={`${size}`} viewBox="0 0 24 24" fill="currentColor">
+const PinIcon = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
   </svg>
 );
