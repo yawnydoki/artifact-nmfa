@@ -137,7 +137,7 @@ const MuseumMap = () => {
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-museum-gold text-[10px] uppercase tracking-[0.2em] font-bold flex items-center gap-2 mb-0.5 hover:brightness-110 transition-all bg-white/10 px-4 py-2 rounded-full border border-white/20 backdrop-blur-md flex-shrink-0"
           >
-            {isExpanded ? "Show Map" : "Full View"}
+            {isExpanded ? "Hide" : "Expand"}
             <svg 
               className={`w-3 h-3 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} 
               fill="none" stroke="currentColor" viewBox="0 0 24 24"

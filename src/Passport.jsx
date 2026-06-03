@@ -186,18 +186,10 @@ const Passport = () => {
                       onClick={() => handleOpenArtwork(item)}
                       className="bg-white p-4 rounded-3xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors"
                     >
-                      <div
-                        className={`w-[60px] h-[60px] bg-[#BBA58F] rounded-2xl flex-shrink-0 overflow-hidden border ${
-                          item.badgeType === "Gold"
-                            ? "border-[#E6BA39]"
-                            : item.badgeType === "Silver"
-                              ? "border-[#C0C0C0]"
-                              : "border-[#CD7F32]"
-                        }`}
-                      >
-                        {item.badge_url && (
+                      <div className="w-16 h-16 bg-[#D1C2B0] rounded-lg flex-shrink-0 overflow-hidden relative">
+                        {item.thumbnail_url && (
                           <img
-                            src={item.badge_url}
+                            src={item.thumbnail_url}
                             alt="thumbnail"
                             className="w-full h-full object-cover scale-[1.03]"
                           />
@@ -250,10 +242,10 @@ const Passport = () => {
                     Image Unavailable
                   </span>
                 )
-              ) : selectedArtwork.badge_url ? (
+              ) : selectedArtwork.thumbnail_url ? (
                 <img
-                  src={selectedArtwork.badge_url}
-                  alt="Artwork Badge"
+                  src={selectedArtwork.thumbnail_url}
+                  alt="Artwork Thumbnail"
                   className="w-full h-full object-cover opacity-90 scale-[1.03]"
                 />
               ) : (

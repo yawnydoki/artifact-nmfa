@@ -53,6 +53,9 @@ const Dashboard = () => {
   const [toastMessage, setToastMessage] = useState(null);
   const [showNotScannableHint, setShowNotScannableHint] = useState(false);
 
+  // New state to toggle collapsing/hiding the detected artwork pane
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+
   const animationRef = useRef(null);
 
   const isFetchingRef = useRef(false);
@@ -154,6 +157,7 @@ const Dashboard = () => {
       setScanProgress(0);
       setPendingTargetIndex(null);
       setShowTapToScanBtn(false);
+      setIsPanelCollapsed(false); // Make sure the panel opens uncollapsed on a fresh scan
 
       let startTime = null;
       const duration = 1500;
@@ -379,18 +383,34 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* DETECTED ARTWORK BOTTOM CONTAINER */}
       {paintingDetected && activeArtwork && !showInfoModal && (
         <div className="absolute inset-0 z-50 flex flex-col justify-end items-center pb-[120px] pointer-events-none">
-          <div className="w-11/12 max-w-sm bg-artifact-bg/95 backdrop-blur-md border border-artifact-card/30 rounded-[2rem] p-6 shadow-2xl animate-fade-in-up pointer-events-auto relative">
+          
+          {/* Card Component with Smooth Slide and Fade Transition */}
+          <div 
+            className={`w-11/12 max-w-sm bg-artifact-bg/95 backdrop-blur-md border border-artifact-card/30 rounded-[2rem] p-6 shadow-2xl pointer-events-auto relative transition-all duration-500 ease-in-out ${
+              isPanelCollapsed 
+                ? "transform translate-y-[200%] opacity-0 pointer-events-none" 
+                : "transform translate-y-0 opacity-100"
+            }`}
+          >
+            {/* Collapse Arrow Button replacing the rigid close icon */}
             <button
-              onClick={() => {
-                setPaintingDetected(false);
-                setActiveArtwork(null);
-                setIsTracking(false);
-              }}
-              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center bg-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/20 transition-colors z-10"
+              onClick={() => setIsPanelCollapsed(true)}
+              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center bg-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/20 transition-all z-10"
+              title="Minimize panel"
             >
-              ✕
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                className="w-4 h-4 transform rotate-180" // Pointing down
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+              </svg>
             </button>
 
             <div className="flex justify-between items-start mb-4 pr-6">
@@ -441,6 +461,32 @@ const Dashboard = () => {
               </button>
             </div>
           </div>
+
+          <div 
+            className={`absolute bottom-32 left-1/2 -translate-x-1/2 transition-all duration-500 ease-out ${
+              isPanelCollapsed 
+                ? "opacity-100 scale-100 pointer-events-auto" 
+                : "opacity-0 scale-95 pointer-events-none"
+            }`}
+          >
+            <button
+              onClick={() => setIsPanelCollapsed(false)}
+              className="px-4 py-1.5 rounded-full bg-[#381111]/95 border-1 text-white font-serif font-medium text-base tracking-wider shadow-[0_4px_15px_rgba(0,0,0,0.6)] backdrop-blur-sm hover:bg-[#381111] hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                className="w-4 h-4 animate-bounce"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" fill="none" className="transform rotate-180 origin-center" />
+              </svg>
+              Artwork Info
+            </button>
+          </div>
+
         </div>
       )}
 
@@ -457,12 +503,24 @@ const Dashboard = () => {
               </button>
             </div>
 
-            <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl overflow-hidden rounded-lg">
-              {activeArtwork.badge_url ? (
+            <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl overflow-hidden rounded-lg relative">
+              {activeModalTab === "artist_description" ? (
+                activeArtwork.artist_image_url ? (
+                  <img
+                    src={activeArtwork.artist_image_url}
+                    alt="Artist Photograph"
+                    className="w-full h-full object-cover opacity-90 scale-[1.03]"
+                  />
+                ) : (
+                  <span className="text-[#998670] text-sm font-serif italic">
+                    Image Unavailable
+                  </span>
+                )
+              ) : activeArtwork.thumbnail_url ? (
                 <img
-                  src={activeArtwork.badge_url}
-                  alt="Artwork"
-                  className="w-full h-full object-cover opacity-80"
+                  src={activeArtwork.thumbnail_url}
+                  alt="Artwork Thumbnail"
+                  className="w-full h-full object-cover opacity-90 scale-[1.03]"
                 />
               ) : (
                 "img"
@@ -480,17 +538,6 @@ const Dashboard = () => {
                 ? `• ${activeArtwork.artist_year}`
                 : ""}
             </p>
-
-            <div
-              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-36 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6]`}
-            >
-              {typeof activeArtwork[activeModalTab] === "object" &&
-              activeArtwork[activeModalTab] !== null
-                ? activeArtwork[activeModalTab][currentLang] ||
-                  activeArtwork[activeModalTab].eng
-                : activeArtwork[activeModalTab] ||
-                  "More information coming soon..."}
-            </div>
 
             <div className="mx-5 grid grid-cols-3 gap-3 mb-3">
               <button
@@ -513,7 +560,52 @@ const Dashboard = () => {
               </button>
             </div>
 
-            <div className="mx-5 mb-6">
+            <div
+              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-48 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6] text-justify`}
+            >
+              <div className="mb-2">
+                {typeof activeArtwork[activeModalTab] === "object" &&
+                activeArtwork[activeModalTab] !== null
+                  ? activeArtwork[activeModalTab][currentLang] ||
+                    activeArtwork[activeModalTab].eng
+                  : activeArtwork[activeModalTab] ||
+                    "More information coming soon..."}
+              </div>
+
+              {activeModalTab === "artist_description" && (
+                <div className="mt-5 pt-4 border-t border-[#C4AB8F]/50">
+                  <h4 className="font-serif font-bold text-[#783713] mb-3 text-base text-left">
+                    Related Works
+                  </h4>
+                  <div className="flex overflow-x-auto gap-3 pb-2 hide-scrollbar">
+                    {activeArtwork.related_arts &&
+                    activeArtwork.related_arts.length > 0 ? (
+                      activeArtwork.related_arts.map((art, idx) => (
+                        <div
+                          key={idx}
+                          className="w-24 shrink-0 flex flex-col gap-1"
+                        >
+                          <img
+                            src={art.image_url}
+                            alt={art.title}
+                            className="w-24 h-24 object-cover rounded-lg border border-[#C4AB8F] shadow-sm"
+                          />
+                          <span className="text-xs font-serif leading-tight text-center truncate text-[#4A260F]">
+                            {art.title}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs italic text-[#783713]/60 w-full text-center">
+                        More works coming soon...
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mx-5 mb-6 shadow-[0_4px_15px_rgba(0,0,0,0.3)]">
               <button
                 onClick={() =>
                   navigate("/quiz", { state: { artwork: activeArtwork } })
