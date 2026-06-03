@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const EndSequence = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState('prompt');
 
   const GOOGLE_FORM_URL = "https://forms.gle/QRjdiA5TodgDYxBLA";
@@ -43,11 +45,18 @@ const EndSequence = () => {
       )}
 
       {step === 'thankyou' && (
-        <div className="w-10/11 max-w-sm bg-[#381111] p-3 rounded-[1.5rem] shadow-2xl animate-fade-in-up mt-8">
-          <div className="bg-[#E0CCB6] rounded-xl py-3 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
-            <h3 className="text-[#4A260F] text-[2rem] leading-tight tracking-wide">
-              Thank you <br /> for participating!
+        <div className="w-11/12 max-w-sm bg-[#381111] p-3 rounded-[1.5rem] shadow-2xl animate-fade-in-up mt-8">
+          <div className="bg-[#E0CCB6] rounded-xl py-12 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
+            <h3 className="text-[#4A260F] text-[2rem] leading-tight tracking-wide mb-8">
+              Thank you<br/>for participating!
             </h3>
+            
+            <button 
+              onClick={() => navigate('/certificate')}
+              className="w-full bg-[#4A260F] text-[#E0CCB6] rounded-xl py-3 font-lora font-bold text-lg hover:brightness-110 active:scale-95 transition-all shadow-md"
+            >
+              Claim Your Certificate
+            </button>
           </div>
         </div>
       )}

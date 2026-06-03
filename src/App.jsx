@@ -15,6 +15,7 @@ const QuizScreen = lazy(() => import("./QuizScreen"));
 const Passport = lazy(() => import("./Passport"));
 const EndPrompt = lazy(() => import("./EndPrompt"));
 const EndSequence = lazy(() => import("./EndSequence"));
+const Certificate = lazy(() => import("./Certificate"));
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -67,6 +68,14 @@ const AnimatedRoutes = () => {
             element={
               <PageWrapper>
                 <EndSequence />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/certificate"
+            element={
+              <PageWrapper>
+                <Certificate />
               </PageWrapper>
             }
           />

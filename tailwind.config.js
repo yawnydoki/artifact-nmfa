@@ -24,6 +24,9 @@ export default {
         neohellenic: ['"GFS Neohellenic"', "sans-serif"],
         arial: ["Arial", "Helvetica", "sans-serif"],
         script: ['Allura', 'cursive'],
+        agbalumo: ['"Agbalumo"', "system-ui"],
+        birthstone: ['"Birthstone Bounce"', "cursive"],
+        lora: ['"Lora"', "serif"],
       },
       keyframes: {
         "fade-in-up": {
