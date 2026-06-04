@@ -68,7 +68,7 @@ const MuseumMap = () => {
                 className={`w-[22%] h-full rounded-sm flex items-center justify-center transition-all relative ${activeZone === mapZones.green.id ? 'ring-4 ring-white z-10' : 'hover:brightness-110'}`}
                 style={{ backgroundColor: mapZones.green.hex }}
               >
-                <PinIcon className="text-white drop-shadow-md w-5 h-5" />
+                <PinIcon className={`text-white drop-shadow-md w-5 h-5 transition-transform ${activeZone === mapZones.green.id ? 'animate-bounce' : ''}`} />
               </button>
               
               <div className="w-[14%] h-full bg-[#755D50] rounded-sm"></div>
@@ -79,7 +79,7 @@ const MuseumMap = () => {
                 className={`w-[22%] h-full rounded-sm flex items-center justify-center transition-all relative ${activeZone === mapZones.purple.id ? 'ring-4 ring-white z-10' : 'hover:brightness-110'}`}
                 style={{ backgroundColor: mapZones.purple.hex }}
               >
-                <PinIcon className="text-white drop-shadow-md w-5 h-5" />
+                <PinIcon className={`text-white drop-shadow-md w-5 h-5 transition-transform ${activeZone === mapZones.purple.id ? 'animate-bounce' : ''}`} />
               </button>
               
               <div className="w-[11%] h-full bg-[#755D50] rounded-sm"></div>
@@ -101,7 +101,7 @@ const MuseumMap = () => {
                 className={`w-[28%] h-full rounded-sm flex items-center justify-center transition-all relative ${activeZone === mapZones.orange.id ? 'ring-4 ring-white z-10' : 'hover:brightness-110'}`}
                 style={{ backgroundColor: mapZones.orange.hex }}
               >
-                <PinIcon className="text-white drop-shadow-md w-6 h-6" />
+                <PinIcon className={`text-white drop-shadow-md w-6 h-6 transition-transform ${activeZone === mapZones.orange.id ? 'animate-bounce' : ''}`} />
               </button>
 
               <button 
@@ -109,7 +109,7 @@ const MuseumMap = () => {
                 className={`w-[14%] h-full rounded-sm flex items-center justify-center transition-all relative ${activeZone === mapZones.darkGreen.id ? 'ring-4 ring-white z-10' : 'hover:brightness-110'}`}
                 style={{ backgroundColor: mapZones.darkGreen.hex }}
               >
-                <PinIcon className="text-white drop-shadow-md w-5 h-5" />
+                <PinIcon className={`text-white drop-shadow-md w-5 h-5 transition-transform ${activeZone === mapZones.darkGreen.id ? 'animate-bounce' : ''}`} />
               </button>
 
               <div className="w-[9%] h-full bg-[#875e47] rounded-sm"></div> 
