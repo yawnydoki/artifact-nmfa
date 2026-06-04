@@ -27,9 +27,24 @@ const QuizScreen = () => {
 
   const { refreshBadges } = useData();
 
-  const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
+  const [savedSession] = useState(() => {
+    const sessionStr = localStorage.getItem("artifact_quiz_session");
+    if (sessionStr) {
+      try {
+        const parsed = JSON.parse(sessionStr);
+        if (parsed.artworkId === artwork?.id) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error("Failed to parse quiz session", e);
+      }
+    }
+    return null;
+  });
+
+  const [currentQIndex, setCurrentQIndex] = useState(savedSession?.currentQIndex ?? 0);
+  const [score, setScore] = useState(savedSession?.score ?? 0);
+  const [lives, setLives] = useState(savedSession?.lives ?? 3);
   const [gameState, setGameState] = useState("playing");
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [damageAnim, setDamageAnim] = useState(false);
@@ -39,7 +54,9 @@ const QuizScreen = () => {
   const [stampRotation] = useState(() => Math.floor(Math.random() * 16) - 8);
 
   const [selectedQuestions] = useState(() => {
+    if (savedSession?.selectedQuestions) return savedSession.selectedQuestions;
     if (!artwork) return [];
+    
     const allQuestions = [
       artwork.q1,
       artwork.q2,
@@ -48,6 +65,7 @@ const QuizScreen = () => {
       artwork.q5,
     ].filter(Boolean);
     const shuffled = allQuestions.sort(() => Math.random() - 0.5).slice(0, 3);
+    
     return shuffled.map((q) => {
       const langData = q[currentLang] || q.eng;
       const choices = langData?.choices || [];
@@ -60,6 +78,19 @@ const QuizScreen = () => {
       };
     });
   });
+
+  useEffect(() => {
+    if (artwork && gameState === "playing") {
+      const sessionData = {
+        artworkId: artwork.id,
+        currentQIndex,
+        score,
+        lives,
+        selectedQuestions
+      };
+      localStorage.setItem("artifact_quiz_session", JSON.stringify(sessionData));
+    }
+  }, [artwork, currentQIndex, score, lives, selectedQuestions, gameState]);
 
   useEffect(() => {
     if (!artwork) navigate("/");
@@ -102,13 +133,16 @@ const QuizScreen = () => {
 
       if (!isCorrect && lives - 1 <= 0) {
         setGameState("failed");
+        localStorage.removeItem("artifact_quiz_session");
       } else if (currentQIndex === 2) {
         if (finalScore >= 2) {
           setGameState("passed");
+          localStorage.removeItem("artifact_quiz_session");
           if (navigator.vibrate) navigator.vibrate([150, 50, 150]);
           await awardBadge(finalScore);
         } else {
           setGameState("failed");
+          localStorage.removeItem("artifact_quiz_session");
         }
       } else {
         setCurrentQIndex((prev) => prev + 1);
