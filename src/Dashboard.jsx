@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import ArScanner from "./ArScanner";
+import ArErrorBoundary from "./ArErrorBoundary"; 
 import { useLanguage } from "./LanguageContext";
 import { uiDict } from "./translations";
 import { useData } from "./DataContext";
@@ -53,7 +54,6 @@ const Dashboard = () => {
   const [toastMessage, setToastMessage] = useState(null);
   const [showNotScannableHint, setShowNotScannableHint] = useState(false);
 
-  // New state to toggle collapsing/hiding the detected artwork pane
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   const animationRef = useRef(null);
@@ -157,7 +157,7 @@ const Dashboard = () => {
       setScanProgress(0);
       setPendingTargetIndex(null);
       setShowTapToScanBtn(false);
-      setIsPanelCollapsed(false); // Make sure the panel opens uncollapsed on a fresh scan
+      setIsPanelCollapsed(false); 
 
       let startTime = null;
       const duration = 1500;
@@ -257,11 +257,13 @@ const Dashboard = () => {
         </div>
       )}
 
-      <ArScanner
-        onTargetFound={handleDetection}
-        onTargetLost={handleTargetLost}
-        unlockedByIndex={unlockedByIndex}
-      />
+      <ArErrorBoundary>
+        <ArScanner
+          onTargetFound={handleDetection}
+          onTargetLost={handleTargetLost}
+          unlockedByIndex={unlockedByIndex}
+        />
+      </ArErrorBoundary>
 
       <div className="absolute top-12 left-0 w-full px-6 flex justify-between items-center z-40 pointer-events-none">
         <div
@@ -383,11 +385,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* DETECTED ARTWORK BOTTOM CONTAINER */}
       {paintingDetected && activeArtwork && !showInfoModal && (
         <div className="absolute inset-0 z-50 flex flex-col justify-end items-center pb-[120px] pointer-events-none">
           
-          {/* Card Component with Smooth Slide and Fade Transition */}
           <div 
             className={`w-11/12 max-w-sm bg-artifact-bg/95 backdrop-blur-md border border-artifact-card/30 rounded-[2rem] p-6 shadow-2xl pointer-events-auto relative transition-all duration-500 ease-in-out ${
               isPanelCollapsed 
@@ -395,7 +395,6 @@ const Dashboard = () => {
                 : "transform translate-y-0 opacity-100"
             }`}
           >
-            {/* Collapse Arrow Button replacing the rigid close icon */}
             <button
               onClick={() => setIsPanelCollapsed(true)}
               className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center bg-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/20 transition-all z-10"
@@ -407,7 +406,7 @@ const Dashboard = () => {
                 fill="none" 
                 stroke="currentColor" 
                 strokeWidth="2.5" 
-                className="w-4 h-4 transform rotate-180" // Pointing down
+                className="w-4 h-4 transform rotate-180" 
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
               </svg>
