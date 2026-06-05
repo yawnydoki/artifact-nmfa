@@ -116,7 +116,7 @@ const Certificate = () => {
               
               <div className="-mb-2 flex flex-col items-center w-full">
                 <img 
-                  src="/logo_trans.png" 
+                  src="/logo_red.png" 
                   alt="ArtiFact Logo" 
                   className="w-[15%] object-contain mb-[-5%]"
                 />
