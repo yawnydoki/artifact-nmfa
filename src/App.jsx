@@ -129,7 +129,7 @@ function App() {
 
       const { error } = await supabase
         .from("unlocked_badges")
-        .upsert(insertData, { onConflict: "visitor_id, artwork_id" });
+        .upsert(insertData, { onConflict: "visitor_id,artwork_id" });
 
       if (error) throw error;
 

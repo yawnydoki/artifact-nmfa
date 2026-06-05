@@ -209,7 +209,7 @@ const QuizScreen = () => {
         .from("unlocked_badges")
         .upsert([
           { visitor_id: visitorId, artwork_id: artwork.id, badge_type: newTier }
-        ], { onConflict: 'visitor_id, artwork_id' });
+        ], { onConflict: 'visitor_id,artwork_id' }); 
 
       if (error) throw error;
 

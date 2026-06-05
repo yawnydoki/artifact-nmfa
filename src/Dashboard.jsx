@@ -115,16 +115,6 @@ const Dashboard = () => {
     return () => clearTimeout(timeoutId);
   }, [isTracking, isScanningSequence, paintingDetected, pendingTargetIndex]);
 
-  useEffect(() => {
-    let delayTimer;
-    if (pendingTargetIndex !== null) {
-      delayTimer = setTimeout(() => setShowTapToScanBtn(true), 2000);
-    } else {
-      setShowTapToScanBtn(false);
-    }
-    return () => clearTimeout(delayTimer);
-  }, [pendingTargetIndex]);
-
   const handleDetection = useCallback((index) => {
     setIsTracking(true);
     setShowNotScannableHint(false);
@@ -245,6 +235,20 @@ const Dashboard = () => {
       setIsFetching(false);
     }
   };
+
+  useEffect(() => {
+    let delayTimer;
+    if (pendingTargetIndex !== null) {
+      if (unlockedByIndex[pendingTargetIndex]) {
+        startScanSequence();
+      } else {
+        delayTimer = setTimeout(() => setShowTapToScanBtn(true), 2000);
+      }
+    } else {
+      setShowTapToScanBtn(false);
+    }
+    return () => clearTimeout(delayTimer);
+  }, [pendingTargetIndex, unlockedByIndex]);
 
   return (
     <div className="relative h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center justify-center font-neohellenic">
