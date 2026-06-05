@@ -76,7 +76,7 @@ const Certificate = () => {
         <div className="w-full h-full flex flex-col items-center justify-center relative animate-fade-in">
           
           <button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/end')}
             className="absolute top-6 right-6 text-white text-2xl font-serif hover:scale-110 transition-transform z-50"
           >
             X
@@ -104,48 +104,54 @@ const Certificate = () => {
             </button>
           )}
 
-          <div className="w-[90%] max-w-[400px] bg-[#EBE0C9] rounded-sm p-4 relative shadow-[0_0_30px_rgba(0,0,0,0.5)] border-[12px] border-[#d4c3a3] border-double">
+          <div className="relative w-[90%] max-w-[400px]aspect-auto">
             
-            <div className="border border-[#7A1515]/30 p-6 flex flex-col items-center text-center relative h-[65vh] max-h-[600px] overflow-hidden">
+            <img 
+              src="/Group 45.svg" 
+              alt="Certificate Border" 
+              className="w-full h-full object-contain"
+            />
+            
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-[15%]">
               
               <div className="-mb-2 flex flex-col items-center w-full">
                 <img 
                   src="/logo_trans.png" 
                   alt="ArtiFact Logo" 
-                  className="w-12 h-12 object-contain mx-auto"
+                  className="w-[15%] object-contain mb-[-5%]"
                 />
               </div>
 
-              <h1 className="font-agbalumo text-[#7A1515] text-[2.75rem] leading-none drop-shadow-sm mb-1 relative z-20">
+              <h1 className="font-agbalumo text-[#7A1515] leading-none mb-1" style={{ fontSize: "clamp(1.5rem, 6vw, 2.75rem)" }}>
                 Certificate
               </h1>
-              <h2 className="font-agbalumo text-[#7A1515] text-[1.75rem] leading-none mb-4">
+              <h2 className="font-agbalumo text-[#7A1515] leading-none mb-3" style={{ fontSize: "clamp(1rem, 4vw, 1.75rem)" }}>
                 of Appreciation
               </h2>
 
-              <div className="w-3/4 border-t border-[#7A1515]/40 mb-4"></div>
+              <div className="w-1/2 border-t border-[#7A1515]/40 mb-2"></div>
 
-              <h3 className="font-birthstone text-[#7A1515] text-6xl leading-none mb-4">
+              <h3 className="font-birthstone text-[#7A1515] leading-none mb-2 break-all text-center" style={{ fontSize: "clamp(2rem, 12vw, 5rem)" }}>
                 {visitorName}
               </h3>
 
-              <div className="w-1/4 border-t border-[#7A1515]/40 mb-3"></div>
+              <div className="w-1/4 border-t border-[#7A1515]/40 mb-2"></div>
 
-              <h4 className="font-agbalumo text-[#7A1515] text-2xl mb-1">
+              <h4 className="font-agbalumo text-[#7A1515]" style={{ fontSize: "clamp(0.8rem, 4vw, 1.5rem)" }}>
                 “ArtiFact Explorer”
               </h4>
-              <p className="font-serif text-[#7A1515] text-[10px] font-bold tracking-widest mb-6">
+              <p className="font-serif text-[#7A1515] font-bold tracking-widest mb-2" style={{ fontSize: "clamp(0.4rem, 2vw, 0.6rem)" }}>
                 at the National Museum of Fine Arts
               </p>
 
-              <div className="flex-1 mb-10 w-full flex flex-col justify-center transition-opacity duration-300">
+              <div className="w-2/3 flex-col flex items-center justify-center overflow-hidden">
                 {currentSlide === 0 ? (
-                  <p className="font-lora text-[#7A1515]/90 text-[13px] leading-relaxed text-justify px-2">
+                  <p className="font-lora text-[#7A1515]/90 text-justify leading-snug px-1" style={{ fontSize: "clamp(0.6rem, 2.5vw, 0.85rem)" }}>
                     Congratulations on unlocking all badges! Thank you for testing ArtiFact and participating in our thesis project. Your time, support, and valuable feedback have greatly contributed to our research. We sincerely appreciate your participation.
                   </p>
                 ) : (
                   <div className="flex flex-col items-center w-full">
-                    <div className="grid grid-cols-5 gap-3 mb-8 w-full px-2">
+                    <div className="grid grid-cols-5 gap-3 mb-4 w-full px-2">
                       {[...Array(10)].map((_, i) => (
                         <div 
                           key={i} 
@@ -155,7 +161,7 @@ const Certificate = () => {
                         ></div>
                       ))}
                     </div>
-                    <p className="font-agbalumo text-[#7A1515] text-xl">
+                    <p className="font-agbalumo text-[#7A1515]" style={{ fontSize: "clamp(0.8rem, 4vw, 1.2rem)" }}>
                       {totalBadges} Badges Collected
                     </p>
                   </div>

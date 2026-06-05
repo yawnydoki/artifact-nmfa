@@ -16,7 +16,7 @@ const EndPrompt = () => {
           
           <div className="flex w-full gap-4 px-2">
             <button 
-              onClick={() => navigate('/end')}
+              onClick={() => navigate('/certificate')}
               className="flex-1 bg-transparent border-[2px] border-[#4A260F] text-[#4A260F] rounded-xl py-2.5 text-lg hover:bg-[#4A260F] hover:text-[#E0CCB6] transition-colors shadow-sm"
             >
               Yes

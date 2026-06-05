@@ -50,13 +50,6 @@ const EndSequence = () => {
             <h3 className="text-[#4A260F] text-[2rem] leading-tight tracking-wide mb-8">
               Thank you<br/>for participating!
             </h3>
-            
-            <button 
-              onClick={() => navigate('/certificate')}
-              className="w-full bg-[#4A260F] text-[#E0CCB6] rounded-xl py-3 font-lora font-bold text-lg hover:brightness-110 active:scale-95 transition-all shadow-md"
-            >
-              Claim Your Certificate
-            </button>
           </div>
         </div>
       )}
