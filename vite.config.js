@@ -2,11 +2,29 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import basicSsl from "@vitejs/plugin-basic-ssl";
+import viteCompression from "vite-plugin-compression"; 
 
 export default defineConfig({
   plugins: [
     react(),
     basicSsl(),
+    
+    viteCompression({
+      algorithm: "brotliCompress",
+      ext: ".br",
+      threshold: 10240, 
+      filter: /\.(js|mjs|json|css|html|mind)$/i, 
+      deleteOriginFile: false,
+    }),
+
+    viteCompression({
+      algorithm: "gzip",
+      ext: ".gz",
+      threshold: 10240,
+      filter: /\.(js|mjs|json|css|html|mind)$/i, 
+      deleteOriginFile: false,
+    }),
+
     VitePWA({
       registerType: "autoUpdate",
 
@@ -83,7 +101,7 @@ export default defineConfig({
               cacheName: "artifact-supabase-images",
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
+                maxAgeSeconds: 60 * 60 * 24 * 30, 
               },
               cacheableResponse: {
                 statuses: [0, 200],
