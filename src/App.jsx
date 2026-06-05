@@ -72,7 +72,7 @@ const AnimatedRoutes = () => {
             }
           />
           <Route
-            path="/certificate"
+            path="/Certificate"
             element={
               <PageWrapper>
                 <Certificate />
