@@ -256,13 +256,13 @@ const Certificate = () => {
 
               <h1
                 className="font-agbalumo text-[#7A1515] leading-none mb-1 mt-1"
-                style={{ fontSize: "clamp(1.5rem, 6vw, 2.75rem)" }}
+                style={{ fontSize: "clamp(2.5rem, 6vw, 2.75rem)" }}
               >
                 Certificate
               </h1>
               <h2
                 className="font-agbalumo text-[#7A1515] leading-none mb-2"
-                style={{ fontSize: "clamp(1rem, 4vw, 1.75rem)" }}
+                style={{ fontSize: "clamp(1.5rem, 4vw, 1.75rem)" }}
               >
                 of Appreciation
               </h2>
@@ -279,25 +279,25 @@ const Certificate = () => {
               <div className="w-1/4 border-t border-[#7A1515]/40 mb-1"></div>
 
               <h4
-                className="font-agbalumo text-[#7A1515] mb-1"
+                className="font-agbalumo text-[#7A1515] leading-none mb-0"
                 style={{ fontSize: "clamp(0.8rem, 4vw, 1.5rem)" }}
               >
                 “ArtiFact Explorer”
               </h4>
               <p
-                className="font-serif text-[#7A1515] font-bold tracking-widest mb-2"
+                className="font-serif text-[#7A1515] font-bold m-0 p-1 leading-tight"
                 style={{ fontSize: "clamp(0.4rem, 2vw, 0.6rem)" }}
               >
                 at the National Museum of Fine Arts
               </p>
 
-              <div className="w-2/3 flex-col flex items-center justify-center pb-2">
+              <div className="w-3/4 flex-col flex items-center justify-center mt-1 pb-10">
                 {currentSlide === 0 ? (
                   <p
-                    className="font-lora text-[#7A1515]/90 text-justify leading-tight px-1"
+                    className="font-lora text-[#7A1515]/90 leading-tight text-justify"
                     style={{ fontSize: "clamp(0.55rem, 2.2vw, 0.75rem)" }}
                   >
-                    Congratulations on unlocking all badges! Thank you for
+                    Congratulations on unlocking the badges! Thank you for
                     testing ArtiFact and participating in our thesis project.
                     Your time, support, and valuable feedback have greatly
                     contributed to our research. We sincerely appreciate your
