@@ -28,6 +28,13 @@ const MuseumMap = () => {
     darkGreen: { id: 4, hex: '#165C3B' } 
   };
 
+  const galleryNames = {
+  [mapZones.green.id]: "This section is found in GALLERY VIII",
+  [mapZones.purple.id]: "This section is found in GALLERY VI",
+  [mapZones.orange.id]: "This section is found in HALL OF MASTERS",
+  [mapZones.darkGreen.id]: "This section is found in  GALLERY III"
+};
+
   return (
     <div className="h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center pt-6 pb-[100px] relative box-border transition-colors duration-500">
       
@@ -149,6 +156,14 @@ const MuseumMap = () => {
 
         <div className="bg-[#1D0C09] p-3 rounded-[2rem] shadow-2xl flex-1 flex flex-col min-h-0 border border-white/5 overflow-hidden">
           <div className="bg-artifact-card rounded-[1.4rem] p-4 flex-1 overflow-y-auto hide-scrollbar flex flex-col gap-4">
+            
+            {activeZone && (
+              <div className="text-center mb-1">
+                <span className="text-artifact-border text-[15px] font-serif">
+                  {galleryNames[activeZone]}
+                </span>
+              </div>
+            )}
             
             {isDataLoading ? (
               <div className="flex-1 flex items-center justify-center text-artifact-border font-serif animate-pulse text-base italic">
