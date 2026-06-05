@@ -198,12 +198,6 @@ const QuizScreen = () => {
     offlineQueue.push(badgeData);
     localStorage.setItem('artifact_offline_queue', JSON.stringify(offlineQueue));
 
-    if (existingBadgeIndex >= 0) {
-      showToast(`${newTier} Badge Upgraded!`);
-    } else {
-      showToast(`${newTier} Badge Unlocked!`);
-    }
-
     try {
       const { error } = await supabase
         .from("unlocked_badges")

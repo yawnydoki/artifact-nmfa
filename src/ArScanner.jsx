@@ -169,10 +169,11 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
           >
             <a-text 
               value="???" 
+              position="0 -0.2 0.05"
               align="center" 
               anchor="center" 
               baseline="center"
-              color="#000000" 
+              color="#FFFFFF" 
               width="4" 
               scale="2.2 2.2 2.2"
               shader="msdf"
@@ -183,11 +184,11 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
 
             <a-text 
               value="???" 
-              position="0 0 0.005" 
+              position="0.01 -0.2 0.005" 
               align="center" 
               anchor="center" 
               baseline="center"
-              color="#FFFFFF" 
+              color="#000000" 
               width="4" 
               scale="2.2 2.2 2.2"
               shader="msdf"
