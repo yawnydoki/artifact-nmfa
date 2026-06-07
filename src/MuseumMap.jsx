@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useLanguage } from './LanguageContext';
-import { uiDict } from './translations';
+import { useTranslation } from 'react-i18next';
 import { useData } from './DataContext';
 
 const MuseumMap = () => {
   const { currentLang } = useLanguage();
-  const t = uiDict[currentLang] || uiDict.eng;
+  const { t } = useTranslation();
   
   const isCJK = ['chi', 'jap', 'kor'].includes(currentLang);
 
@@ -29,18 +29,18 @@ const MuseumMap = () => {
   };
 
   const galleryNames = {
-  [mapZones.green.id]: "This section is found in GALLERY VIII",
-  [mapZones.purple.id]: "This section is found in GALLERY VI",
-  [mapZones.orange.id]: "This section is found in HALL OF MASTERS",
-  [mapZones.darkGreen.id]: "This section is found in  GALLERY III"
-};
+    [mapZones.green.id]: t("This section is found in GALLERY VIII"),
+    [mapZones.purple.id]: t("This section is found in GALLERY VI"),
+    [mapZones.orange.id]: t("This section is found in HALL OF MASTERS"),
+    [mapZones.darkGreen.id]: t("This section is found in GALLERY III")
+  };
 
   return (
     <div className="h-[100dvh] w-screen bg-artifact-bg overflow-hidden flex flex-col items-center pt-6 pb-[100px] relative box-border transition-colors duration-500">
       
       <div className={`w-11/12 max-w-sm mb-2 pl-2 flex-shrink-0 transition-opacity duration-300 ${isExpanded ? 'opacity-0 h-0 overflow-hidden mb-0' : 'opacity-100'}`}>
         <h2 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-3xl tracking-wide`}>
-          {t.museumMap || "Museum Map"}
+          {t("Museum Map")}
         </h2>
       </div>
 
@@ -48,21 +48,21 @@ const MuseumMap = () => {
         
         <div className="w-full flex flex-col items-center mb-2.5 text-center font-serif flex-shrink-0">
           <div className="w-full bg-[#E8D1B5] border-2 border-[#240B06] rounded-2xl py-2 px-4 shadow-md flex flex-col items-center text-[#240B06]">
-            <span className="text-[0.9rem] font-medium tracking-wide mb-1">Color Codes:</span>
+            <span className="text-[0.9rem] font-medium tracking-wide mb-1">{t("Color Codes:")}</span>
             <div className="flex gap-6 text-[0.8rem]">
               <div className="flex items-center gap-2">
                 <div className="w-3.5 h-3.5 bg-[#755D50] rounded-sm"></div>
-                <span>Other Rooms</span>
+                <span>{t("Other Rooms")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3.5 h-3.5 bg-[#875e47] rounded-sm"></div>
-                <span>Hallway</span>
+                <span>{t("Hallway")}</span>
               </div>
             </div>
           </div>
           <p className="text-white text-[11px] opacity-90 tracking-wide leading-tight mt-1.5 px-2">
-            Colored Rooms have Unlockable paintings.<br />
-            Current paintings are only found within the second floor
+            {t("Colored Rooms have Unlockable paintings.")}<br />
+            {t("Current paintings are only found within the second floor")}
           </p>
         </div>
         
@@ -94,7 +94,7 @@ const MuseumMap = () => {
 
             <div className="w-full h-[12%] bg-[#875e47] my-[1%] rounded-sm flex items-center justify-center">
               <span className="text-[#E8D1B5] font-serif text-sm tracking-wide select-none">
-                Hallway
+                {t("Hallway")}
               </span>
             </div>
 
@@ -125,7 +125,7 @@ const MuseumMap = () => {
 
             <div className="w-full h-[13%] bg-[#875e47] mt-[1%] rounded-sm flex items-center justify-center">
               <span className="text-[#E8D1B5] font-serif text-sm tracking-wide select-none">
-                Entrance
+                {t("Entrance")}
               </span>
             </div>
 
@@ -137,14 +137,14 @@ const MuseumMap = () => {
         
         <div className="flex justify-between items-end mb-2.5 px-2 flex-shrink-0">
           <h3 className={`${isCJK ? 'font-sans font-bold' : 'font-serif'} text-white text-[1.1rem] drop-shadow-sm`}>
-            {t.clueBehind || "Clues in the selected area"}
+            {t("Clues in the selected area")}
           </h3>
           
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-museum-gold text-[10px] uppercase tracking-[0.2em] font-bold flex items-center gap-2 mb-0.5 hover:brightness-110 transition-all bg-white/10 px-4 py-2 rounded-full border border-white/20 backdrop-blur-md flex-shrink-0"
           >
-            {isExpanded ? "Hide" : "Expand"}
+            {isExpanded ? t("Hide") : t("Expand")}
             <svg 
               className={`w-3 h-3 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} 
               fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -159,7 +159,7 @@ const MuseumMap = () => {
             
             {activeZone && (
               <div className="text-center mb-1">
-                <span className="text-artifact-border text-[15px] font-serif font-bold">
+                <span className="text-artifact-border text-[15px] font-serif">
                   {galleryNames[activeZone]}
                 </span>
               </div>
@@ -167,15 +167,15 @@ const MuseumMap = () => {
             
             {isDataLoading ? (
               <div className="flex-1 flex items-center justify-center text-artifact-border font-serif animate-pulse text-base italic">
-                {t.loading || "Accessing archives..."}
+                {t("Accessing archives...")}
               </div>
             ) : !activeZone ? (
               <div className="flex-1 flex items-center justify-center text-center text-artifact-border/60 font-serif italic p-4 text-sm leading-relaxed">
-                {t.selectArea || "Select a colored wing on the map to reveal the hidden masterpieces."}
+                {t("Select a colored wing on the map to reveal the hidden masterpieces.")}
               </div>
             ) : activeClues.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-center text-artifact-border/60 font-serif italic text-sm">
-                {t.areaEmpty || "This gallery currently holds no secrets."}
+                {t("This gallery currently holds no secrets.")}
               </div>
             ) : (
               activeClues.map((art) => (
@@ -189,7 +189,7 @@ const MuseumMap = () => {
                         {art.title?.[currentLang] || art.title?.eng}
                       </span>
                       <span className="bg-[#3E5D36] text-white text-[9px] font-bold px-3 py-0.5 rounded-full uppercase tracking-[0.2em] shadow-md">
-                        {t.found || "Collected"}
+                        {t("Collected")}
                       </span>
                     </div>
                   ) : (

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 import { useLanguage } from "./LanguageContext";
-import { uiDict } from "./translations";
+import { useTranslation } from "react-i18next";
 import { useData } from "./DataContext";
 
 const style = document.createElement("style");
@@ -22,7 +22,7 @@ const QuizScreen = () => {
   const artwork = location.state?.artwork;
 
   const { currentLang } = useLanguage();
-  const t = uiDict[currentLang] || uiDict.eng;
+  const { t } = useTranslation();
   const isCJK = ["chi", "jap", "kor"].includes(currentLang);
 
   const { refreshBadges } = useData();
@@ -242,7 +242,7 @@ const QuizScreen = () => {
           <h2
             className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-white text-[1.4rem] tracking-wide drop-shadow-sm`}
           >
-            {t.testYourself || "Test yourself!"}
+            {t("Test yourself!")}
           </h2>
           <div
             className={`text-white text-[10px] font-bold px-3 py-1.5 rounded-full border tracking-wider shadow-sm transition-all duration-200 ${
@@ -251,7 +251,7 @@ const QuizScreen = () => {
                 : "bg-[#1B4B18] border-[#2D8029]"
             }`}
           >
-            {damageAnim ? "💔" : "♡"} {lives}/3 {t.lives || "LIVES"}
+            {damageAnim ? "💔" : "♡"} {lives}/3 {t("LIVES")}
           </div>
         </div>
       )}
@@ -313,7 +313,7 @@ const QuizScreen = () => {
               onClick={() => navigate("/")}
               className={`px-8 py-2.5 rounded-full bg-[#381111]/90 backdrop-blur-md border border-[#C4AB8F]/50 text-[#E0CCB6] shadow-xl hover:bg-[#4A260F] transition-all active:scale-95 ${isCJK ? "font-sans" : "font-serif"} text-[1.1rem] tracking-wide`}
             >
-              {t.exitQuiz || "Exit Quiz"}
+              {t("Exit Quiz")}
             </button>
           </div>
         </>
@@ -326,7 +326,7 @@ const QuizScreen = () => {
               <h3
                 className={`${isCJK ? "font-sans" : "font-serif"} text-[#4A260F] text-2xl`}
               >
-                {achievedTier === "Gold" ? "Perfect Score!" : "Quiz Passed!"}
+                {achievedTier === "Gold" ? t("Perfect Score!") : t("Quiz Passed!")}
               </h3>
 
               <div className="w-full h-[4px] bg-[#8b7463]/40 mb-6"></div>
@@ -353,7 +353,7 @@ const QuizScreen = () => {
               <p
                 className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-[#783713] text-xl leading-tight`}
               >
-                {achievedTier} {t.badge || "Badge"}
+                {achievedTier} {t("Badge")}
               </p>
             </div>
           </div>
@@ -362,7 +362,7 @@ const QuizScreen = () => {
             onClick={() => navigate("/passport")}
             className={`mt-8 px-8 py-3 rounded-full border border-white/40 text-white shadow-md hover:bg-white/10 transition-colors ${isCJK ? "font-sans font-bold" : "font-serif text-lg"}`}
           >
-            {t.viewPassport || "View in Passport"}
+            {t("View in Passport")}
           </button>
         </div>
       )}
@@ -373,18 +373,18 @@ const QuizScreen = () => {
             <h3
               className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-[#4A260F] text-3xl mb-3 leading-tight`}
             >
-              {t.outOfLives || "Out of Lives!"}
+              {t("Out of Lives!")}
             </h3>
             <p
               className={`${isCJK ? "font-sans" : "font-neohellenic"} text-[#4A260F]/80 mb-8`}
             >
-              {t.reviewAndTry || "Review the clues and try again."}
+              {t("Review the clues and try again.")}
             </p>
             <button
               onClick={() => navigate("/")}
               className={`w-full bg-[#4A260F] text-[#E0CCB6] py-3 rounded-xl ${isCJK ? "font-sans font-bold" : "font-serif text-[1.1rem]"} shadow-md hover:brightness-110 transition-all`}
             >
-              {t.returnToCamera || "Return to Camera"}
+              {t("Return to Camera")}
             </button>
           </div>
         </div>

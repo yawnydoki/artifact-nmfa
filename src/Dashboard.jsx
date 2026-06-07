@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import ArScanner from "./ArScanner";
 import ArErrorBoundary from "./ArErrorBoundary"; 
 import { useLanguage } from "./LanguageContext";
-import { uiDict } from "./translations";
+import { useTranslation } from "react-i18next";
 import { useData } from "./DataContext";
 import { supabase } from "./supabaseClient";
 
@@ -32,7 +32,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const { currentLang } = useLanguage();
-  const t = uiDict[currentLang] || uiDict.eng;
+  const { t } = useTranslation();
   const isCJK = ["chi", "jap", "kor"].includes(currentLang);
 
   const { artworks, unlockedBadges, refreshBadges } = useData();
@@ -190,7 +190,7 @@ const Dashboard = () => {
                 JSON.stringify(offlineQueue),
               );
 
-              showToast(t.badgeUnlocked || "Bronze Badge Unlocked!");
+              showToast(t("Bronze Badge Unlocked!"));
 
               try {
                 const { error } = await supabase
@@ -285,12 +285,12 @@ const Dashboard = () => {
             {paintingDetected && activeArtwork
               ? `${activeArtwork.title?.[currentLang] || activeArtwork.title?.eng}`
               : isScanningSequence
-                ? `Scanning Artwork... ${Math.floor(scanProgress)}%`
+                ? `${t("Scanning Artwork...")} ${Math.floor(scanProgress)}%`
                 : pendingTargetIndex !== null
-                  ? "Target Acquired!"
+                  ? t("Target Acquired!")
                   : showNotScannableHint
-                    ? "Target not recognized. Check map!"
-                    : t.scanPrompt || "Scan an Artwork..."}
+                    ? t("Target not recognized. Check map!")
+                    : t("Scan an Artwork...")}
           </div>
         </div>
 
@@ -304,10 +304,10 @@ const Dashboard = () => {
           }`}
         >
           {isTracking
-            ? "Tracking Active"
+            ? t("Tracking Active")
             : paintingDetected
-              ? "Tracking Paused"
-              : "AR Ready"}
+              ? t("Tracking Paused")
+              : t("AR Ready")}
         </div>
       </div>
 
@@ -356,7 +356,7 @@ const Dashboard = () => {
               onClick={startScanSequence}
               className="px-10 py-2.5 rounded-full bg-[#F5D896] border-[3px] border-[#3A1414] text-[#3A1414] font-serif font-bold text-[19px] tracking-widest shadow-[0_5px_15px_rgba(0,0,0,0.5)] animate-pulse hover:brightness-110 active:scale-95 transition-all flex items-center justify-center"
             >
-              SCAN
+              {t("SCAN")}
             </button>
           </div>
 
@@ -439,7 +439,7 @@ const Dashboard = () => {
             >
               {activeArtwork.clues?.[currentLang] ||
                 activeArtwork.clues?.eng ||
-                "Explore the details of this masterpiece..."}
+                t("Explore the details of this masterpiece...")}
             </p>
 
             <hr className="border-t-[1.5px] border-dotted border-white/40 mb-5" />
@@ -451,7 +451,7 @@ const Dashboard = () => {
                 }
                 className="flex-1 bg-museum-gold text-artifact-bg py-2.5 rounded-full font-serif text-lg tracking-wide hover:brightness-110 transition-all shadow-md active:scale-95"
               >
-                {t.startQuiz || "Start Quiz"}
+                {t("Start Quiz")}
               </button>
               <button
                 onClick={() => {
@@ -460,7 +460,7 @@ const Dashboard = () => {
                 }}
                 className="flex-1 bg-museum-gold text-artifact-bg py-2.5 rounded-full font-serif text-lg tracking-wide hover:brightness-110 transition-all shadow-md active:scale-95"
               >
-                {t.viewInfo || "Read more..."}
+                {t("Read more...")}
               </button>
             </div>
           </div>
@@ -486,7 +486,7 @@ const Dashboard = () => {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" fill="none" className="transform rotate-180 origin-center" />
               </svg>
-              Artwork Info
+              {t("Artwork Info")}
             </button>
           </div>
 
@@ -497,7 +497,7 @@ const Dashboard = () => {
         <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-[#E0CCB6] w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl flex flex-col relative border border-[#C4AB8F]">
             <div className="bg-[#381111] py-4 px-6 flex justify-between items-center text-white font-serif shadow-sm">
-              <span className="text-2xl">About</span>
+              <span className="text-2xl">{t("About")}</span>
               <button
                 onClick={() => setShowInfoModal(false)}
                 className="text-xl opacity-80 hover:opacity-100 transition-opacity"
@@ -516,7 +516,7 @@ const Dashboard = () => {
                   />
                 ) : (
                   <span className="text-[#998670] text-sm font-serif italic">
-                    Image Unavailable
+                    {t("Image Unavailable")}
                   </span>
                 )
               ) : activeArtwork.thumbnail_url ? (
@@ -547,19 +547,19 @@ const Dashboard = () => {
                 onClick={() => setActiveModalTab("origin")}
                 className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "origin" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
-                {t.origin || "Origin"}
+                {t("Origin")}
               </button>
               <button
                 onClick={() => setActiveModalTab("artist_description")}
                 className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "artist_description" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
-                {t.artist || "Artist"}
+                {t("Artist")}
               </button>
               <button
                 onClick={() => setActiveModalTab("art_element")}
                 className={`border border-[#783713] rounded-xl font-serif py-1.5 text-[12px] transition-colors duration-150 active:scale-95 ${activeModalTab === "art_element" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
-                {t.elements || "Art Elements"}
+                {t("Art Elements")}
               </button>
             </div>
 
@@ -572,13 +572,13 @@ const Dashboard = () => {
                   ? activeArtwork[activeModalTab][currentLang] ||
                     activeArtwork[activeModalTab].eng
                   : activeArtwork[activeModalTab] ||
-                    "More information coming soon..."}
+                    t("More information coming soon...")}
               </div>
 
               {activeModalTab === "artist_description" && (
                 <div className="mt-5 pt-4 border-t border-[#C4AB8F]/50">
                   <h4 className="font-serif font-bold text-[#783713] mb-3 text-base text-left">
-                    Related Works
+                    {t("Related Works")}
                   </h4>
                   <div className="flex overflow-x-auto gap-3 pb-2 hide-scrollbar">
                     {activeArtwork.related_arts &&
@@ -600,7 +600,7 @@ const Dashboard = () => {
                       ))
                     ) : (
                       <p className="text-xs italic text-[#783713]/60 w-full text-center">
-                        More works coming soon...
+                        {t("More works coming soon...")}
                       </p>
                     )}
                   </div>
@@ -615,7 +615,7 @@ const Dashboard = () => {
                 }
                 className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
               >
-                {t.startQuiz || "Start Quiz"}
+                {t("Start Quiz")}
               </button>
             </div>
           </div>

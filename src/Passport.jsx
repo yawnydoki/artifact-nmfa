@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "./LanguageContext";
-import { uiDict } from "./translations";
+import { useTranslation } from "react-i18next";
 import { useData } from "./DataContext";
 import TutorialModal from "./TutorialModal";
 
@@ -16,7 +16,7 @@ const Passport = () => {
   const navigate = useNavigate();
 
   const { currentLang } = useLanguage();
-  const t = uiDict[currentLang] || uiDict.eng;
+  const { t } = useTranslation();
   const isCJK = ["chi", "jap", "kor"].includes(currentLang);
 
   const [activeTab, setActiveTab] = useState("badges");
@@ -59,10 +59,10 @@ const Passport = () => {
     <div className="h-[100dvh] w-screen bg-[#946A42] overflow-hidden flex flex-col items-center pt-10 pb-[120px] font-neohellenic relative box-border">
       <div className="w-11/12 max-w-sm flex justify-between items-center mb-6 pl-2 flex-shrink-0">
         <h2 className="font-sans font-bold text-white text-3xl tracking-wide">
-          {t.passport || "Passport"}
+          {t("Passport")}
         </h2>
         <div className="bg-[#4C7541] border border-[#6BB252] text-white text-[10px] px-3 py-1.5 rounded-full shadow-sm tracking-wider">
-          {unlockedCount}/{totalCount} {t.unlocked || "unlocked"}
+          {unlockedCount}/{totalCount} {t("unlocked")}
         </div>
       </div>
 
@@ -76,7 +76,7 @@ const Passport = () => {
                 : "bg-[#C4AB8F] text-[#5A3B22]/70 z-10"
             }`}
           >
-            {t.yourBadges || "User Badges"}
+            {t("User Badges")}
           </button>
           <button
             onClick={() => setActiveTab("history")}
@@ -86,7 +86,7 @@ const Passport = () => {
                 : "bg-[#C4AB8F] text-[#5A3B22]/70 z-10"
             }`}
           >
-            {t.history || "History"}
+            {t("History")}
           </button>
         </div>
 
@@ -167,17 +167,17 @@ const Passport = () => {
                   </div>
                   <div className="flex flex-col flex-1 text-left">
                     <h3 className="font-serif text-[#381111] text-[18px] leading-tight mb-0.5">
-                      Instructions: How to play?
+                      {t("Instructions: How to play?")}
                     </h3>
                     <p className="font-serif text-[#783713] text-[14px] leading-tight opacity-90">
-                      A guide to ArtiFact NMFA
+                      {t("A guide to ArtiFact NMFA")}
                     </p>
                   </div>
                 </div>
 
                 {unlockedHistory.length === 0 ? (
                   <p className="font-serif text-center text-[#9A7B5C] mt-4 italic text-lg">
-                    {t.areaEmpty || "Scan paintings to start your history!"}
+                    {t("Scan paintings to start your history!")}
                   </p>
                 ) : (
                   unlockedHistory.map((item) => (
@@ -220,7 +220,7 @@ const Passport = () => {
         <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-[#E0CCB6] w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl flex flex-col relative border border-[#C4AB8F]">
             <div className="bg-[#381111] py-4 px-6 flex justify-between items-center text-white font-serif shadow-sm">
-              <span className="text-2xl">About</span>
+              <span className="text-2xl">{t("About")}</span>
               <button
                 onClick={() => setSelectedArtwork(null)}
                 className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center bg-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/20 transition-colors z-10"
@@ -239,7 +239,7 @@ const Passport = () => {
                   />
                 ) : (
                   <span className="text-[#998670] text-sm font-serif italic">
-                    Image Unavailable
+                    {t("Image Unavailable")}
                   </span>
                 )
               ) : selectedArtwork.thumbnail_url ? (
@@ -272,19 +272,19 @@ const Passport = () => {
                 onClick={() => setActiveModalTab("origin")}
                 className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "origin" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
-                {t.origin || "Origin"}
+                {t("Origin")}
               </button>
               <button
                 onClick={() => setActiveModalTab("artist_description")}
                 className={`border border-[#783713] rounded-xl font-serif py-1.5 text-sm transition-colors duration-150 active:scale-95 ${activeModalTab === "artist_description" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
-                {t.artist || "Artist"}
+                {t("Artist")}
               </button>
               <button
                 onClick={() => setActiveModalTab("art_element")}
                 className={`border border-[#783713] rounded-xl font-serif py-1.5 text-[12px] transition-colors duration-150 active:scale-95 ${activeModalTab === "art_element" ? "bg-[#783713] text-[#E0CCB6]" : "text-[#783713] hover:bg-[#783713]/10"}`}
               >
-                {t.elements || "Art Elements"}
+                {t("Art Elements")}
               </button>
             </div>
 
@@ -297,13 +297,13 @@ const Passport = () => {
                   ? selectedArtwork[activeModalTab][currentLang] ||
                     selectedArtwork[activeModalTab].eng
                   : selectedArtwork[activeModalTab] ||
-                    "More information coming soon..."}
+                    t("More information coming soon...")}
               </div>
 
               {activeModalTab === "artist_description" && (
                 <div className="mt-5 pt-4 border-t border-[#C4AB8F]/50">
                   <h4 className="font-serif font-bold text-[#783713] mb-3 text-base text-left">
-                    Related Works
+                    {t("Related Works")}
                   </h4>
                   <div className="flex overflow-x-auto gap-3 pb-2 hide-scrollbar">
                     {selectedArtwork.related_arts &&
@@ -325,7 +325,7 @@ const Passport = () => {
                       ))
                     ) : (
                       <p className="text-xs italic text-[#783713]/60 w-full text-center">
-                        More works coming soon...
+                        {t("More works coming soon...")}
                       </p>
                     )}
                   </div>
@@ -340,7 +340,7 @@ const Passport = () => {
                 }
                 className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
               >
-                Take Quiz?
+                {t("Start Quiz")}
               </button>
             </div>
           </div>

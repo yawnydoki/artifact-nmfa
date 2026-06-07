@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const EndPrompt = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="h-[100dvh] w-screen bg-[#4c291d] overflow-hidden flex flex-col items-center justify-center font-serif relative box-border pb-[120px]">
@@ -11,7 +13,7 @@ const EndPrompt = () => {
         <div className="bg-[#E0CCB6] rounded-xl py-3 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
           
           <h3 className="text-[#4A260F] text-[1.3rem] leading-snug mb-4 max-w-[250px]">
-            Would you like to end the tour?
+            {t("Would you like to end the tour?")}
           </h3>
           
           <div className="flex w-full gap-4 px-2">
@@ -19,13 +21,13 @@ const EndPrompt = () => {
               onClick={() => navigate('/certificate')}
               className="flex-1 bg-transparent border-[2px] border-[#4A260F] text-[#4A260F] rounded-xl py-2.5 text-lg hover:bg-[#4A260F] hover:text-[#E0CCB6] transition-colors shadow-sm"
             >
-              Yes
+              {t("Yes")}
             </button>
             <button 
               onClick={() => navigate('/')}
               className="flex-1 bg-transparent border-[2px] border-[#4A260F] text-[#4A260F] rounded-xl py-2.5 text-lg hover:bg-[#4A260F] hover:text-[#E0CCB6] transition-colors shadow-sm"
             >
-              No
+              {t("No")}
             </button>
           </div>
 

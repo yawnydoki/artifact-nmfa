@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 
 const TARGET_COUNT = 10;
 
 const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
+  const { t } = useTranslation();
   const sceneRef = useRef(null);
   const targetRefs = useRef([]);
   const floatingRefs = useRef([]);
@@ -105,24 +107,20 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
 
     targets.forEach((target) => {
       target.addEventListener("targetFound", handleFound);
-
       target.addEventListener("targetLost", handleLost);
     });
 
     return () => {
       targets.forEach((target) => {
         target.removeEventListener("targetFound", handleFound);
-
         target.removeEventListener("targetLost", handleLost);
       });
 
       document.querySelectorAll("video").forEach((video) => {
         if (video.srcObject) {
           video.srcObject.getTracks().forEach((track) => track.stop());
-
           video.srcObject = null;
         }
-
         video.remove();
       });
 
@@ -141,7 +139,7 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   if (camStatus === "checking") {
     return (
       <div className="h-full w-full bg-[#16120c] flex items-center justify-center font-serif text-[#E0CCB6] animate-pulse relative z-50">
-        Initializing AR...
+        {t("Initializing AR...")}
       </div>
     );
   }
@@ -162,24 +160,24 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97a9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
                 />
               </svg>
             </div>
 
             <h3 className="font-serif text-[#4A260F] text-2xl font-bold mb-3">
-              Camera Access Required
+              {t("Camera Access Required")}
             </h3>
 
             <p className="font-serif text-[#4A260F]/80 text-[15px] leading-relaxed mb-2">
               {camStatus === "denied"
-                ? "ArtiFact requires camera permissions to scan the artworks."
-                : "Your browser or device does not support the required AR camera features."}
+                ? t("ArtiFact requires camera permissions to scan the artworks.")
+                : t("Your browser or device does not support the required AR camera features.")}
             </p>
 
             {camStatus === "denied" && (
               <p className="font-serif text-[#4A260F] font-bold text-[14px] leading-relaxed mt-2 p-3 bg-[#4A260F]/10 rounded-lg">
-                Please enable camera access in your browser settings.
+                {t("Please enable camera access in your browser settings.")}
               </p>
             )}
           </div>
@@ -215,6 +213,7 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
             id="questionMark"
             src="/questionmark.png"
             crossOrigin="anonymous"
+            alt="target"
           />
         </a-assets>
 
@@ -254,4 +253,4 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   );
 };
 
-export default ArScanner;
+export default React.memo(ArScanner);

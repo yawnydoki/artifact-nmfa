@@ -1,11 +1,20 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useData } from "./DataContext";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
+const style = document.createElement("style");
+style.innerHTML = `
+  @keyframes shimmer { 0% { transform: translateX(-150%) skewX(-20deg); } 20% { transform: translateX(150%) skewX(-20deg); } 100% { transform: translateX(150%) skewX(-20deg); } }
+  .animate-shimmer::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation: shimmer 6.7s infinite; }
+`;
+if (typeof document !== "undefined") document.head.appendChild(style);
+
 const Certificate = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { unlockedBadges, artworks } = useData();
 
   const [visitorName, setVisitorName] = useState("");
@@ -80,7 +89,7 @@ const Certificate = () => {
 
     } catch (error) {
       console.error(`Failed to generate ${format.toUpperCase()}:`, error);
-      alert("Failed to download certificate. Please try again.");
+      alert(t("Failed to download certificate. Please try again."));
     } finally {
       setIsDownloading(false);
     }
@@ -102,14 +111,13 @@ const Certificate = () => {
       {!isGenerated ? (
         <div className="w-full flex flex-col items-center z-10 animate-fade-in-up mt-[-10vh]">
           <h1 className="font-serif text-[#F5EAD4] text-[2.5rem] tracking-wide mb-6 drop-shadow-md">
-            Congratulations!
+            {t("Congratulations!")}
           </h1>
 
           <div className="w-full max-w-sm bg-[#381111] p-2 rounded-2xl shadow-2xl mb-4">
             <div className="bg-[#E0CCB6] rounded-xl pt-6 pb-8 px-6 flex flex-col items-center text-center">
               <p className="font-serif text-[#4A260F] text-[1.15rem] leading-snug mb-8">
-                To claim your certificate please enter your 'alias' for your
-                appreciation.
+                {t("To claim your certificate please enter your 'alias' for your appreciation.")}
               </p>
 
               <form
@@ -118,7 +126,7 @@ const Certificate = () => {
               >
                 <input
                   type="text"
-                  placeholder="Type Any Name Here..."
+                  placeholder={t("Type Any Name Here...")}
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
                   className="w-full bg-transparent border-b border-[#4A260F]/60 text-center font-serif text-[#4A260F] text-lg pb-2 placeholder:text-[#4A260F]/50 focus:outline-none focus:border-[#4A260F] transition-colors"
@@ -128,7 +136,7 @@ const Certificate = () => {
                   type="submit"
                   className="bg-[#E0CCB6] border-2 border-[#4A260F] text-[#4A260F] rounded-lg px-8 py-2 font-serif text-[1.15rem] shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:bg-[#4A260F]/5 active:scale-95 transition-all"
                 >
-                  Redeem Prize
+                  {t("Redeem Prize")}
                 </button>
               </form>
             </div>
@@ -137,8 +145,7 @@ const Certificate = () => {
           <div className="w-full max-w-sm bg-[#381111] p-2 rounded-2xl shadow-2xl">
             <div className="bg-[#E0CCB6] rounded-xl py-4 px-5 text-center">
               <p className="font-serif text-[#4A260F] text-[1.05rem] leading-tight">
-                Note: All gold badges to get a special prize from us! We'll be
-                by the entrance!
+                {t("Note: All gold badges to get a special prize from us! We'll be by the entrance!")}
               </p>
             </div>
           </div>
@@ -151,7 +158,7 @@ const Certificate = () => {
               <div className="w-full max-w-sm bg-[#381111] p-2 rounded-2xl shadow-2xl border border-white/10">
                 <div className="bg-[#E0CCB6] rounded-xl py-8 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
                   <h3 className="font-serif text-[#4A260F] text-2xl font-bold mb-2">
-                    Save your Certificate!
+                    {t("Save your Certificate!")}
                   </h3>
                   
                   <div className="flex flex-col gap-3 w-full">
@@ -159,19 +166,19 @@ const Certificate = () => {
                       onClick={() => handleDownload('pdf')} 
                       className="w-full bg-[#7A1515] text-[#E0CCB6] py-3 rounded-lg font-serif text-lg tracking-wide hover:brightness-110 active:scale-95 transition-all shadow-md"
                     >
-                      Download as PDF
+                      {t("Download as PDF")}
                     </button>
                     <button 
                       onClick={() => handleDownload('png')} 
                       className="w-full bg-[#7A1515] text-[#E0CCB6] py-3 rounded-lg font-serif text-lg tracking-wide hover:brightness-110 active:scale-95 transition-all shadow-md"
                     >
-                      Download as PNG
+                      {t("Download as PNG")}
                     </button>
                     <button 
                       onClick={() => handleDownload('jpeg')} 
                       className="w-full bg-[#7A1515] text-[#E0CCB6] py-3 rounded-lg font-serif text-lg tracking-wide hover:brightness-110 active:scale-95 transition-all shadow-md"
                     >
-                      Download as JPEG
+                      {t("Download as JPEG")}
                     </button>
                   </div>
 
@@ -179,7 +186,7 @@ const Certificate = () => {
                     onClick={() => setShowDownloadModal(false)} 
                     className="mt-6 font-serif text-[#7A1515] underline text-sm hover:text-[#4A260F] transition-colors"
                   >
-                    Cancel
+                    {t("Cancel")}
                   </button>
                 </div>
               </div>
@@ -258,13 +265,13 @@ const Certificate = () => {
                 className="font-agbalumo text-[#7A1515] leading-none mb-1 mt-1"
                 style={{ fontSize: "clamp(2.5rem, 6vw, 2.75rem)" }}
               >
-                Certificate
+                {t("Certificate")}
               </h1>
               <h2
                 className="font-agbalumo text-[#7A1515] leading-none mb-2"
                 style={{ fontSize: "clamp(1.5rem, 4vw, 1.75rem)" }}
               >
-                of Appreciation
+                {t("of Appreciation")}
               </h2>
 
               <div className="w-1/2 border-t border-[#7A1515]/40 mb-1"></div>
@@ -282,13 +289,13 @@ const Certificate = () => {
                 className="font-agbalumo text-[#7A1515] leading-none mb-0"
                 style={{ fontSize: "clamp(0.8rem, 4vw, 1.5rem)" }}
               >
-                “ArtiFact Explorer”
+                “{t("ArtiFact Explorer")}”
               </h4>
               <p
                 className="font-serif text-[#7A1515] font-bold m-0 p-1 leading-tight"
                 style={{ fontSize: "clamp(0.4rem, 2vw, 0.6rem)" }}
               >
-                at the National Museum of Fine Arts
+                {t("at the National Museum of Fine Arts")}
               </p>
 
               <div className="w-3/4 flex-col flex items-center justify-center mt-1 pb-10">
@@ -297,11 +304,7 @@ const Certificate = () => {
                     className="font-lora text-[#7A1515]/90 leading-tight text-justify"
                     style={{ fontSize: "clamp(0.55rem, 2.2vw, 0.75rem)" }}
                   >
-                    Congratulations on unlocking the badges! Thank you for
-                    testing ArtiFact and participating in our thesis project.
-                    Your time, support, and valuable feedback have greatly
-                    contributed to our research. We sincerely appreciate your
-                    participation.
+                    {t("Congratulations on unlocking the badges! Thank you for testing ArtiFact and participating in our thesis project. Your time, support, and valuable feedback have greatly contributed to our research. We sincerely appreciate your participation.")}
                   </p>
                 ) : (
                   <div className="flex flex-col items-center w-full">
@@ -342,7 +345,7 @@ const Certificate = () => {
                       className="font-agbalumo text-[#7A1515] leading-none"
                       style={{ fontSize: "clamp(0.75rem, 3.5vw, 1.1rem)" }}
                     >
-                      {totalBadges} Badges Collected
+                      {totalBadges} {t("Badges Collected")}
                     </p>
                   </div>
                 )}
