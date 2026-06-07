@@ -1,15 +1,24 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 
-const TARGET_COUNT = 15;
+const TARGET_COUNT = 10;
 
 const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   const sceneRef = useRef(null);
   const targetRefs = useRef([]);
-  const callbacksRef = useRef({ onTargetFound, onTargetLost });
+  const floatingRefs = useRef([]);
+
+  const callbacksRef = useRef({
+    onTargetFound,
+    onTargetLost,
+  });
+
   const [camStatus, setCamStatus] = useState("checking");
 
   useEffect(() => {
-    callbacksRef.current = { onTargetFound, onTargetLost };
+    callbacksRef.current = {
+      onTargetFound,
+      onTargetLost,
+    };
   }, [onTargetFound, onTargetLost]);
 
   const checkCamera = useCallback(async () => {
@@ -17,10 +26,17 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
       setCamStatus("unsupported");
       return;
     }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((t) => t.stop());
-      setTimeout(() => setCamStatus("granted"), 400);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+
+      stream.getTracks().forEach((track) => track.stop());
+
+      setTimeout(() => {
+        setCamStatus("granted");
+      }, 300);
     } catch {
       setCamStatus("denied");
     }
@@ -32,49 +48,91 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
 
   useEffect(() => {
     if (camStatus !== "denied") return;
-    const onVisible = () => {
-      if (document.visibilityState === "visible") checkCamera();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        checkCamera();
+      }
     };
-    window.addEventListener("visibilitychange", onVisible);
-    return () => window.removeEventListener("visibilitychange", onVisible);
+
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [camStatus, checkCamera]);
 
   useEffect(() => {
     if (camStatus !== "granted") return;
 
     const handleFound = (e) => {
-      const index = parseInt(e.target.dataset.index, 10);
+      const index = Number(e.target.dataset.index);
+
+      const floating = floatingRefs.current[index];
+
+      if (floating) {
+        floating.setAttribute(
+          "animation",
+          `
+          property: position;
+          from: 0 0 0.03;
+          to: 0 0.02 0.03;
+          dir: alternate;
+          dur: 2500;
+          easing: easeInOutQuad;
+          loop: true;
+        `,
+        );
+      }
+
       callbacksRef.current.onTargetFound?.(index);
     };
-    const handleLost = () => callbacksRef.current.onTargetLost?.();
+
+    const handleLost = (e) => {
+      const index = Number(e.target.dataset.index);
+
+      const floating = floatingRefs.current[index];
+
+      if (floating) {
+        floating.removeAttribute("animation");
+        floating.setAttribute("position", "0 0 0");
+      }
+
+      callbacksRef.current.onTargetLost?.();
+    };
 
     const targets = targetRefs.current.filter(Boolean);
-    targets.forEach((t) => {
-      t.addEventListener("targetFound", handleFound);
-      t.addEventListener("targetLost", handleLost);
+
+    targets.forEach((target) => {
+      target.addEventListener("targetFound", handleFound);
+
+      target.addEventListener("targetLost", handleLost);
     });
 
     return () => {
-      targets.forEach((t) => {
-        t.removeEventListener("targetFound", handleFound);
-        t.removeEventListener("targetLost", handleLost);
+      targets.forEach((target) => {
+        target.removeEventListener("targetFound", handleFound);
+
+        target.removeEventListener("targetLost", handleLost);
       });
 
       document.querySelectorAll("video").forEach((video) => {
-        video.srcObject?.getTracks().forEach((track) => {
-          track.stop();
-          video.srcObject?.removeTrack(track);
-        });
-        video.srcObject = null;
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach((track) => track.stop());
+
+          video.srcObject = null;
+        }
+
         video.remove();
       });
 
       const arSystem = sceneRef.current?.systems?.["mindar-image-system"];
-      if (arSystem?.controller) {
+
+      if (arSystem) {
         try {
           arSystem.stop();
-        } catch (e) {
-          console.warn("MindAR cleanup bypassed:", e);
+        } catch (err) {
+          console.warn("MindAR cleanup bypassed:", err);
         }
       }
     };
@@ -108,19 +166,20 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
                 />
               </svg>
             </div>
+
             <h3 className="font-serif text-[#4A260F] text-2xl font-bold mb-3">
               Camera Access Required
             </h3>
+
             <p className="font-serif text-[#4A260F]/80 text-[15px] leading-relaxed mb-2">
               {camStatus === "denied"
                 ? "ArtiFact requires camera permissions to scan the artworks."
                 : "Your browser or device does not support the required AR camera features."}
             </p>
+
             {camStatus === "denied" && (
               <p className="font-serif text-[#4A260F] font-bold text-[14px] leading-relaxed mt-2 p-3 bg-[#4A260F]/10 rounded-lg">
-                Please enable camera access in your device or browser settings.
-                The scanner will automatically start when you return to this
-                screen.
+                Please enable camera access in your browser settings.
               </p>
             )}
           </div>
@@ -134,53 +193,62 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
       <a-scene
         embedded
         ref={sceneRef}
-        mindar-image="imageTargetSrc: /targets.mind; autoStart: true; uiLoading: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001;"
+        mindar-image="
+          imageTargetSrc: /targets.mind;
+          autoStart: true;
+          uiLoading: no;
+          uiError: no;
+          filterMinCF: 0.01;
+          filterBeta: 0.1;
+        "
         color-space="sRGB"
-        renderer="antialias: false; precision: mediump; colorManagement: true;"
+        renderer="
+          antialias: true;
+          precision: mediump;
+          colorManagement: true;
+        "
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
       >
+        <a-assets>
+          <img
+            id="questionMark"
+            src="/questionmark.png"
+            crossOrigin="anonymous"
+          />
+        </a-assets>
+
         <a-camera position="0 0 0" look-controls="enabled: false" />
-        {Array.from({ length: TARGET_COUNT }, (_, i) => (
-          <a-entity
-            key={i}
-            ref={(el) => (targetRefs.current[i] = el)}
-            mindar-image-target={`targetIndex: ${i}`}
-            data-index={i}
-          >
+
+        {Array.from({ length: TARGET_COUNT }, (_, i) => {
+          if (unlockedByIndex?.[i]) {
+            return null;
+          }
+
+          return (
             <a-entity
-              visible={unlockedByIndex?.[i] ? "false" : "true"}
-              animation="property: position; from: 0 0 0.02; to: 0 0 0.08; dir: alternate; dur: 4000; loop: true; easing: easeInOutQuad"
+              key={i}
+              ref={(el) => (targetRefs.current[i] = el)}
+              mindar-image-target={`targetIndex: ${i}`}
+              data-index={i}
             >
-              <a-text
-                value="???"
-                position="0 -0.2 0.05"
-                align="center"
-                anchor="center"
-                baseline="center"
-                color="#FFFFFF"
-                width="4"
-                scale="2.2 2.2 2.2"
-                shader="msdf"
-                font="https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/roboto/Roboto-Medium.json"
-                outlineColor="#000000"
-                outlineWidth="0.1"
-              />
-              <a-text
-                value="???"
-                position="0.01 -0.2 0.005"
-                align="center"
-                anchor="center"
-                baseline="center"
-                color="#000000"
-                width="4"
-                scale="2.2 2.2 2.2"
-                shader="msdf"
-                font="https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/roboto/Roboto-Medium.json"
-              />
+              <a-entity
+                ref={(el) => (floatingRefs.current[i] = el)}
+                position="0 0 0.03"
+              >
+                <a-plane
+                  src="#questionMark"
+                  position="0 0 0"
+                  width="0.9"
+                  height="0.45"
+                  transparent="true"
+                  look-at="[camera]"
+                  material="alphaTest: 0.01; side: double;"
+                ></a-plane>
+              </a-entity>
             </a-entity>
-          </a-entity>
-        ))}
+          );
+        })}
       </a-scene>
     </div>
   );
