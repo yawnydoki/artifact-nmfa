@@ -31,7 +31,7 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: { facingMode: "environment" },
       });
 
       stream.getTracks().forEach((track) => track.stop());
@@ -69,7 +69,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
 
     const handleFound = (e) => {
       const index = Number(e.target.dataset.index);
-
       const floating = floatingRefs.current[index];
 
       if (floating) {
@@ -92,7 +91,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
 
     const handleLost = (e) => {
       const index = Number(e.target.dataset.index);
-
       const floating = floatingRefs.current[index];
 
       if (floating) {
@@ -125,7 +123,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
       });
 
       const arSystem = sceneRef.current?.systems?.["mindar-image-system"];
-
       if (arSystem) {
         try {
           arSystem.stop();
@@ -217,7 +214,11 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
           />
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false" />
+        <a-camera 
+          position="0 0 0" 
+          look-controls="enabled: false" 
+          wasd-controls="enabled: false"
+        />
 
         {Array.from({ length: TARGET_COUNT }, (_, i) => {
           if (unlockedByIndex?.[i]) {
@@ -241,7 +242,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
                   width="0.9"
                   height="0.45"
                   transparent="true"
-                  look-at="[camera]"
                   material="alphaTest: 0.01; side: double;"
                 ></a-plane>
               </a-entity>

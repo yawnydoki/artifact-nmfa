@@ -8,7 +8,6 @@ const TutorialModal = ({ onClose }) => {
   
   const [showSubtext, setShowSubtext] = useState(false);
 
-  // Splash timer logic
   useEffect(() => {
     if (isSplashActive) {
       const timer = setTimeout(() => {
@@ -151,7 +150,6 @@ const TutorialModal = ({ onClose }) => {
           </div>
         )}
 
-        {/* ... Slides 1 and 2 remain exactly the same ... */}
         {currentSlide === 1 && ( 
           <div className="flex flex-col w-full h-full animate-fade-in">
             <div className="flex flex-col items-center mb-4 flex-shrink-0 text-center">
