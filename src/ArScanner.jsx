@@ -193,7 +193,7 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
           autoStart: true;
           uiLoading: no;
           uiError: no;
-          filterMinCF: 0.01;
+          filterMinCF: 0.001;
           filterBeta: 0.1;
         "
         color-space="sRGB"
