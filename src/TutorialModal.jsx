@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "./LanguageContext";
+import PointingGuide from "./PointGuide";
 import "./App.css";
 
 const TutorialModal = ({ onClose }) => {
@@ -12,6 +13,8 @@ const TutorialModal = ({ onClose }) => {
   const [isSplashActive, setIsSplashActive] = useState(true);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [showSubtext, setShowSubtext] = useState(false);
+
+  const [showGuide, setShowGuide] = useState(false);
 
   const languages = [
     { code: "eng", label: "English" },
@@ -70,8 +73,6 @@ const TutorialModal = ({ onClose }) => {
   };
 
   const handleTap = (e) => {
-    if (isSplashActive || isLangOpen) return;
-
     if (
       e.target.closest("button") ||
       e.target.closest("select") ||
@@ -120,6 +121,10 @@ const TutorialModal = ({ onClose }) => {
     );
   }
 
+  if (showGuide) {
+    return <PointingGuide onComplete={onClose} />;
+  }
+
   return (
     <div
       className="fixed inset-0 z-[200] bg-[#430d0d] text-[#F5EAD4] flex flex-col items-center justify-between font-serif h-[100dvh] overflow-hidden animate-fade-in"
@@ -131,7 +136,7 @@ const TutorialModal = ({ onClose }) => {
       <div className="w-full flex justify-end p-5 z-10 flex-shrink-0">
         <button
           onClick={onClose}
-          className="text-white text-3xl font-bold hover:scale-110 active:scale-95 transition-transform"
+          className="text-white text-3xl font-bold hover:scale-110 active:scale-95 transition-transform pointer-events-auto"
         >
           X
         </button>
@@ -467,6 +472,26 @@ const TutorialModal = ({ onClose }) => {
                   </div>
                 </div>
               </div>
+              
+              <div className="w-full flex justify-center mt-2 mb-2">
+                <button
+                  onClick={() => setShowGuide(true)}
+                  className="w-full bg-[#EBC37A] text-[#4A1515] py-3 px-6 rounded-xl flex justify-center items-center text-[15px] sm:text-base font-bold shadow-[0_4px_10px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all gap-2 border border-[#A68340]"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t("Need a guide?")}
+                </button>
+              </div>
             </div>
 
             <p className="text-center text-sm sm:text-base leading-tight mt-3 flex-shrink-0 text-center">
@@ -478,7 +503,7 @@ const TutorialModal = ({ onClose }) => {
         )}
 
         {currentSlide === 2 && (
-          <div className="flex flex-col h-full animate-fade-in text-center">
+          <div className="flex flex-col h-full animate-fade-in text-center relative">
             <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-4">
               <LogoIcon customClass="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0" />
               <h2 className="font-serif font-bold text-3xl sm:text-4xl tracking-wide">
@@ -498,7 +523,7 @@ const TutorialModal = ({ onClose }) => {
                 <br />
                 <a
                   href="mailto:fantasticfore.feua@gmail.com"
-                  className="underline underline-offset-4 decoration-white/50 text-center block mt-2 relative z-50"
+                  className="underline underline-offset-4 decoration-white/50 text-center block mt-2 pointer-events-auto relative z-50"
                 >
                   fantasticfore.feua@gmail.com
                 </a>
@@ -508,9 +533,10 @@ const TutorialModal = ({ onClose }) => {
               <p className="text-base sm:text-lg font-serif mb-3">
                 {t("Click the Camera to Start Exploring!")}
               </p>
+
               <button
-                onClick={onClose}
-                className="bg-[#F5EAD4] text-[#4A1515] p-4 sm:p-5 rounded-3xl shadow-xl hover:scale-105 active:scale-95 transition-all relative z-50"
+                onClick={() => setShowGuide(true)}
+                className="bg-[#F5EAD4] text-[#4A1515] px-6 py-4 rounded-3xl shadow-xl hover:scale-105 active:scale-95 transition-all pointer-events-auto relative z-50 flex flex-col items-center gap-1"
               >
                 <svg
                   className="w-10 h-10 sm:w-12 sm:h-12"
@@ -558,13 +584,13 @@ const TutorialModal = ({ onClose }) => {
 
       {isLangOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] animate-fade-in"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] animate-fade-in pointer-events-auto"
           onClick={() => setIsLangOpen(false)}
         ></div>
       )}
 
       <div
-        className={`fixed bottom-24 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-xl rounded-[2rem] p-6 shadow-2xl z-[300] transition-all duration-300 border border-museum-gold/30 ${
+        className={`fixed bottom-24 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-xl rounded-[2rem] p-6 shadow-2xl z-[300] transition-all duration-300 border border-museum-gold/30 pointer-events-auto ${
           isLangOpen
             ? "translate-y-0 opacity-100"
             : "translate-y-[120%] opacity-0 pointer-events-none"

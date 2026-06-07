@@ -146,6 +146,7 @@ const BottomNav = () => {
 
           <div className="absolute inset-0 flex justify-between items-center px-4 z-10">
             <button
+              id="tour-map"
               onClick={() => handleNav("/map")}
               onMouseEnter={preloadMap}
               onTouchStart={preloadMap}
@@ -173,6 +174,7 @@ const BottomNav = () => {
             </button>
 
             <button
+              id="tour-camera"
               onClick={() => handleNav("/")}
               onMouseEnter={preloadHome}
               onTouchStart={preloadHome}
@@ -199,6 +201,7 @@ const BottomNav = () => {
             </button>
 
             <button
+              id="tour-passport"
               onClick={() => handleNav("/passport")}
               onMouseEnter={preloadPassport}
               onTouchStart={preloadPassport}
@@ -220,6 +223,7 @@ const BottomNav = () => {
         </div>
 
         <button
+          id="tour-end-prompt"
           onClick={() => handleNav("/end-prompt")}
           className="pointer-events-auto p-3 rounded-full transition-all duration-300 text-white hover:bg-white/5 active:scale-95"
         >
