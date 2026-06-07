@@ -1,31 +1,27 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 
+const TARGET_COUNT = 15;
+
 const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   const sceneRef = useRef(null);
   const targetRefs = useRef([]);
   const callbacksRef = useRef({ onTargetFound, onTargetLost });
-
-  const [camStatus, setCamStatus] = useState("checking"); 
+  const [camStatus, setCamStatus] = useState("checking");
 
   useEffect(() => {
     callbacksRef.current = { onTargetFound, onTargetLost };
   }, [onTargetFound, onTargetLost]);
 
   const checkCamera = useCallback(async () => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (!navigator.mediaDevices?.getUserMedia) {
       setCamStatus("unsupported");
       return;
     }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((track) => track.stop());
-
-      setTimeout(() => {
-        setCamStatus("granted");
-      }, 400);
-    } catch (err) {
-      console.error("Camera access denied or failed:", err);
+      stream.getTracks().forEach((t) => t.stop());
+      setTimeout(() => setCamStatus("granted"), 400);
+    } catch {
       setCamStatus("denied");
     }
   }, []);
@@ -35,65 +31,50 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   }, [checkCamera]);
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && camStatus === 'denied') {
-        checkCamera();
-      }
+    if (camStatus !== "denied") return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") checkCamera();
     };
-
-    window.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => window.removeEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("visibilitychange", onVisible);
+    return () => window.removeEventListener("visibilitychange", onVisible);
   }, [camStatus, checkCamera]);
 
   useEffect(() => {
     if (camStatus !== "granted") return;
 
-    const handleTargetFound = (event) => {
-      const index = parseInt(event.target.dataset.index);
-      if (callbacksRef.current.onTargetFound)
-        callbacksRef.current.onTargetFound(index);
+    const handleFound = (e) => {
+      const index = parseInt(e.target.dataset.index, 10);
+      callbacksRef.current.onTargetFound?.(index);
     };
+    const handleLost = () => callbacksRef.current.onTargetLost?.();
 
-    const handleTargetLost = () => {
-      if (callbacksRef.current.onTargetLost)
-        callbacksRef.current.onTargetLost();
-    };
-
-    const validTargets = targetRefs.current.filter(Boolean);
-    validTargets.forEach((target) => {
-      target.addEventListener("targetFound", handleTargetFound);
-      target.addEventListener("targetLost", handleTargetLost);
+    const targets = targetRefs.current.filter(Boolean);
+    targets.forEach((t) => {
+      t.addEventListener("targetFound", handleFound);
+      t.addEventListener("targetLost", handleLost);
     });
 
     return () => {
-      validTargets.forEach((target) => {
-        target.removeEventListener("targetFound", handleTargetFound);
-        target.removeEventListener("targetLost", handleTargetLost);
+      targets.forEach((t) => {
+        t.removeEventListener("targetFound", handleFound);
+        t.removeEventListener("targetLost", handleLost);
       });
 
-      const videoElements = document.querySelectorAll("video");
-      videoElements.forEach((video) => {
-        if (video.srcObject) {
-          const tracks = video.srcObject.getTracks();
-          tracks.forEach((track) => {
-            track.stop(); 
-            if (video.srcObject) video.srcObject.removeTrack(track);
-          });
-          video.srcObject = null;
-        }
-        video.remove(); 
+      document.querySelectorAll("video").forEach((video) => {
+        video.srcObject?.getTracks().forEach((track) => {
+          track.stop();
+          video.srcObject?.removeTrack(track);
+        });
+        video.srcObject = null;
+        video.remove();
       });
 
-      if (sceneRef.current && sceneRef.current.systems) {
-        const arSystem = sceneRef.current.systems["mindar-image-system"];
-        if (arSystem) {
-          try {
-            if (arSystem.controller) {
-              arSystem.stop();
-            }
-          } catch (e) {
-            console.warn("MindAR cleanup bypassed to prevent crash:", e);
-          }
+      const arSystem = sceneRef.current?.systems?.["mindar-image-system"];
+      if (arSystem?.controller) {
+        try {
+          arSystem.stop();
+        } catch (e) {
+          console.warn("MindAR cleanup bypassed:", e);
         }
       }
     };
@@ -102,7 +83,7 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   if (camStatus === "checking") {
     return (
       <div className="h-full w-full bg-[#16120c] flex items-center justify-center font-serif text-[#E0CCB6] animate-pulse relative z-50">
-        Initializing AR Lens...
+        Initializing AR...
       </div>
     );
   }
@@ -127,17 +108,14 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
                 />
               </svg>
             </div>
-
             <h3 className="font-serif text-[#4A260F] text-2xl font-bold mb-3">
               Camera Access Required
             </h3>
-
             <p className="font-serif text-[#4A260F]/80 text-[15px] leading-relaxed mb-2">
               {camStatus === "denied"
                 ? "ArtiFact requires camera permissions to scan the artworks."
                 : "Your browser or device does not support the required AR camera features."}
             </p>
-
             {camStatus === "denied" && (
               <p className="font-serif text-[#4A260F] font-bold text-[14px] leading-relaxed mt-2 p-3 bg-[#4A260F]/10 rounded-lg">
                 Please enable camera access in your device or browser settings.
@@ -151,56 +129,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
     );
   }
 
-  const renderTargets = () => {
-    const targets = [];
-    for (let i = 0; i < 15; i++) {
-      const visibility = (unlockedByIndex && unlockedByIndex[i]) ? "false" : "true";
-
-      targets.push(
-        <a-entity 
-          key={i} 
-          ref={(el) => (targetRefs.current[i] = el)} 
-          mindar-image-target={`targetIndex: ${i}`} 
-          data-index={i}
-        >
-          <a-entity
-            visible={visibility}
-            animation="property: position; from: 0 0 0.02; to: 0 0 0.08; dir: alternate; dur: 4000; loop: true; easing: easeInOutQuad"
-          >
-            <a-text 
-              value="???" 
-              position="0 -0.2 0.05"
-              align="center" 
-              anchor="center" 
-              baseline="center"
-              color="#FFFFFF" 
-              width="4" 
-              scale="2.2 2.2 2.2"
-              shader="msdf"
-              font="https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/roboto/Roboto-Medium.json"
-              outlineColor="#000000"
-              outlineWidth="0.1"
-            ></a-text>
-
-            <a-text 
-              value="???" 
-              position="0.01 -0.2 0.005" 
-              align="center" 
-              anchor="center" 
-              baseline="center"
-              color="#000000" 
-              width="4" 
-              scale="2.2 2.2 2.2"
-              shader="msdf"
-              font="https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/roboto/Roboto-Medium.json"
-            ></a-text>
-          </a-entity>
-        </a-entity>
-      );
-    }
-    return targets;
-  };
-
   return (
     <div className="absolute inset-0 z-0">
       <a-scene
@@ -212,8 +140,47 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
       >
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        {renderTargets()}
+        <a-camera position="0 0 0" look-controls="enabled: false" />
+        {Array.from({ length: TARGET_COUNT }, (_, i) => (
+          <a-entity
+            key={i}
+            ref={(el) => (targetRefs.current[i] = el)}
+            mindar-image-target={`targetIndex: ${i}`}
+            data-index={i}
+          >
+            <a-entity
+              visible={unlockedByIndex?.[i] ? "false" : "true"}
+              animation="property: position; from: 0 0 0.02; to: 0 0 0.08; dir: alternate; dur: 4000; loop: true; easing: easeInOutQuad"
+            >
+              <a-text
+                value="???"
+                position="0 -0.2 0.05"
+                align="center"
+                anchor="center"
+                baseline="center"
+                color="#FFFFFF"
+                width="4"
+                scale="2.2 2.2 2.2"
+                shader="msdf"
+                font="https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/roboto/Roboto-Medium.json"
+                outlineColor="#000000"
+                outlineWidth="0.1"
+              />
+              <a-text
+                value="???"
+                position="0.01 -0.2 0.005"
+                align="center"
+                anchor="center"
+                baseline="center"
+                color="#000000"
+                width="4"
+                scale="2.2 2.2 2.2"
+                shader="msdf"
+                font="https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/roboto/Roboto-Medium.json"
+              />
+            </a-entity>
+          </a-entity>
+        ))}
       </a-scene>
     </div>
   );
