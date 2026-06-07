@@ -124,9 +124,12 @@ const Dashboard = () => {
       activeArtworkRef.current.target_index === index
     )
       return;
+      
     if (isFetchingRef.current || isScanningSequenceRef.current) return;
 
     setPendingTargetIndex(index);
+    
+    setPaintingDetected(false); 
   }, []);
 
   const handleTargetLost = useCallback(() => {

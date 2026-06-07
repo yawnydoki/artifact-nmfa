@@ -193,7 +193,7 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
           autoStart: true;
           uiLoading: no;
           uiError: no;
-          filterMinCF: 0.001;
+          filterMinCF: 0.01;
           filterBeta: 0.1;
         "
         color-space="sRGB"
@@ -221,10 +221,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
         />
 
         {Array.from({ length: TARGET_COUNT }, (_, i) => {
-          if (unlockedByIndex?.[i]) {
-            return null;
-          }
-
           return (
             <a-entity
               key={i}
@@ -232,19 +228,22 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
               mindar-image-target={`targetIndex: ${i}`}
               data-index={i}
             >
-              <a-entity
-                ref={(el) => (floatingRefs.current[i] = el)}
-                position="0 0 0.03"
-              >
-                <a-plane
-                  src="#questionMark"
-                  position="0 0 0"
-                  width="0.9"
-                  height="0.45"
-                  transparent="true"
-                  material="alphaTest: 0.01; side: double;"
-                ></a-plane>
-              </a-entity>
+              {/* Only render the floating "???" graphic if it HAS NOT been unlocked */}
+              {!unlockedByIndex?.[i] && (
+                <a-entity
+                  ref={(el) => (floatingRefs.current[i] = el)}
+                  position="0 0 0.03"
+                >
+                  <a-plane
+                    src="#questionMark"
+                    position="0 0 0"
+                    width="0.9"
+                    height="0.45"
+                    transparent="true"
+                    material="alphaTest: 0.01; side: double;"
+                  ></a-plane>
+                </a-entity>
+              )}
             </a-entity>
           );
         })}
