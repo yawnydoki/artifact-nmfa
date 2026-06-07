@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "extract-strings": "npx i18next-parser",
-  "translate": "node auto-translate.js"
+    "translate": "node auto-translate.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",

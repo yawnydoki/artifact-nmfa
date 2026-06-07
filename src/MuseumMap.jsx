@@ -28,11 +28,15 @@ const MuseumMap = () => {
     darkGreen: { id: 4, hex: '#165C3B' } 
   };
 
+  const boldCapitalWords = (text) => {
+  return text.replace(/\b([A-Z]{2,})\b/g, '<strong class="font-bold">$1</strong>');
+  };
+
   const galleryNames = {
-    [mapZones.green.id]: t("This section is found in GALLERY VIII"),
-    [mapZones.purple.id]: t("This section is found in GALLERY VI"),
-    [mapZones.orange.id]: t("This section is found in HALL OF MASTERS"),
-    [mapZones.darkGreen.id]: t("This section is found in GALLERY III")
+    [mapZones.green.id]: boldCapitalWords(t("This section is found in GALLERY VIII")),
+    [mapZones.purple.id]: boldCapitalWords(t("This section is found in GALLERY VI")),
+    [mapZones.orange.id]: boldCapitalWords(t("This section is found in HALL OF MASTERS")),
+    [mapZones.darkGreen.id]: boldCapitalWords(t("This section is found in GALLERY III"))
   };
 
   return (
@@ -159,12 +163,13 @@ const MuseumMap = () => {
             
             {activeZone && (
               <div className="text-center mb-1">
-                <span className="text-artifact-border text-[15px] font-serif">
-                  {galleryNames[activeZone]}
-                </span>
+                <span 
+                  className="text-artifact-border text-[15px] font-serif"
+                  dangerouslySetInnerHTML={{ __html: galleryNames[activeZone] }}
+                />
               </div>
             )}
-            
+                        
             {isDataLoading ? (
               <div className="flex-1 flex items-center justify-center text-artifact-border font-serif animate-pulse text-base italic">
                 {t("Accessing archives...")}

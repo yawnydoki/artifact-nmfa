@@ -56,6 +56,8 @@ const Dashboard = () => {
 
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
+  const [badgeOverlay, setBadgeOverlay] = useState(null);
+
   const animationRef = useRef(null);
 
   const isFetchingRef = useRef(false);
@@ -193,7 +195,18 @@ const Dashboard = () => {
                 JSON.stringify(offlineQueue),
               );
 
-              showToast(t("Bronze Badge Unlocked!"));
+              // Inside startScanSequence, update this block:
+              if (visitorId && !unlockedSet.has(data.id)) {
+                // Pass the name/title instead of just the tier
+                setBadgeOverlay({ 
+                  tier: "Bronze", 
+                  artwork: data,
+                  name: data.badge_name?.[currentLang] || data.badge_name?.eng || data.title?.[currentLang] || data.title?.eng
+                });
+                
+                setTimeout(() => setBadgeOverlay(null), 2500);
+                // ... rest of your code
+              }
 
               try {
                 const { error } = await supabase
@@ -624,6 +637,38 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      {badgeOverlay && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none animate-fade-in-up">
+          <div className="w-10/12 max-w-[300px] bg-[#381111] p-3 rounded-[1.5rem] shadow-2xl relative border border-white/5">
+            <div className="bg-[#E0CCB6] rounded-xl pt-6 pb-8 px-6 flex flex-col items-center text-center border border-[#C4AB8F]">
+              <h3 className={`${isCJK ? "font-sans" : "font-serif"} text-[#4A260F] text-2xl`}>
+                {t("Badge Unlocked!")}
+              </h3>
+
+              <div className="w-full h-[4px] bg-[#8b7463]/40 mb-6"></div>
+
+              <div className="w-28 h-28 rounded-full mb-4 border-[6px] border-[#CD7F32] overflow-hidden flex items-center justify-center animate-ink-stamp">
+                {badgeOverlay.artwork.badge_url ? (
+                  <img
+                    src={badgeOverlay.artwork.badge_url}
+                    alt="Unlocked Badge"
+                    className="w-full h-full object-cover saturate-100"
+                  />
+                ) : (
+                  <span className="text-[#CD7F32] text-3xl font-serif">★</span>
+                )}
+              </div>
+
+              <p className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-[#783713] text-xl leading-tight`}>
+                {badgeOverlay.name}
+              </p>
+              
+            </div>
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 };
