@@ -159,7 +159,7 @@ const MuseumMap = () => {
             
             {activeZone && (
               <div className="text-center mb-1">
-                <span className="text-artifact-border text-[15px] font-serif">
+                <span className="text-artifact-border text-[15px] font-serif font-bold">
                   {galleryNames[activeZone]}
                 </span>
               </div>
