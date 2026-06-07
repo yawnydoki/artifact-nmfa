@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from "react";
-import './App.css';
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "./LanguageContext";
+import "./App.css";
 
 const TutorialModal = ({ onClose }) => {
+  const { t, i18n } = useTranslation();
+  const { currentLang, setCurrentLang } = useLanguage();
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [expandedMode, setExpandedMode] = useState(null);
   const [isSplashActive, setIsSplashActive] = useState(true);
-  
+  const [isLangOpen, setIsLangOpen] = useState(false);
   const [showSubtext, setShowSubtext] = useState(false);
+
+  const languages = [
+    { code: "eng", label: "English" },
+    { code: "tag", label: "Tagalog" },
+    { code: "chi", label: "中文 (Chinese)" },
+    { code: "jap", label: "日本語 (Japanese)" },
+    { code: "kor", label: "한국어 (Korean)" },
+  ];
 
   useEffect(() => {
     if (isSplashActive) {
@@ -56,6 +69,28 @@ const TutorialModal = ({ onClose }) => {
     }
   };
 
+  const handleTap = (e) => {
+    if (isSplashActive || isLangOpen) return;
+
+    if (
+      e.target.closest("button") ||
+      e.target.closest("select") ||
+      e.target.closest("a")
+    ) {
+      return;
+    }
+
+    const clickX = e.clientX;
+    const screenWidth = window.innerWidth;
+    const tapZoneWidth = screenWidth * 0.3;
+
+    if (clickX < tapZoneWidth && currentSlide > 0) {
+      setCurrentSlide((prev) => prev - 1);
+    } else if (clickX > screenWidth - tapZoneWidth && currentSlide < 2) {
+      setCurrentSlide((prev) => prev + 1);
+    }
+  };
+
   const LogoIcon = ({ customClass = "mb-4 w-20 h-20" }) => (
     <img
       src="logo_trans.png"
@@ -68,20 +103,20 @@ const TutorialModal = ({ onClose }) => {
     return (
       <div className="fixed inset-0 z-[200] bg-[#430d0d] text-white flex flex-col items-center justify-center font-serif h-[100dvh] overflow-hidden">
         <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in pb-10">
-            <LogoIcon customClass="w-28 h-28 sm:w-20 sm:h-20" />
-              <p className="font-serif font-bold text-7xl sm:text-8xl tracking-tight mb-1 leading-none">
-                welcome
-              </p>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-script text-8xl sm:text-8xl -rotate-6 italic">
-                  to
-                </span>
-                <p className="font-serif font-bold text-5xl sm:text-2xl tracking-wide">
-                  ArtiFact!
-                </p>
-              </div>
-            </div>
+          <LogoIcon customClass="w-28 h-28 sm:w-20 sm:h-20" />
+          <p className="font-serif font-bold text-7xl sm:text-8xl tracking-tight mb-1 leading-none">
+            {t("welcome")}
+          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-script text-8xl sm:text-8xl -rotate-6 italic">
+              {t("to")}
+            </span>
+            <p className="font-serif font-bold text-5xl sm:text-2xl tracking-wide">
+              {t("ArtiFact!")}
+            </p>
           </div>
+        </div>
+      </div>
     );
   }
 
@@ -91,6 +126,7 @@ const TutorialModal = ({ onClose }) => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onClick={handleTap}
     >
       <div className="w-full flex justify-end p-5 z-10 flex-shrink-0">
         <button
@@ -101,67 +137,70 @@ const TutorialModal = ({ onClose }) => {
         </button>
       </div>
 
-      <div className="text-white flex-1 w-full max-w-sm px-6 flex flex-col items-center overflow-y-auto hide-scrollbar pb-24">
+      <div className="text-white flex-1 w-full max-w-sm px-6 flex flex-col items-center overflow-y-auto hide-scrollbar pb-24 relative">
         {currentSlide === 0 && (
           <div className="flex flex-col items-center justify-center min-h-full text-center w-full overflow-hidden">
-            
-            <div 
+            <div
               className={`flex flex-col items-center transition-all duration-1000 ease-in-out transform ${
-                showSubtext 
-                  ? "translate-y-0 mb-4" 
-                  : "sm:translate-y-[15dvh]"
+                showSubtext ? "translate-y-0 mb-4" : "sm:translate-y-[15dvh]"
               }`}
             >
               <LogoIcon customClass="w-28 h-28 sm:w-20 sm:h-20" />
               <p className="font-serif font-bold text-7xl sm:text-8xl tracking-tight mb-1 leading-none">
-                welcome
+                {t("welcome")}
               </p>
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-script text-8xl sm:text-8xl -rotate-6 italic">
-                  to
+                  {t("to")}
                 </span>
                 <p className="font-serif font-bold text-5xl sm:text-2xl tracking-wide">
-                  ArtiFact!
+                  {t("ArtiFact!")}
                 </p>
               </div>
             </div>
-            
-            <div 
+
+            <div
               className={`w-full select-none pointer-events-none transition-all duration-1000 ease-in-out transform ${
-                showSubtext 
-                  ? "opacity-100 translate-y-0 max-h-[500px]" 
+                showSubtext
+                  ? "opacity-100 translate-y-0 max-h-[500px]"
                   : "opacity-0 translate-y-10 max-h-0 overflow-hidden"
               }`}
             >
               <p className="font-serif text-[15px] sm:text-base mb-4 leading-relaxed px-2 text-center">
-                ArtiFact is an undergraduate thesis project in Beta.
+                {t("ArtiFact is an undergraduate thesis project in Beta.")}
               </p>
               <p className="font-serif text-[15px] sm:text-base mb-6 leading-relaxed px-1 text-center">
-                Thank you for exploring and testing our system. We hope you enjoy
-                experiencing art in a more interactive way.
+                {t(
+                  "Thank you for exploring and testing our system. We hope you enjoy experiencing art in a more interactive way.",
+                )}
               </p>
               <div className="font-serif text-right w-full pr-4 text-base sm:text-lg italic">
-                <p>Sincerely,<br/>
-                The Researchers
+                <p>
+                  {t("Sincerely,")}
+                  <br />
+                  {t("The Researchers")}
                 </p>
               </div>
             </div>
-
           </div>
         )}
 
-        {currentSlide === 1 && ( 
+        {currentSlide === 1 && (
           <div className="flex flex-col w-full h-full animate-fade-in">
             <div className="flex flex-col items-center mb-4 flex-shrink-0 text-center">
               <LogoIcon customClass="mb-2 w-16 h-16" />
-              <p className="font-serif text-4xl sm:text-4xl mb-1">How to Use</p>
-              <p className="font-serif text-5xl sm:text-6xl tracking-wide">ArtiFact:</p>
+              <p className="font-serif text-4xl sm:text-4xl mb-1">
+                {t("How to Use")}
+              </p>
+              <p className="font-serif text-5xl sm:text-6xl tracking-wide">
+                {t("ArtiFact:")}
+              </p>
             </div>
 
             <div className="flex-1 w-full flex flex-col gap-3 overflow-y-auto hide-scrollbar">
               <div className="w-full flex flex-col">
                 <p className="text-xs text-[#F5EAD4] sm:text-sm font-sans pb-2 pl-1 text-left">
-                  Scan Paintings and Learn!
+                  {t("Scan Paintings and Learn!")}
                 </p>
                 <button
                   onClick={() =>
@@ -169,7 +208,7 @@ const TutorialModal = ({ onClose }) => {
                   }
                   className={`w-full bg-[#F5EAD4] text-[#4A1515] py-2.5 px-2 rounded-lg flex justify-between items-center text-base sm:text-lg shadow-md transition-all active:scale-100 ${expandedMode === "info" ? "rounded-b-none" : ""}`}
                 >
-                  Informational Mode
+                  {t("Informational Mode")}
                   <svg
                     className={`w-5 h-5 transition-transform duration-300 ${expandedMode === "info" ? "rotate-180" : ""}`}
                     fill="currentColor"
@@ -207,10 +246,10 @@ const TutorialModal = ({ onClose }) => {
                     </svg>
                     <div className="flex flex-col text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        Use the MAP ICON
+                        {t("Use the MAP ICON")}
                       </span>
                       <span className="text-[#4A1515] text-[10px] sm:text-[11px] leading-tight font-sans mt-0.5">
-                        To find hints on where to locate paintings.
+                        {t("To find hints on where to locate paintings.")}
                       </span>
                     </div>
                   </div>
@@ -218,14 +257,14 @@ const TutorialModal = ({ onClose }) => {
                   <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center justify-between gap-2 shadow-lg">
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        SCAN Paintings
+                        {t("SCAN Paintings")}
                       </span>
                       <span className="text-[#4A1515] text-[10px] sm:text-[11px] leading-tight font-sans mt-0.5">
-                        Unlock badges and read more about each artwork.
+                        {t("Unlock badges and read more about each artwork.")}
                       </span>
                     </div>
                     <div className="bg-[#EBC37A] text-[#4A1515] px-3 sm:px-4 py-1.5 rounded-full font-bold text-xs sm:text-sm border border-[#A68340] shadow-sm flex-shrink-0">
-                      SCAN
+                      {t("SCAN")}
                     </div>
                   </div>
 
@@ -243,11 +282,12 @@ const TutorialModal = ({ onClose }) => {
                     </svg>
                     <div className="flex flex-col text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        Check your PASSPORT
+                        {t("Check your PASSPORT")}
                       </span>
                       <span className="text-[#4A1515] text-[10px] sm:text-[11px] leading-tight font-sans mt-0.5">
-                        View your badge progress and scan the history of
-                        previously discovered paintings.
+                        {t(
+                          "View your badge progress and scan the history of previously discovered paintings.",
+                        )}
                       </span>
                     </div>
                   </div>
@@ -255,11 +295,12 @@ const TutorialModal = ({ onClose }) => {
                   <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        Earn your digital certificate
+                        {t("Earn your digital certificate")}
                       </span>
                       <span className="text-[#4A1515] text-[10px] sm:text-[11px] leading-tight font-sans mt-0.5">
-                        Unlock all paintings to receive a certificate showing
-                        your collected badges.
+                        {t(
+                          "Unlock all paintings to receive a certificate showing your collected badges.",
+                        )}
                       </span>
                     </div>
                     <svg
@@ -280,7 +321,7 @@ const TutorialModal = ({ onClose }) => {
 
               <div className="w-full flex flex-col mt-1">
                 <p className="text-xs sm:text-sm text-[#F5EAD4] font-sans pb-2 pl-1 text-left">
-                  Challenge Yourself and Earn Rewards!
+                  {t("Challenge Yourself and Earn Rewards!")}
                 </p>
                 <button
                   onClick={() =>
@@ -288,7 +329,7 @@ const TutorialModal = ({ onClose }) => {
                   }
                   className={`w-full bg-[#F5EAD4] text-[#4A1515] py-2.5 px-4 rounded-lg flex justify-between items-center text-base sm:text-lg shadow-md transition-all active:scale-100 ${expandedMode === "game" ? "rounded-b-none" : ""}`}
                 >
-                  Gamified Mode
+                  {t("Gamified Mode")}
                   <svg
                     className={`w-5 h-5 transition-transform duration-300 ${expandedMode === "game" ? "rotate-180" : ""}`}
                     fill="currentColor"
@@ -326,10 +367,10 @@ const TutorialModal = ({ onClose }) => {
                     </svg>
                     <div className="flex flex-col text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        Use the MAP ICON
+                        {t("Use the MAP ICON")}
                       </span>
                       <span className="text-[#4A1515] text-[10px] sm:text-[11px] leading-tight font-sans mt-0.5">
-                        To find hints on where to locate paintings.
+                        {t("To find hints on where to locate paintings.")}
                       </span>
                     </div>
                   </div>
@@ -337,14 +378,14 @@ const TutorialModal = ({ onClose }) => {
                   <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center justify-between gap-2 shadow-lg">
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        SCAN Paintings
+                        {t("SCAN Paintings")}
                       </span>
                       <span className="text-[#4A1515] text-[10px] sm:text-[11px] leading-tight font-sans mt-0.5">
-                        Unlock badges and read more about each artwork.
+                        {t("Unlock badges and read more about each artwork.")}
                       </span>
                     </div>
                     <div className="bg-[#EBC37A] text-[#4A1515] px-3 sm:px-4 py-1.5 rounded-full font-bold text-xs sm:text-sm border border-[#A68340] shadow-sm flex-shrink-0">
-                      SCAN
+                      {t("SCAN")}
                     </div>
                   </div>
 
@@ -366,11 +407,12 @@ const TutorialModal = ({ onClose }) => {
                     </svg>
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        CHALLENGE yourself
+                        {t("CHALLENGE yourself")}
                       </span>
                       <span className="text-[#4A1515] text-[9.5px] sm:text-[10px] leading-tight font-sans mt-0.5">
-                        You have 3 lives. Score 3 correct answers, you get gold
-                        badge; otherwise, you get a silver badge.
+                        {t(
+                          "You have 3 lives. Score 3 correct answers, you get gold badge; otherwise, you get a silver badge.",
+                        )}
                       </span>
                     </div>
                   </div>
@@ -378,11 +420,12 @@ const TutorialModal = ({ onClose }) => {
                   <div className="bg-white border-2 border-[#5C1B1B] rounded-lg p-3 flex items-center gap-3 shadow-lg">
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        Check your PASSPORT
+                        {t("Check your PASSPORT")}
                       </span>
                       <span className="text-[#4A1515] text-[10px] sm:text-[11px] leading-tight font-sans mt-0.5">
-                        View your badge progress and scan the history of
-                        previously discovered paintings.
+                        {t(
+                          "View your badge progress and scan the history of previously discovered paintings.",
+                        )}
                       </span>
                     </div>
                     <svg
@@ -413,11 +456,12 @@ const TutorialModal = ({ onClose }) => {
                     </svg>
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-[#7A2323] text-[14px] sm:text-[15px] font-bold leading-tight">
-                        Earn REWARDS
+                        {t("Earn REWARDS")}
                       </span>
                       <span className="text-[#4A1515] text-[9.5px] sm:text-[10px] leading-tight font-sans mt-0.5">
-                        Unlock all paintings to earn a digital certificate, or
-                        collect all 10 Gold Badges to receive a pin award.
+                        {t(
+                          "Unlock all paintings to earn a digital certificate, or collect all 10 Gold Badges to receive a pin award.",
+                        )}
                       </span>
                     </div>
                   </div>
@@ -426,9 +470,9 @@ const TutorialModal = ({ onClose }) => {
             </div>
 
             <p className="text-center text-sm sm:text-base leading-tight mt-3 flex-shrink-0 text-center">
-              Explore Art Your Way — Learn Freely
+              {t("Explore Art Your Way — Learn Freely")}
               <br />
-              or Play the Challenge.
+              {t("or Play the Challenge.")}
             </p>
           </div>
         )}
@@ -438,27 +482,23 @@ const TutorialModal = ({ onClose }) => {
             <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-4">
               <LogoIcon customClass="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0" />
               <h2 className="font-serif font-bold text-3xl sm:text-4xl tracking-wide">
-                Short Disclaimer
+                {t("Short Disclaimer")}
               </h2>
             </div>
             <div className="flex-1 overflow-y-auto hide-scrollbar font-sans text-[14px] sm:text-[15px] leading-relaxed opacity-95 text-left">
               <p className="font-serif text-justify mb-4">
-                ArtiFact currently only includes 10 selected paintings as the
-                system is presently intended for research and educational
-                project purposes. Due to the limited number of artworks, users
-                in Informational Mode will temporarily share certain features
-                from the Gamified Educational Mode, such as using the Map icon
-                to help locate paintings more easily.
+                {t(
+                  "ArtiFact currently only includes 10 selected paintings as the system is presently intended for research and educational project purposes. Due to the limited number of artworks, users in Informational Mode will temporarily share certain features from the Gamified Educational Mode, such as using the Map icon to help locate paintings more easily.",
+                )}
               </p>
               <p className="font-serif text-justify mb-4">
-                Users may also revisit the tutorial anytime through the Passport
-                and History section by selecting the "How to Play" bar for
-                guidance and navigation instructions. If you would like to
-                support this project or have any concerns, you may contact us
-                at: <br />
+                {t(
+                  'Users may also revisit the tutorial anytime through the Passport and History section by selecting the "How to Play" bar for guidance and navigation instructions. If you would like to support this project or have any concerns, you may contact us at:',
+                )}{" "}
+                <br />
                 <a
                   href="mailto:fantasticfore.feua@gmail.com"
-                  className="underline underline-offset-4 decoration-white/50 text-center block mt-2"
+                  className="underline underline-offset-4 decoration-white/50 text-center block mt-2 relative z-50"
                 >
                   fantasticfore.feua@gmail.com
                 </a>
@@ -466,11 +506,11 @@ const TutorialModal = ({ onClose }) => {
             </div>
             <div className="flex flex-col items-center mt-4 flex-shrink-0">
               <p className="text-base sm:text-lg font-serif mb-3">
-                Click the Camera to Start Exploring!
+                {t("Click the Camera to Start Exploring!")}
               </p>
               <button
                 onClick={onClose}
-                className="bg-[#F5EAD4] text-[#4A1515] p-4 sm:p-5 rounded-3xl shadow-xl hover:scale-105 active:scale-95 transition-all"
+                className="bg-[#F5EAD4] text-[#4A1515] p-4 sm:p-5 rounded-3xl shadow-xl hover:scale-105 active:scale-95 transition-all relative z-50"
               >
                 <svg
                   className="w-10 h-10 sm:w-12 sm:h-12"
@@ -497,12 +537,77 @@ const TutorialModal = ({ onClose }) => {
         )}
       </div>
 
-      <div className="absolute bottom-8 left-0 w-full flex justify-center gap-1 z-10 bg-gradient-to-t from-[#430d0d] pt-6 pb-2">
-        {[0, 1, 2].map((idx) => (
+      <button
+        onClick={() => setIsLangOpen(true)}
+        className="absolute bottom-6 left-6 z-[250] pointer-events-auto p-3 rounded-full transition-all duration-300 text-white hover:bg-white/10 active:scale-95"
+      >
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+          />
+        </svg>
+      </button>
+
+      {isLangOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] animate-fade-in"
+          onClick={() => setIsLangOpen(false)}
+        ></div>
+      )}
+
+      <div
+        className={`fixed bottom-24 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-xl rounded-[2rem] p-6 shadow-2xl z-[300] transition-all duration-300 border border-museum-gold/30 ${
+          isLangOpen
+            ? "translate-y-0 opacity-100"
+            : "translate-y-[120%] opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="font-serif text-museum-gold text-2xl tracking-wide">
+            {t("Select Language")}
+          </h3>
           <button
+            onClick={() => setIsLangOpen(false)}
+            className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center bg-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/20 transition-colors z-10"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => {
+                i18n.changeLanguage(lang.code);
+                if (setCurrentLang) setCurrentLang(lang.code);
+                setTimeout(() => setIsLangOpen(false), 200);
+              }}
+              className={`py-3.5 px-5 rounded-xl font-neohellenic text-lg text-left transition-all tracking-wide border ${
+                (currentLang || i18n.language) === lang.code
+                  ? "bg-museum-gold/10 border-museum-gold text-museum-gold shadow-md pl-6"
+                  : "bg-white/5 border-transparent text-white hover:bg-white/10"
+              }`}
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute bottom-8 left-0 w-full flex justify-center gap-1 z-10 bg-gradient-to-t from-[#430d0d] pt-6 pb-2 pointer-events-none">
+        {[0, 1, 2].map((idx) => (
+          <div
             key={idx}
-            onClick={() => setCurrentSlide(idx)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? "w-10 bg-white" : "w-10 bg-gray-400/50 hover:bg-[#F5EAD4]/50"}`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === idx ? "w-10 bg-white" : "w-10 bg-gray-400/50"}`}
           />
         ))}
       </div>
