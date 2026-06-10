@@ -467,7 +467,7 @@ const Dashboard = () => {
                 }
                 className="flex-1 bg-museum-gold text-artifact-bg py-2.5 rounded-full font-serif text-lg tracking-wide hover:brightness-110 transition-all shadow-md active:scale-95"
               >
-                {t("Start Quiz")}
+                {t("Try Quiz?")}
               </button>
               <button
                 onClick={() => {
@@ -631,7 +631,7 @@ const Dashboard = () => {
                 }
                 className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg"
               >
-                {t("Start Quiz")}
+                {t("Try Quiz?")}
               </button>
             </div>
           </div>
