@@ -69,7 +69,7 @@ const InstallGate = ({ children }) => {
           onClick={handleInstallClick}
           className="bg-[#C9B99A] text-[#16120c] text-xl font-bold py-4 px-8 rounded-full shadow-lg hover:bg-white transition"
         >
-          Install AR App
+          Add app to Home Screen
         </button>
       )}
     </div>
