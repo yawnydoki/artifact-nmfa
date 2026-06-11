@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useData } from "./DataContext";
@@ -11,6 +11,36 @@ style.innerHTML = `
   .animate-shimmer::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation: shimmer 6.7s infinite; }
 `;
 if (typeof document !== "undefined") document.head.appendChild(style);
+
+const CorsSafeImage = ({ src, alt, className }) => {
+  const [objectUrl, setObjectUrl] = useState(null);
+
+  useEffect(() => {
+    if (!src) return;
+    let isMounted = true;
+    
+    fetch(src)
+      .then(response => response.blob())
+      .then(blob => {
+        if (isMounted) {
+          setObjectUrl(URL.createObjectURL(blob));
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load image safely:", err);
+        if (isMounted) setObjectUrl(src); 
+      });
+
+    return () => {
+      isMounted = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [src]);
+
+  if (!objectUrl) return <div className="w-full h-full bg-white/20 animate-pulse"></div>;
+
+  return <img src={objectUrl} alt={alt} className={className} />;
+};
 
 const Certificate = () => {
   const navigate = useNavigate();
@@ -328,11 +358,10 @@ const Certificate = () => {
                             }`}
                           >
                             {isUnlocked && badge.badge_url ? (
-                              <img 
+                              <CorsSafeImage 
                                 src={badge.badge_url} 
                                 alt="Badge" 
                                 className="w-full h-full object-cover saturate-100" 
-                                crossOrigin="anonymous" 
                               />
                             ) : isUnlocked ? (
                               <span className="text-[#AA8855]" style={{ fontSize: "clamp(0.6rem, 2vw, 1rem)" }}>★</span>
