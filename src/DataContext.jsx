@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { supabase } from './supabaseClient';
+import { supabase } from './supabaseClient.js';
 
 const DataContext = createContext();
 

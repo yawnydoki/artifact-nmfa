@@ -11,7 +11,7 @@ import ArErrorBoundary from "./ArErrorBoundary";
 import { useLanguage } from "./LanguageContext";
 import { useTranslation } from "react-i18next";
 import { useData } from "./DataContext";
-import { supabase } from "./supabaseClient";
+import { supabase } from "./supabaseClient.js";
 
 const style = document.createElement("style");
 style.innerHTML = `
@@ -195,9 +195,7 @@ const Dashboard = () => {
                 JSON.stringify(offlineQueue),
               );
 
-              // Inside startScanSequence, update this block:
               if (visitorId && !unlockedSet.has(data.id)) {
-                // Pass the name/title instead of just the tier
                 setBadgeOverlay({ 
                   tier: "Bronze", 
                   artwork: data,
@@ -205,7 +203,6 @@ const Dashboard = () => {
                 });
                 
                 setTimeout(() => setBadgeOverlay(null), 2500);
-                // ... rest of your code
               }
 
               try {

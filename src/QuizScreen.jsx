@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
+import { supabase } from "./supabaseClient.js";
 import { useLanguage } from "./LanguageContext";
 import { useTranslation } from "react-i18next";
 import { useData } from "./DataContext";
