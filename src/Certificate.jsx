@@ -19,13 +19,21 @@ const CorsSafeImage = ({ src, alt, className }) => {
     if (!src) return;
     let isMounted = true;
     
-    fetch(src)
-      .then(response => response.blob())
+    const fetchUrl = src.includes('?') ? `${src}&_cb=${Date.now()}` : `${src}?_cb=${Date.now()}`;
+
+    fetch(fetchUrl, {
+      mode: 'cors',      
+      cache: 'no-cache' 
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.blob();
+      })
       .then(blob => {
         const reader = new FileReader();
         reader.onloadend = () => {
           if (isMounted) {
-            setBase64Url(reader.result);
+            setBase64Url(reader.result); 
           }
         };
         reader.readAsDataURL(blob);
@@ -42,7 +50,7 @@ const CorsSafeImage = ({ src, alt, className }) => {
 
   if (!base64Url) return <div className="w-full h-full bg-[#AA8855]/20 animate-pulse"></div>;
 
-  return <img src={base64Url} alt={alt} className={className} />;
+  return <img src={base64Url} alt={alt} crossOrigin="anonymous" className={className} style={{ objectFit: 'cover' }} />;
 };
 
 const Certificate = () => {
@@ -99,7 +107,7 @@ const Certificate = () => {
         scale: 3, 
         useCORS: true, 
         backgroundColor: "#3b1212", 
-        allowTaint: true,
+        allowTaint: false, 
       });
 
       const safeName = visitorName.replace(/[^a-z0-9]/gi, "_").toLowerCase() || "visitor";
@@ -300,49 +308,33 @@ const Certificate = () => {
                 />
               </div>
 
-              <h1
-                className="font-agbalumo text-[#7A1515] leading-none mb-1 mt-1"
-                style={{ fontSize: "clamp(2.5rem, 6vw, 2.75rem)" }}
-              >
+              <h1 className="font-agbalumo text-[#7A1515] leading-none mb-1 mt-1 text-[2.25rem] sm:text-[2.75rem]">
                 {t("Certificate")}
               </h1>
-              <h2
-                className="font-agbalumo text-[#7A1515] leading-none mb-2"
-                style={{ fontSize: "clamp(1.5rem, 4vw, 1.75rem)" }}
-              >
+              
+              <h2 className="font-agbalumo text-[#7A1515] leading-none mb-2 text-[1.5rem] sm:text-[1.75rem]">
                 {t("of Appreciation")}
               </h2>
 
               <div className="w-1/2 border-t border-[#7A1515]/40 mb-1"></div>
 
-              <h3
-                className="font-birthstone text-[#7A1515] leading-none mb-1 break-all text-center"
-                style={{ fontSize: "clamp(2rem, 12vw, 5rem)" }}
-              >
+              <h3 className="font-birthstone text-[#7A1515] leading-none mb-1 break-all text-center text-[2.5rem] sm:text-[3.5rem]">
                 {visitorName}
               </h3>
 
               <div className="w-1/4 border-t border-[#7A1515]/40 mb-1"></div>
 
-              <h4
-                className="font-agbalumo text-[#7A1515] leading-none mb-0"
-                style={{ fontSize: "clamp(0.8rem, 4vw, 1.5rem)" }}
-              >
+              <h4 className="font-agbalumo text-[#7A1515] leading-none mb-0 text-[1rem] sm:text-[1.25rem]">
                 “{t("ArtiFact Explorer")}”
               </h4>
-              <p
-                className="font-serif text-[#7A1515] font-bold m-0 p-1 leading-tight"
-                style={{ fontSize: "clamp(0.4rem, 2vw, 0.6rem)" }}
-              >
+              
+              <p className="font-serif text-[#7A1515] font-bold m-0 p-1 leading-tight text-[0.5rem] sm:text-[0.6rem]">
                 {t("at the National Museum of Fine Arts")}
               </p>
 
               <div className="w-3/4 flex-col flex items-center justify-center mt-1 pb-10">
                 {currentSlide === 0 ? (
-                  <p
-                    className="font-lora text-[#7A1515]/90 leading-tight text-justify"
-                    style={{ fontSize: "clamp(0.55rem, 2.2vw, 0.75rem)" }}
-                  >
+                  <p className="font-lora text-[#7A1515]/90 leading-tight text-center text-[0.6rem] sm:text-[0.75rem]">
                     {t("Congratulations on unlocking the badges! Thank you for testing ArtiFact and participating in our thesis project. Your time, support, and valuable feedback have greatly contributed to our research. We sincerely appreciate your participation.")}
                   </p>
                 ) : (
@@ -373,16 +365,13 @@ const Certificate = () => {
                                 className="w-full h-full object-cover saturate-100" 
                               />
                             ) : isUnlocked ? (
-                              <span className="text-[#AA8855]" style={{ fontSize: "clamp(0.6rem, 2vw, 1rem)" }}>★</span>
+                              <span className="text-[#AA8855] text-[0.75rem] sm:text-[0.9rem]">★</span>
                             ) : null}
                           </div>
                         );
                       })}
                     </div>
-                    <p
-                      className="font-agbalumo text-[#7A1515] leading-none"
-                      style={{ fontSize: "clamp(0.75rem, 3.5vw, 1.1rem)" }}
-                    >
+                    <p className="font-agbalumo text-[#7A1515] leading-none text-[0.85rem] sm:text-[1rem]">
                       {totalBadges} {t("Badges Collected")}
                     </p>
                   </div>
