@@ -13,7 +13,7 @@ style.innerHTML = `
 if (typeof document !== "undefined") document.head.appendChild(style);
 
 const CorsSafeImage = ({ src, alt, className }) => {
-  const [objectUrl, setObjectUrl] = useState(null);
+  const [base64Url, setBase64Url] = useState(null);
 
   useEffect(() => {
     if (!src) return;
@@ -22,24 +22,27 @@ const CorsSafeImage = ({ src, alt, className }) => {
     fetch(src)
       .then(response => response.blob())
       .then(blob => {
-        if (isMounted) {
-          setObjectUrl(URL.createObjectURL(blob));
-        }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (isMounted) {
+            setBase64Url(reader.result);
+          }
+        };
+        reader.readAsDataURL(blob);
       })
       .catch(err => {
         console.error("Failed to load image safely:", err);
-        if (isMounted) setObjectUrl(src); 
+        if (isMounted) setBase64Url(src); 
       });
 
     return () => {
       isMounted = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [src]);
 
-  if (!objectUrl) return <div className="w-full h-full bg-white/20 animate-pulse"></div>;
+  if (!base64Url) return <div className="w-full h-full bg-[#AA8855]/20 animate-pulse"></div>;
 
-  return <img src={objectUrl} alt={alt} className={className} />;
+  return <img src={base64Url} alt={alt} className={className} />;
 };
 
 const Certificate = () => {
@@ -82,6 +85,9 @@ const Certificate = () => {
 
   const handleDownload = async (format) => {
     setShowDownloadModal(false); 
+    
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
     const element = certificateRef.current;
     if (!element) return;
 
@@ -93,6 +99,7 @@ const Certificate = () => {
         scale: 3, 
         useCORS: true, 
         backgroundColor: "#3b1212", 
+        allowTaint: true,
       });
 
       const safeName = visitorName.replace(/[^a-z0-9]/gi, "_").toLowerCase() || "visitor";
@@ -279,6 +286,7 @@ const Certificate = () => {
             <img
               src="/Group 45.svg"
               alt="Certificate Border"
+              crossOrigin="anonymous"
               className="w-full h-full object-contain"
             />
 
@@ -287,6 +295,7 @@ const Certificate = () => {
                 <img
                   src="/logo_red.png"
                   alt="ArtiFact Logo"
+                  crossOrigin="anonymous"
                   className="w-[20%] object-contain mb-[0%]"
                 />
               </div>
