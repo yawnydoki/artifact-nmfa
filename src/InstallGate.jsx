@@ -7,13 +7,9 @@ const InstallGate = ({ children }) => {
 
   useEffect(() => {
     const checkStandalone = () => {
-      
       const isStandaloneMedia = window.matchMedia('(display-mode: standalone)').matches;
-      
       const isIOSStandalone = window.navigator.standalone === true;
-     
       const isStandaloneUrl = window.location.search.includes('mode=standalone');
-
       return isStandaloneMedia || isIOSStandalone || isStandaloneUrl;
     };
     setIsStandalone(checkStandalone());
@@ -40,9 +36,11 @@ const InstallGate = ({ children }) => {
     }
   };
 
-  // add ?dev=true to the end of your localhost url
+  const isAdminRoute = window.location.pathname.startsWith('/admin');
+
   const isDevBypass = window.location.search.includes('dev=true');
-  if (isStandalone || isDevBypass) {
+  
+  if (isStandalone || isDevBypass || isAdminRoute) {
     return children;
   }
 

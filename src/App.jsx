@@ -8,6 +8,7 @@ import { useData } from "./DataContext";
 import LoadingScreen from "./LoadingScreen";
 import BottomNav from "./BottomNav";
 import TutorialModal from "./TutorialModal";
+import AdminRoute from "./AdminRoute";
 
 const Dashboard = lazy(() => import("./Dashboard"));
 const MuseumMap = lazy(() => import("./MuseumMap"));
@@ -16,9 +17,13 @@ const Passport = lazy(() => import("./Passport"));
 const EndPrompt = lazy(() => import("./EndPrompt"));
 const EndSequence = lazy(() => import("./EndSequence"));
 const Certificate = lazy(() => import("./Certificate"));
+const AdminLogin = lazy(() => import("./AdminLogin"));
+const AdminDashboard = lazy(() => import("./AdminDashboard"));
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <AnimatePresence mode="wait">
       <Suspense fallback={null}>
@@ -79,6 +84,27 @@ const AnimatedRoutes = () => {
               </PageWrapper>
             }
           />
+
+          <Route
+            path="/admin/login"
+            element={
+              isAdminRoute ? (
+                <AdminLogin />
+              ) : (
+                <PageWrapper>
+                  <AdminLogin />
+                </PageWrapper>
+              )
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </Suspense>
     </AnimatePresence>
@@ -102,12 +128,10 @@ function App() {
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [initError, setInitError] = useState(false);
   const { loadInitialData } = useData();
-
   const [showTutorial, setShowTutorial] = useState(false);
 
   const syncOfflineQueue = async () => {
     if (!navigator.onLine) return;
-
     const queue = JSON.parse(
       localStorage.getItem("artifact_offline_queue") || "[]",
     );
@@ -132,10 +156,8 @@ function App() {
         .upsert(insertData, { onConflict: "visitor_id,artwork_id" });
 
       if (error) throw error;
-
       localStorage.removeItem("artifact_offline_queue");
       console.log("Offline queue synced successfully!");
-
       await loadInitialData(visitorId);
     } catch (err) {
       console.error("Failed to sync offline queue:", err.message);
@@ -170,9 +192,7 @@ function App() {
         const { error } = await supabase
           .from("visitors")
           .insert([{ id: visitorId }]);
-
         if (error) throw error;
-
         localStorage.setItem("artifact_visitor_id", visitorId);
         console.log("New anonymous visitor registered:", visitorId);
       } else {
@@ -180,10 +200,9 @@ function App() {
       }
 
       await loadInitialData(visitorId);
-      setIsAppLoading(false); 
+      setIsAppLoading(false);
     } catch (err) {
       console.error("Error initializing app:", err.message);
-
       let visitorId = localStorage.getItem("artifact_visitor_id");
       if (visitorId) {
         await loadInitialData(visitorId);
@@ -196,15 +215,12 @@ function App() {
 
   useEffect(() => {
     initializeApp();
-
     const hasSeenTutorial = localStorage.getItem("artifact_has_seen_tutorial");
     if (!hasSeenTutorial) {
       setShowTutorial(true);
     }
-
     syncOfflineQueue();
     window.addEventListener("online", syncOfflineQueue);
-
     return () => {
       window.removeEventListener("online", syncOfflineQueue);
     };
@@ -225,13 +241,12 @@ function App() {
       />
     );
   }
-  
+
   return (
     <BrowserRouter>
       <div className="relative w-screen h-[100dvh] overflow-hidden bg-artifact-bg">
         <AnimatedRoutes />
         <BottomNav />
-
         {showTutorial && <TutorialModal onClose={handleCloseTutorial} />}
       </div>
     </BrowserRouter>
