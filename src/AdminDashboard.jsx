@@ -183,13 +183,22 @@ const AdminDashboard = () => {
 
   const inputStyles = "p-2 rounded border border-[#381111]/30 w-full bg-white text-[#381111] focus:outline-none focus:ring-2 focus:ring-[#E19B2D]";
 
+  const LogoIcon = ({ customClass = "mb-4 w-20 h-20" }) => (
+    <img
+      src="/logo_trans.png"
+      alt="ArtiFact Logo"
+      className={`${customClass} drop-shadow-md object-contain`}
+    />
+  );
+
   return (
     <div className="min-h-[100dvh] w-screen bg-[#F5EAD4] font-sans flex flex-col md:flex-row relative">
       
       <div className="w-full md:w-64 bg-[#381111] text-[#E0CCB6] flex flex-col shadow-xl flex-shrink-0 z-20">
         <div className="p-6 border-b border-white/10">
-          <h1 className="font-serif text-2xl font-bold tracking-wide">ArtiFact Admin</h1>
-          <p className="text-sm opacity-70 font-neohellenic mt-1">Greetings!</p>
+          <LogoIcon customClass="w-60 h-10" />
+          <h1 className="font-serif text-2xl font-bold tracking-wide mt-1 mb-1">ArtiFact Admin</h1>
+          <p className="text-sm opacity-70 font-neohellenic mt-1">Admin Panel</p>
         </div>
         
         <nav className="flex-1 flex md:flex-col overflow-x-auto md:overflow-x-hidden p-4 gap-2 hide-scrollbar">
@@ -197,13 +206,14 @@ const AdminDashboard = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-shrink-0 text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`flex justify-between items-center flex-shrink-0 text-left px-4 py-3 rounded-lg font-medium transition-colors ${
                 activeTab === tab.id 
                   ? 'bg-[#E0CCB6] text-[#381111] shadow-md' 
                   : 'hover:bg-white/10 text-[#E0CCB6]/80 hover:text-white'
               }`}
             >
               {tab.label}
+              <span className="font-bold">&gt;</span>
             </button>
           ))}
         </nav>
@@ -211,8 +221,21 @@ const AdminDashboard = () => {
         <div className="p-4 border-t border-white/10">
           <button 
             onClick={handleLogout}
-            className="w-full text-left px-4 py-3 rounded-lg text-red-300 hover:bg-red-900/30 transition-colors font-medium"
+            className="w-full flex text-left gap-2 px-4 py-3 rounded-lg text-red-300 hover:bg-red-900/30 transition-colors font-medium"
           >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
             Sign Out
           </button>
         </div>
@@ -520,6 +543,24 @@ const AdminDashboard = () => {
                         <div className="flex flex-col gap-2 mb-4">
                           <label className="font-bold text-sm">Question Prompt</label>
                           <input type="text" value={qData.question || ''} onChange={(e) => handleQuizChange(qNum, 'eng', 'question', e.target.value)} placeholder="Enter question..." className={`${inputStyles} font-bold`} />
+                        </div>
+
+                        <div className="bg-[#E0CCB6]/30 p-3 rounded-lg mb-4 text-sm border border-[#381111]/10 flex justify-between items-center">
+                          <div className="flex items-center gap-1">
+                            <span className="font-bold text-[#381111] uppercase tracking-wider">
+                              Correct Answer:
+                            </span>
+                            <div className="text-[#4A260F] font-bold">
+                              {qData.choices[qData.correct_index] ? (
+                                `"${qData.choices[qData.correct_index]}"` 
+                              ) : (
+                                <span className="italic opacity-50 text-xs">Please Select A Correct Answer</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs bg-[#4A260F] text-[#E0CCB6] px-2 py-1 rounded">
+                            Index: {qData.correct_index}
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
