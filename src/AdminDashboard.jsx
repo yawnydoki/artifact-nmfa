@@ -249,15 +249,6 @@ const AdminDashboard = () => {
 
           {activeTab === 'content' && (
              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col flex-1 min-h-0">
-                <div className="flex justify-between items-center mb-6 flex-shrink-0">
-                    <h3 className="text-xl font-bold text-[#4A260F]">Artwork Database</h3>
-                    <button 
-                      onClick={openAddModal}
-                      className="bg-[#4A260F] text-[#E0CCB6] px-4 py-2 rounded-lg hover:brightness-110 shadow-sm transition-all font-medium"
-                    >
-                      + Add New Painting
-                    </button>
-                </div>
                 
                 {isLoadingData ? (
                   <div className="w-full py-12 flex justify-center text-[#4A260F] animate-pulse">Loading database records...</div>
