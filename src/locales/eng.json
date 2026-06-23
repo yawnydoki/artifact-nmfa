@@ -30,7 +30,7 @@
   "AR Ready": "AR Ready",
   "SCAN": "SCAN",
   "Explore the details of this masterpiece...": "Explore the details of this masterpiece...",
-  "Start Quiz": "Start Quiz",
+  "Try Quiz?": "",
   "Read more...": "Read more...",
   "Artwork Info": "Artwork Info",
   "About": "About",
@@ -74,6 +74,7 @@
   "Instructions: How to play?": "Instructions: How to play?",
   "A guide to ArtiFact NMFA": "A guide to ArtiFact NMFA",
   "Scan paintings to start your history!": "Scan paintings to start your history!",
+  "Start Quiz": "Start Quiz",
   "Scan Artworks!": "Scan Artworks!",
   "Point your camera at any painting to uncover its secrets.": "Point your camera at any painting to uncover its secrets.",
   "Find Hints": "Find Hints",
@@ -119,7 +120,6 @@
   "You have 3 lives. Score 3 correct answers, you get gold badge; otherwise, you get a silver badge.": "You have 3 lives. Score 3 correct answers, you get gold badge; otherwise, you get a silver badge.",
   "Earn REWARDS": "Earn REWARDS",
   "Unlock all paintings to earn a digital certificate, or collect all 10 Gold Badges to receive a pin award.": "Unlock all paintings to earn a digital certificate, or collect all 10 Gold Badges to receive a pin award.",
-  "Need a guide?": "Need a guide?",
   "Explore Art Your Way — Learn Freely": "Explore Art Your Way — Learn Freely",
   "or Play the Challenge.": "or Play the Challenge.",
   "Short Disclaimer": "Short Disclaimer",
@@ -127,5 +127,6 @@
   "Users may also revisit the tutorial anytime through the Passport and History section by selecting the \"How to Play\" bar for guidance and navigation instructions. If you would like to support this project or have any concerns, you may contact us at:": "Users may also revisit the tutorial anytime through the Passport and History section by selecting the \"How to Play\" bar for guidance and navigation instructions. If you would like to support this project or have any concerns, you may contact us at:",
   "Click the Camera to Start Exploring!": "Click the Camera to Start Exploring!",
   "Select Language": "Select Language",
+  "Need a guide?": "Need a guide?",
   "Bronze Badge Unlocked!": "Bronze Badge Unlocked!"
 }
