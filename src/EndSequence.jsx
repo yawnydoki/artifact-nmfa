@@ -57,7 +57,7 @@ const EndSequence = () => {
               onClick={() => navigate("/")}
               className="w-full bg-[#4A260F] text-[#E0CCB6] py-3 rounded-xl font-serif text-[1.1rem] shadow-md hover:brightness-110 transition-all active:scale-95"
             >
-              {t("Go Back")}
+              {t("Close ArtiFact")}
             </button>
           </div>
         </div>

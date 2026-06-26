@@ -22,6 +22,8 @@ const Passport = () => {
   const [activeTab, setActiveTab] = useState("badges");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [activeModalTab, setActiveModalTab] = useState("origin");
+  const [isInfoExpanded, setIsInfoExpanded] = useState(false);
+  
 
   const [showTutorial, setShowTutorial] = useState(false);
 
@@ -45,6 +47,7 @@ const Passport = () => {
   const handleOpenArtwork = (artwork) => {
     setSelectedArtwork(artwork);
     setActiveModalTab("origin");
+    setIsInfoExpanded(false);
   };
 
   const getBadgeStyles = (type) => {
@@ -218,7 +221,11 @@ const Passport = () => {
 
       {selectedArtwork && (
         <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-[#E0CCB6] w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl flex flex-col relative border border-[#C4AB8F]">
+          <div
+            className={`bg-[#E0CCB6] w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl flex flex-col relative border border-[#C4AB8F] transition-all duration-300 ${
+              isInfoExpanded ? "h-[90vh]" : ""
+            }`}
+          >
             <div className="bg-[#381111] py-4 px-6 flex justify-between items-center text-white font-serif shadow-sm">
               <span className="text-2xl">{t("About")}</span>
               <button
@@ -229,6 +236,7 @@ const Passport = () => {
               </button>
             </div>
 
+          {!isInfoExpanded && (
             <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl overflow-hidden rounded-lg relative">
               {activeModalTab === "artist_description" ? (
                 selectedArtwork.artist_image_url ? (
@@ -252,6 +260,7 @@ const Passport = () => {
                 "img"
               )}
             </div>
+          )}
 
             <h2
               className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-center text-[2.5rem] text-[#4A260F] mt-3 leading-none`}
@@ -289,8 +298,30 @@ const Passport = () => {
             </div>
 
             <div
-              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl h-48 overflow-y-auto hide-scrollbar mb-4 ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"} text-[#4A260F]/80 border border-[#E0CCB6] text-justify`}
+              className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl border border-[#E0CCB6] relative mb-4 transition-all duration-300
+                  ${
+                      isInfoExpanded
+                          ? "h-[30rem]"
+                          : "h-48"
+                  }
+                  ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"}
+                  text-[#4A260F]/80 border border-[#E0CCB6] text-justify
+              `}
             >
+              <button
+                onClick={() => setIsInfoExpanded(!isInfoExpanded)}
+                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-[#783713] text-[#E0CCB6] hover:brightness-110 transition-all active:scale-100 flex items-center justify-center"
+                title={isInfoExpanded ? t("Show Image") : t("Expand Reading")}
+              >
+                {isInfoExpanded ? "⛶" : "⛶"}
+              </button>
+
+              <div
+                className={`h-full overflow-y-auto p-2 pr-8 ${
+                  isCJK ? "font-sans text-sm" : "font-neohellenic text-[20px]"
+                } text-[#4A260F]/80 text-justify hide-scrollbar`}
+              >
+
               <div className="mb-2">
                 {typeof selectedArtwork[activeModalTab] === "object" &&
                 selectedArtwork[activeModalTab] !== null
@@ -332,8 +363,9 @@ const Passport = () => {
                 </div>
               )}
             </div>
+            </div>
 
-            <div className="mx-5 mb-6">
+            <div className="mx-5 mb-6 shadow-[0_4px_15px_rgba(0,0,0,0.3)]">
               <button
                 onClick={() =>
                   navigate("/quiz", { state: { artwork: selectedArtwork } })
@@ -346,6 +378,7 @@ const Passport = () => {
           </div>
         </div>
       )}
+      
 
       {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
     </div>

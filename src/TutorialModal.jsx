@@ -165,16 +165,16 @@ const TutorialModal = ({ onClose }) => {
             </div>
 
             <div
-              className={`w-full select-none pointer-events-none transition-all duration-1000 ease-in-out transform ${
+              className={`w-full overflow-y-auto hide-scrollbar transition-all duration-1000 ease-in-out transform ${
                 showSubtext
                   ? "opacity-100 translate-y-0 max-h-[500px]"
                   : "opacity-0 translate-y-10 max-h-0 overflow-hidden"
               }`}
             >
-              <p className="font-serif text-[15px] sm:text-base mb-4 leading-relaxed px-2 text-center">
+              <p className="font-serif text-[20px] sm:text-base mb-4 leading-relaxed px-2 text-center">
                 {t("ArtiFact is an undergraduate thesis project in Beta.")}
               </p>
-              <p className="font-serif text-[15px] sm:text-base mb-6 leading-relaxed px-1 text-center">
+              <p className="font-serif text-[20px] sm:text-base mb-6 leading-relaxed px-2 text-center">
                 {t(
                   "Thank you for exploring and testing our system. We hope you enjoy experiencing art in a more interactive way.",
                 )}
@@ -204,7 +204,7 @@ const TutorialModal = ({ onClose }) => {
 
             <div className="flex-1 w-full flex flex-col gap-3 overflow-y-auto hide-scrollbar">
               <div className="w-full flex flex-col">
-                <p className="text-xs text-[#F5EAD4] sm:text-sm font-sans pb-2 pl-1 text-left">
+                <p className="text-sm text-[#F5EAD4] sm:text-base font-sans pb-2 pl-1 text-left">
                   {t("Scan Paintings and Learn!")}
                 </p>
                 <button
@@ -215,7 +215,7 @@ const TutorialModal = ({ onClose }) => {
                 >
                   {t("Informational Mode")}
                   <svg
-                    className={`w-5 h-5 transition-transform duration-300 ${expandedMode === "info" ? "rotate-180" : ""}`}
+                    className={`w-8 h-8 transition-transform duration-300 ${expandedMode === "info" ? "rotate-180" : ""}`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -325,7 +325,7 @@ const TutorialModal = ({ onClose }) => {
               </div>
 
               <div className="w-full flex flex-col mt-1">
-                <p className="text-xs sm:text-sm text-[#F5EAD4] font-sans pb-2 pl-1 text-left">
+                <p className="text-sm sm:text-base text-[#F5EAD4] font-sans pb-2 pl-1 text-left">
                   {t("Challenge Yourself and Earn Rewards!")}
                 </p>
                 <button
@@ -336,7 +336,7 @@ const TutorialModal = ({ onClose }) => {
                 >
                   {t("Gamified Mode")}
                   <svg
-                    className={`w-5 h-5 transition-transform duration-300 ${expandedMode === "game" ? "rotate-180" : ""}`}
+                    className={`w-8 h-8 transition-transform duration-300 ${expandedMode === "game" ? "rotate-180" : ""}`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -490,7 +490,7 @@ const TutorialModal = ({ onClose }) => {
                 {t("Short Disclaimer")}
               </h2>
             </div>
-            <div className="flex-1 overflow-y-auto hide-scrollbar font-sans text-[14px] sm:text-[15px] leading-relaxed opacity-95 text-left">
+            <div className="flex-1 overflow-y-auto hide-scrollbar font-sans text-[18px] sm:text-[20px] leading-relaxed opacity-95 text-left">
               <p className="font-serif text-justify mb-4">
                 {t(
                   "ArtiFact currently only includes 10 selected paintings as the system is presently intended for research and educational project purposes. Due to the limited number of artworks, users in Informational Mode will temporarily share certain features from the Gamified Educational Mode, such as using the Map icon to help locate paintings more easily.",
