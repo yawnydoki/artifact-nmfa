@@ -655,7 +655,7 @@ const Dashboard = () => {
             <div className="mx-5 mb-6 shadow-[0_4px_15px_rgba(0,0,0,0.3)]">
               <button
                 onClick={() =>
-                  navigate("/quiz", { state: { artwork: selectedArtwork } })
+                  navigate("/mini-game", { state: { artwork: activeArtwork } })
                 }
                 className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg flex items-center justify-center gap-2.5"
               >
@@ -688,7 +688,6 @@ const Dashboard = () => {
                 c11.66,0,21.113-9.453,21.113-21.122C429.046,215.7,419.593,206.247,407.933,206.247z"/>
                   </g>
                 </svg>
-
                 <span>{t("Mini-Game")}</span>
               </button>
             </div>

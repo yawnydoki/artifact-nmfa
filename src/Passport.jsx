@@ -368,7 +368,7 @@ const Passport = () => {
             <div className="mx-5 mb-6 shadow-[0_4px_15px_rgba(0,0,0,0.3)]">
               <button
                 onClick={() =>
-                  navigate("/quiz", { state: { artwork: selectedArtwork } })
+                  navigate("/mini-game", { state: { artwork: selectedArtwork } })
                 }
                 className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg flex items-center justify-center gap-2.5"
               >

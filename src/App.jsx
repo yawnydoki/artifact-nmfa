@@ -11,6 +11,7 @@ import TutorialModal from "./TutorialModal";
 import AdminRoute from "./AdminRoute";
 import { useGatepass } from "./GatepassContext";
 import GatepassScreen from "./GatepassScreen";
+import MiniGame from "./MiniGame";
 
 const Dashboard = lazy(() => import("./Dashboard"));
 const MuseumMap = lazy(() => import("./MuseumMap"));
@@ -111,6 +112,14 @@ const AnimatedRoutes = () => {
               <AdminRoute>
                 <AdminDashboard />
               </AdminRoute>
+            }
+          />
+          <Route 
+            path="/mini-game" 
+            element={
+              <PageWrapper>
+                <MiniGame />
+              </PageWrapper>    
             }
           />
         </Routes>
