@@ -9,6 +9,8 @@ import LoadingScreen from "./LoadingScreen";
 import BottomNav from "./BottomNav";
 import TutorialModal from "./TutorialModal";
 import AdminRoute from "./AdminRoute";
+import { useGatepass } from "./GatepassContext";
+import GatepassScreen from "./GatepassScreen";
 
 const Dashboard = lazy(() => import("./Dashboard"));
 const MuseumMap = lazy(() => import("./MuseumMap"));
@@ -129,6 +131,8 @@ function App() {
   const [initError, setInitError] = useState(false);
   const { loadInitialData } = useData();
   const [showTutorial, setShowTutorial] = useState(false);
+  
+  const { hasPass, isVerifying, validateScannedToken } = useGatepass();
 
   const syncOfflineQueue = async () => {
     if (!navigator.onLine) return;
@@ -214,24 +218,41 @@ function App() {
   };
 
   useEffect(() => {
-    initializeApp();
-    const hasSeenTutorial = localStorage.getItem("artifact_has_seen_tutorial");
-    if (!hasSeenTutorial) {
-      setShowTutorial(true);
+    if (hasPass) {
+      initializeApp();
+      const hasSeenTutorial = localStorage.getItem("artifact_has_seen_tutorial");
+      if (!hasSeenTutorial) {
+        setShowTutorial(true);
+      }
+      syncOfflineQueue();
     }
-    syncOfflineQueue();
+    
     window.addEventListener("online", syncOfflineQueue);
     return () => {
       window.removeEventListener("online", syncOfflineQueue);
     };
-  }, []);
+  }, [hasPass]);
 
   const handleCloseTutorial = () => {
     setShowTutorial(false);
     localStorage.setItem("artifact_has_seen_tutorial", "true");
   };
 
-  if (showLoadingScreen) {
+  const isAdminRoute = window.location.pathname.startsWith('/admin');
+
+  if (isVerifying && !isAdminRoute) {
+    return (
+      <div className="h-[100dvh] w-screen bg-[#16120c] flex items-center justify-center font-serif text-[#E0CCB6]">
+        Verifying Entry Authorization...
+      </div>
+    );
+  }
+
+  if (!hasPass && !isAdminRoute) {
+    return <GatepassScreen onVerify={validateScannedToken} />;
+  }
+  
+  if (showLoadingScreen && !isAdminRoute) {
     return (
       <LoadingScreen
         hasError={initError}
@@ -241,7 +262,7 @@ function App() {
       />
     );
   }
-
+  
   return (
     <BrowserRouter>
       <div className="relative w-screen h-[100dvh] overflow-hidden bg-artifact-bg">

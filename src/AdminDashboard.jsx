@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
+import { QRCodeSVG } from 'qrcode.react';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -10,6 +11,9 @@ const AdminDashboard = () => {
   const [feedback, setFeedback] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+
+  const [currentDailyHash, setCurrentDailyHash] = useState('');
+  const [isGeneratingHash, setIsGeneratingHash] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -29,11 +33,74 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (activeTab === 'feedback') {
       fetchFeedback();
+    } else if (activeTab === 'gatepass') {
+      fetchTodayGatepass();
     } else {
       fetchArtworks();
     }
     setCurrentPage(1);
   }, [activeTab]);
+
+  const fetchTodayGatepass = async () => {
+    const today = new Date().toLocaleDateString('en-CA');
+    try {
+      const { data, error } = await supabase
+        .from('daily_gatepass')
+        .select('token_hash')
+        .eq('valid_date', today)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        setCurrentDailyHash(data.token_hash);
+      } else {
+        setCurrentDailyHash('');
+      }
+    } catch (err) {
+      console.error("Error fetching today's gatepass:", err.message);
+    }
+  };
+
+  const handleGenerateGatepass = async () => {
+    setIsGeneratingHash(true);
+    const today = new Date().toLocaleDateString('en-CA');
+    const newSecureHash = crypto.randomUUID();
+
+    try {
+      const { data: existingPass, error: fetchError } = await supabase
+        .from('daily_gatepass')
+        .select('id')
+        .eq('valid_date', today)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      let resultError;
+
+      if (existingPass) {
+        const { error } = await supabase
+          .from('daily_gatepass')
+          .update({ token_hash: newSecureHash })
+          .eq('id', existingPass.id);
+        resultError = error;
+      } else {
+        const { error } = await supabase
+          .from('daily_gatepass')
+          .insert([{ valid_date: today, token_hash: newSecureHash }]);
+        resultError = error;
+      }
+
+      if (resultError) throw resultError;
+      
+      setCurrentDailyHash(newSecureHash);
+      alert("Success! New Museum QR Gatepass generated for today.");
+    } catch (err) {
+      console.error("Failed to generate token:", err.message);
+      alert("Error generating gatepass code: " + err.message);
+    } finally {
+      setIsGeneratingHash(false);
+    }
+  };
 
   const fetchArtworks = async () => {
     setIsLoadingData(true);
@@ -63,29 +130,6 @@ const AdminDashboard = () => {
     setEditItem(JSON.parse(JSON.stringify(item))); 
     setModalMode(mode);
     setIsNewItem(false);
-    setIsModalOpen(true);
-  };
-
-  const openAddModal = () => {
-    const blankArtwork = {
-      title: { eng: '' },
-      artist: { eng: '' },
-      artist_year: '',
-      zone: 1,
-      clues: { eng: '' },
-      thumbnail_url: '',
-      artist_description: { eng: '' },
-      art_element: { eng: '' },
-      q1: { eng: { question: "", choices: ["", "", "", ""], correct_index: 0 } },
-      q2: { eng: { question: "", choices: ["", "", "", ""], correct_index: 0 } },
-      q3: { eng: { question: "", choices: ["", "", "", ""], correct_index: 0 } },
-      q4: { eng: { question: "", choices: ["", "", "", ""], correct_index: 0 } },
-      q5: { eng: { question: "", choices: ["", "", "", ""], correct_index: 0 } },
-    };
-    
-    setEditItem(blankArtwork);
-    setModalMode('content');
-    setIsNewItem(true);
     setIsModalOpen(true);
   };
 
@@ -159,6 +203,7 @@ const AdminDashboard = () => {
     { id: 'translations', label: 'Translations' },
     { id: 'quizzes', label: 'Quizzes' },
     { id: 'feedback', label: 'Visitor Feedback' },
+    { id: 'gatepass', label: 'Daily Gatepass' },
   ];
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -171,29 +216,20 @@ const AdminDashboard = () => {
   const hasTranslation = (obj, lang) => {
     const exists = obj && obj[lang] && obj[lang].trim() !== "";
     return exists ? (
-      <span className="bg-[#4A260F] text-[#E0CCB6] px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider shadow-sm">
-        Done
-      </span>
+      <span className="bg-[#4A260F] text-[#E0CCB6] px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider shadow-sm">Done</span>
     ) : (
-      <span className="bg-white text-[#4A260F]/40 border border-[#4A260F]/20 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
-        Pending
-      </span>
+      <span className="bg-white text-[#4A260F]/40 border border-[#4A260F]/20 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Pending</span>
     );
   };
 
   const inputStyles = "p-2 rounded border border-[#381111]/30 w-full bg-white text-[#381111] focus:outline-none focus:ring-2 focus:ring-[#E19B2D]";
 
   const LogoIcon = ({ customClass = "mb-4 w-20 h-20" }) => (
-    <img
-      src="/logo_trans.png"
-      alt="ArtiFact Logo"
-      className={`${customClass} drop-shadow-md object-contain`}
-    />
+    <img src="/logo_trans.png" alt="ArtiFact Logo" className={`${customClass} drop-shadow-md object-contain`} />
   );
 
   return (
     <div className="min-h-[100dvh] w-screen bg-[#F5EAD4] font-sans flex flex-col md:flex-row relative">
-      
       <div className="w-full md:w-64 bg-[#381111] text-[#E0CCB6] flex flex-col shadow-xl flex-shrink-0 z-20">
         <div className="p-6 border-b border-white/10">
           <LogoIcon customClass="w-60 h-10" />
@@ -207,9 +243,7 @@ const AdminDashboard = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex justify-between items-center flex-shrink-0 text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                activeTab === tab.id 
-                  ? 'bg-[#E0CCB6] text-[#381111] shadow-md' 
-                  : 'hover:bg-white/10 text-[#E0CCB6]/80 hover:text-white'
+                activeTab === tab.id ? 'bg-[#E0CCB6] text-[#381111] shadow-md' : 'hover:bg-white/10 text-[#E0CCB6]/80 hover:text-white'
               }`}
             >
               {tab.label}
@@ -219,22 +253,9 @@ const AdminDashboard = () => {
         </nav>
 
         <div className="p-4 border-t border-white/10">
-          <button 
-            onClick={handleLogout}
-            className="w-full flex text-left gap-2 px-4 py-3 rounded-lg text-red-300 hover:bg-red-900/30 transition-colors font-medium"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
+          <button onClick={handleLogout} className="w-full flex text-left gap-2 px-4 py-3 rounded-lg text-red-300 hover:bg-red-900/30 transition-colors font-medium">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Sign Out
           </button>
@@ -249,7 +270,6 @@ const AdminDashboard = () => {
 
           {activeTab === 'content' && (
              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col flex-1 min-h-0">
-                
                 {isLoadingData ? (
                   <div className="w-full py-12 flex justify-center text-[#4A260F] animate-pulse">Loading database records...</div>
                 ) : (
@@ -280,12 +300,7 @@ const AdminDashboard = () => {
                               <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold uppercase">Zone {art.zone || '?'}</span>
                             </td>
                             <td className="p-4 border-b border-gray-100 text-right">
-                              <button 
-                                onClick={() => openEditModal(art, 'content')}
-                                className="text-[#4A260F] hover:text-[#E19B2D] font-medium transition-colors px-3 py-1 bg-white border border-gray-200 rounded shadow-sm"
-                              >
-                                Edit
-                              </button>
+                              <button onClick={() => openEditModal(art, 'content')} className="text-[#4A260F] hover:text-[#E19B2D] font-medium transition-colors px-3 py-1 bg-white border border-gray-200 rounded shadow-sm">Edit</button>
                             </td>
                           </tr>
                         ))}
@@ -298,8 +313,6 @@ const AdminDashboard = () => {
 
           {activeTab === 'translations' && (
              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col flex-1 min-h-0">
-                
-
                 {isLoadingData ? (
                   <div className="w-full py-12 flex justify-center text-[#4A260F] animate-pulse">Loading data...</div>
                 ) : (
@@ -324,12 +337,7 @@ const AdminDashboard = () => {
                             <td className="p-4 border-b border-gray-100">{hasTranslation(art.title, 'jap')}</td>
                             <td className="p-4 border-b border-gray-100">{hasTranslation(art.title, 'kor')}</td>
                             <td className="p-4 border-b border-gray-100 text-right">
-                              <button 
-                                onClick={() => openEditModal(art, 'translations')}
-                                className="text-[#4A260F] hover:text-[#E19B2D] font-medium transition-colors px-3 py-1 bg-white border border-gray-200 rounded shadow-sm"
-                              >
-                                Translate
-                              </button>
+                              <button onClick={() => openEditModal(art, 'translations')} className="text-[#4A260F] hover:text-[#E19B2D] font-medium transition-colors px-3 py-1 bg-white border border-gray-200 rounded shadow-sm">Translate</button>
                             </td>
                           </tr>
                         ))}
@@ -342,8 +350,6 @@ const AdminDashboard = () => {
 
           {activeTab === 'quizzes' && (
              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col flex-1 min-h-0">
-            
-
                 {isLoadingData ? (
                   <div className="w-full py-12 flex justify-center text-[#4A260F] animate-pulse">Loading data...</div>
                 ) : (
@@ -364,18 +370,11 @@ const AdminDashboard = () => {
                             <tr key={art.id} className="hover:bg-gray-50 transition-colors group">
                               <td className="p-4 border-b border-gray-100 font-serif font-bold text-[#381111]">{art.title?.eng || 'Untitled'}</td>
                               <td className="p-4 border-b border-gray-100 text-center">
-                                <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider shadow-sm ${questionsSet === 5 ? 'bg-[#4A260F] text-[#E0CCB6]' : 'bg-white text-[#4A260F]/40 border border-[#4A260F]/20'}`}>
-                                  {questionsSet} / 5
-                                </span>
+                                <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider shadow-sm ${questionsSet === 5 ? 'bg-[#4A260F] text-[#E0CCB6]' : 'bg-white text-[#4A260F]/40 border border-[#4A260F]/20'}`}>{questionsSet} / 5</span>
                               </td>
                               <td className="p-4 border-b border-gray-100 text-gray-600 truncate max-w-xs">{art.q1?.eng?.question || 'No question provided'}</td>
                               <td className="p-4 border-b border-gray-100 text-right">
-                                <button 
-                                  onClick={() => openEditModal(art, 'quizzes')}
-                                  className="text-[#4A260F] hover:text-[#E19B2D] font-medium transition-colors px-3 py-1 bg-white border border-gray-200 rounded shadow-sm"
-                                >
-                                  Edit Quiz
-                                </button>
+                                <button onClick={() => openEditModal(art, 'quizzes')} className="text-[#4A260F] hover:text-[#E19B2D] font-medium transition-colors px-3 py-1 bg-white border border-gray-200 rounded shadow-sm">Edit Quiz</button>
                               </td>
                             </tr>
                           );
@@ -389,7 +388,6 @@ const AdminDashboard = () => {
 
           {activeTab === 'feedback' && (
              <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col flex-1 min-h-0">
-                
                 {isLoadingFeedback ? (
                   <div className="w-full py-12 flex justify-center text-[#4A260F] animate-pulse">Loading feedback...</div>
                 ) : (
@@ -424,7 +422,47 @@ const AdminDashboard = () => {
              </div>
           )}
 
-          {!isLoadingData && !isLoadingFeedback && totalPages > 1 && (
+          {activeTab === 'gatepass' && (
+             <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col items-center justify-center flex-1 min-h-0 text-center">
+                <p className="text-gray-500 max-w-md mb-8 text-sm">
+                  Generate the unique verification payload string for today. Visitors must scan this code using their mobile cameras to activate app features inside the venue.
+                </p>
+
+                <button 
+                  onClick={handleGenerateGatepass}
+                  disabled={isGeneratingHash}
+                  className="mb-8 px-8 py-3 bg-[#381111] text-[#E0CCB6] font-serif font-bold text-lg rounded-xl hover:brightness-110 disabled:opacity-50 transition-all shadow-md active:scale-95"
+                >
+                  {isGeneratingHash ? 'Generating Secure Link...' : "Generate Today's Active QR Code"}
+                </button>
+
+                {currentDailyHash ? (
+                  <div className="flex flex-col items-center gap-4 animate-fade-in-up">
+                    <div className="text-xs bg-[#4A260F] text-[#E0CCB6] px-3 py-1 rounded-full font-bold uppercase tracking-wide shadow-sm">
+                      Active Pass Date: {new Date().toLocaleDateString('en-CA')}
+                    </div>
+                    
+                    <div className="p-6 border-4 border-[#381111] rounded-2xl inline-block bg-white shadow-xl">
+                      <QRCodeSVG value={currentDailyHash.trim()} size={240} level="H" includeMargin={true} />
+                    </div>
+                    
+                    <p className="text-sm font-serif italic text-gray-600 mt-1">
+                      Scan this code directly using your phone's camera interface to verify entrance.
+                    </p>
+
+                    <div className="text-xs font-mono bg-gray-100 text-gray-600 px-4 py-2 rounded-lg border border-gray-300 max-w-sm break-all shadow-inner select-all">
+                      <strong>Active Payload:</strong> {currentDailyHash.trim()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-8 border-2 border-dashed border-gray-300 rounded-2xl text-gray-400 italic font-serif max-w-xs">
+                    No active gatepass code generated for today yet. Tap the button above to create one.
+                  </div>
+                )}
+             </div>
+          )}
+
+          {!isLoadingData && !isLoadingFeedback && activeTab !== 'gatepass' && totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-4 flex-shrink-0">
               <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 rounded bg-[#381111] text-[#E0CCB6] disabled:opacity-50 hover:brightness-110 shadow-sm transition-all">Prev</button>
               <div className="flex gap-1">
@@ -454,7 +492,6 @@ const AdminDashboard = () => {
             </div>
 
             <div className="p-6 overflow-y-auto flex-1 text-[#4A260F]">
-              
               {modalMode === 'content' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2">
@@ -538,39 +575,19 @@ const AdminDashboard = () => {
 
                         <div className="bg-[#E0CCB6]/30 p-3 rounded-lg mb-4 text-sm border border-[#381111]/10 flex justify-between items-center">
                           <div className="flex items-center gap-1">
-                            <span className="font-bold text-[#381111] uppercase tracking-wider">
-                              Correct Answer:
-                            </span>
+                            <span className="font-bold text-[#381111] uppercase tracking-wider">Correct Answer:</span>
                             <div className="text-[#4A260F] font-bold">
-                              {qData.choices[qData.correct_index] ? (
-                                `"${qData.choices[qData.correct_index]}"` 
-                              ) : (
-                                <span className="italic opacity-50 text-xs">Please Select A Correct Answer</span>
-                              )}
+                              {qData.choices[qData.correct_index] ? `"${qData.choices[qData.correct_index]}"` : <span className="italic opacity-50 text-xs">Please Select A Correct Answer</span>}
                             </div>
                           </div>
-                          <div className="text-xs bg-[#4A260F] text-[#E0CCB6] px-2 py-1 rounded">
-                            Index: {qData.correct_index}
-                          </div>
+                          <div className="text-xs bg-[#4A260F] text-[#E0CCB6] px-2 py-1 rounded">Index: {qData.correct_index}</div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           {[0, 1, 2, 3].map((choiceIdx) => (
                             <div key={choiceIdx} className="flex items-center gap-2">
-                              <input 
-                                type="radio" 
-                                name={`correct_${qNum}`} 
-                                checked={qData.correct_index === choiceIdx}
-                                onChange={() => handleQuizChange(qNum, 'eng', 'correct_index', choiceIdx)}
-                                className="w-5 h-5 accent-[#E19B2D]"
-                              />
-                              <input 
-                                type="text" 
-                                value={qData.choices?.[choiceIdx] || ''} 
-                                onChange={(e) => handleQuizChange(qNum, 'eng', 'choices', e.target.value, choiceIdx)} 
-                                placeholder={`Choice ${choiceIdx + 1}`} 
-                                className={`p-2 rounded border w-full bg-white text-[#381111] focus:outline-none focus:ring-2 focus:ring-[#E19B2D] ${qData.correct_index === choiceIdx ? 'border-[#E19B2D] bg-[#E19B2D]/10' : 'border-[#381111]/30'}`} 
-                              />
+                              <input type="radio" name={`correct_${qNum}`} checked={qData.correct_index === choiceIdx} onChange={() => handleQuizChange(qNum, 'eng', 'correct_index', choiceIdx)} className="w-5 h-5 accent-[#E19B2D]" />
+                              <input type="text" value={qData.choices?.[choiceIdx] || ''} onChange={(e) => handleQuizChange(qNum, 'eng', 'choices', e.target.value, choiceIdx)} placeholder={`Choice ${choiceIdx + 1}`} className={`p-2 rounded border w-full bg-white text-[#381111] focus:outline-none focus:ring-2 focus:ring-[#E19B2D] ${qData.correct_index === choiceIdx ? 'border-[#E19B2D] bg-[#E19B2D]/10' : 'border-[#381111]/30'}`} />
                             </div>
                           ))}
                         </div>
@@ -579,7 +596,6 @@ const AdminDashboard = () => {
                   })}
                 </div>
               )}
-
             </div>
 
             <div className="bg-[#E0CCB6] px-6 py-4 border-t border-[#381111]/20 flex justify-end gap-4 flex-shrink-0">
