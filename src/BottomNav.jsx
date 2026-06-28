@@ -10,7 +10,7 @@ const BottomNav = () => {
   const { currentLang, setCurrentLang } = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
 
-  const hideNavPaths = ["/quiz", "/end", "/end-prompt", "/certificate"];
+  const hideNavPaths = ["/quiz", "/end", "/end-prompt", "/certificate", "/mini-game"];
   const isAdminRoute = location.pathname.startsWith('/admin');
   if (hideNavPaths.includes(location.pathname) || isAdminRoute) {
     return null;
