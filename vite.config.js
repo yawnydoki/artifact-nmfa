@@ -99,6 +99,7 @@ export default defineConfig({
             handler: "CacheFirst",
             options: {
               cacheName: "artifact-supabase-images",
+              networkTimeoutSeconds: 5,
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 24 * 30, 
