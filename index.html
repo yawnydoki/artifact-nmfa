@@ -32,6 +32,16 @@
     <script src="/scripts/aframe.min.js"></script>
     <script src="/scripts/mindar-image-aframe.prod.js"></script>
 
+    <script type="module">
+  import { Compiler } from 'https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js';
+  
+  window.MINDAR = { 
+    IMAGE: { 
+      Compiler: Compiler 
+    } 
+  };
+</script>
+
     <title>ArtiFact: NMFA Guide</title>
   </head>
   <body>

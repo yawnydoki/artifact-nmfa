@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
-const TARGET_COUNT = 10;
+const TARGET_COUNT = 30;
 
 const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
   const { t } = useTranslation();
@@ -168,8 +168,12 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
 
             <p className="font-serif text-[#4A260F]/80 text-[15px] leading-relaxed mb-2">
               {camStatus === "denied"
-                ? t("ArtiFact requires camera permissions to scan the artworks.")
-                : t("Your browser or device does not support the required AR camera features.")}
+                ? t(
+                    "ArtiFact requires camera permissions to scan the artworks.",
+                  )
+                : t(
+                    "Your browser or device does not support the required AR camera features.",
+                  )}
             </p>
 
             {camStatus === "denied" && (
@@ -188,20 +192,9 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
       <a-scene
         embedded
         ref={sceneRef}
-        mindar-image="
-          imageTargetSrc: /targets.mind;
-          autoStart: true;
-          uiLoading: no;
-          uiError: no;
-          filterMinCF: 0.01;
-          filterBeta: 0.1;
-        "
+        mindar-image="imageTargetSrc: https://tpsrtvvynigljdnbhcuj.supabase.co/storage/v1/object/public/ar-assets/targets.mind?t=${Date.now()}; autoStart: true; uiLoading: no; uiError: no;"
         color-space="sRGB"
-        renderer="
-          antialias: true;
-          precision: mediump;
-          colorManagement: true;
-        "
+        renderer="colorManagement: true, physicallyCorrectLights"
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
       >
@@ -214,9 +207,9 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
           />
         </a-assets>
 
-        <a-camera 
-          position="0 0 0" 
-          look-controls="enabled: false" 
+        <a-camera
+          position="0 0 0"
+          look-controls="enabled: false"
           wasd-controls="enabled: false"
         />
 
@@ -228,7 +221,6 @@ const ArScanner = ({ onTargetFound, onTargetLost, unlockedByIndex }) => {
               mindar-image-target={`targetIndex: ${i}`}
               data-index={i}
             >
-              {/* Only render the floating "???" graphic if it HAS NOT been unlocked */}
               {!unlockedByIndex?.[i] && (
                 <a-entity
                   ref={(el) => (floatingRefs.current[i] = el)}
