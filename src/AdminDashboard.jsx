@@ -502,7 +502,7 @@ const AdminDashboard = () => {
               <div className="mb-4">
                 <button
                   onClick={() => {
-                    setEditItem({ title: {}, artist: {}, clues: {} }); 
+                    setEditItem({ title: {}, artist: {}, clues: {} });
                     setModalMode("content");
                     setIsNewItem(true);
                     setIsModalOpen(true);
@@ -1052,19 +1052,21 @@ const AdminDashboard = () => {
               {modalMode === "translations" && (
                 <div className="flex flex-col gap-6">
                   <div className="flex gap-2 border-b border-[#381111]/20 pb-2">
-                    {["tag", "chi", "jap", "kor"].map((lang) => (
+                    {["eng", "tag", "chi", "jap", "kor"].map((lang) => (
                       <button
                         key={lang}
                         onClick={() => setTranslateLang(lang)}
                         className={`px-4 py-2 rounded-t-lg font-bold uppercase ${translateLang === lang ? "bg-[#381111] text-[#E0CCB6]" : "bg-[#E0CCB6] text-[#381111]"}`}
                       >
-                        {lang === "tag"
-                          ? "Tagalog"
-                          : lang === "chi"
-                            ? "Chinese"
-                            : lang === "jap"
-                              ? "Japanese"
-                              : "Korean"}
+                        {lang === "eng"
+                          ? "English"
+                          : lang === "tag"
+                            ? "Tagalog"
+                            : lang === "chi"
+                              ? "Chinese"
+                              : lang === "jap"
+                                ? "Japanese"
+                                : "Korean"}
                       </button>
                     ))}
                   </div>
