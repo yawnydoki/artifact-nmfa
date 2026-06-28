@@ -25,6 +25,7 @@ const AdminDashboard = lazy(() => import("./AdminDashboard"));
 const AnimatedRoutes = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const { hasPass, validateScannedToken } = useGatepass();  
 
   return (
     <AnimatePresence mode="wait">
@@ -34,10 +35,15 @@ const AnimatedRoutes = () => {
             path="/"
             element={
               <PageWrapper>
-                <Dashboard />
+                {hasPass ? (
+                  <Dashboard />
+                ) : (
+                  <GatepassScreen onVerify={validateScannedToken} />
+                )}
               </PageWrapper>
             }
           />
+
           <Route
             path="/map"
             element={
@@ -131,8 +137,6 @@ function App() {
   const [initError, setInitError] = useState(false);
   const { loadInitialData } = useData();
   const [showTutorial, setShowTutorial] = useState(false);
-  
-  const { hasPass, isVerifying, validateScannedToken } = useGatepass();
 
   const syncOfflineQueue = async () => {
     if (!navigator.onLine) return;
@@ -141,11 +145,7 @@ function App() {
     );
     if (queue.length === 0) return;
 
-    console.log(
-      `Network restored! Attempting to sync ${queue.length} offline badges...`,
-    );
     const visitorId = localStorage.getItem("artifact_visitor_id");
-
     if (!visitorId) return;
 
     try {
@@ -161,7 +161,6 @@ function App() {
 
       if (error) throw error;
       localStorage.removeItem("artifact_offline_queue");
-      console.log("Offline queue synced successfully!");
       await loadInitialData(visitorId);
     } catch (err) {
       console.error("Failed to sync offline queue:", err.message);
@@ -180,12 +179,9 @@ function App() {
           .from("visitors")
           .select("id")
           .eq("id", visitorId)
-          .single();
+          .maybeSingle();
 
         if (error || !data) {
-          console.warn(
-            "Ghost ID detected! Wiping local storage and resetting...",
-          );
           visitorId = null;
           localStorage.removeItem("artifact_visitor_id");
         }
@@ -198,9 +194,6 @@ function App() {
           .insert([{ id: visitorId }]);
         if (error) throw error;
         localStorage.setItem("artifact_visitor_id", visitorId);
-        console.log("New anonymous visitor registered:", visitorId);
-      } else {
-        console.log("Welcome back, visitor:", visitorId);
       }
 
       await loadInitialData(visitorId);
@@ -218,40 +211,26 @@ function App() {
   };
 
   useEffect(() => {
-    if (hasPass) {
-      initializeApp();
-      const hasSeenTutorial = localStorage.getItem("artifact_has_seen_tutorial");
-      if (!hasSeenTutorial) {
-        setShowTutorial(true);
-      }
-      syncOfflineQueue();
+    initializeApp();
+    const hasSeenTutorial = localStorage.getItem("artifact_has_seen_tutorial");
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
     }
-    
+    syncOfflineQueue();
+
     window.addEventListener("online", syncOfflineQueue);
     return () => {
       window.removeEventListener("online", syncOfflineQueue);
     };
-  }, [hasPass]);
+  }, []);
 
   const handleCloseTutorial = () => {
     setShowTutorial(false);
     localStorage.setItem("artifact_has_seen_tutorial", "true");
   };
 
-  const isAdminRoute = window.location.pathname.startsWith('/admin');
+  const isAdminRoute = window.location.pathname.startsWith("/admin");
 
-  if (isVerifying && !isAdminRoute) {
-    return (
-      <div className="h-[100dvh] w-screen bg-[#16120c] flex items-center justify-center font-serif text-[#E0CCB6]">
-        Verifying Entry Authorization...
-      </div>
-    );
-  }
-
-  if (!hasPass && !isAdminRoute) {
-    return <GatepassScreen onVerify={validateScannedToken} />;
-  }
-  
   if (showLoadingScreen && !isAdminRoute) {
     return (
       <LoadingScreen
@@ -262,7 +241,7 @@ function App() {
       />
     );
   }
-  
+
   return (
     <BrowserRouter>
       <div className="relative w-screen h-[100dvh] overflow-hidden bg-artifact-bg">
