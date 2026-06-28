@@ -184,17 +184,20 @@ const AdminDashboard = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: publicUrlData } = supabase.storage
+      const { data } = supabase.storage
         .from("art-thumbnails")
         .getPublicUrl(filePath);
 
-      setEditItem((prev) => ({
-        ...prev,
-        thumbnail_url: publicUrlData.publicUrl,
-      }));
+      console.log("Upload Success! URL obtained:", data.publicUrl);
+
+      setEditItem((prev) => {
+        const updated = { ...prev, thumbnail_url: data.publicUrl };
+        console.log("State updated with URL:", updated);  
+        return updated;
+      });
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Error uploading image to cloud: " + error.message);
+      alert("Error: " + error.message);
     } finally {
       setIsUploadingImage(false);
     }
@@ -317,6 +320,7 @@ const AdminDashboard = () => {
   };
 
   const saveChanges = async () => {
+    //console.log("Final data to save:", editItem);
     setIsSaving(true);
     try {
       if (isNewItem) {
@@ -346,16 +350,26 @@ const AdminDashboard = () => {
         if (!dataToSave.thumbnail_url) {
           dataToSave.thumbnail_url = null;
         }
-
-        const { data, error } = await supabase
+      } else {
+        const { error } = await supabase
           .from("artworks")
-          .insert([dataToSave])
-          .select();
+          .update({
+            title: editItem.title,
+            artist: editItem.artist,
+            clues: editItem.clues,
+            artist_year: editItem.artist_year,
+            zone: editItem.zone,
+            thumbnail_url: editItem.thumbnail_url, 
+          })
+          .eq("id", editItem.id);
 
         if (error) throw error;
 
-        setArtworks([...artworks, data[0]]);
-        alert("New painting created successfully!");
+        setArtworks(
+          artworks.map((a) =>
+            a.id === editItem.id ? { ...a, ...editItem } : a,
+          ),
+        );
       }
 
       closeModal();
