@@ -493,7 +493,7 @@ const TutorialModal = ({ onClose }) => {
             <div className="flex-1 overflow-y-auto hide-scrollbar font-sans text-[16px] sm:text-[18px] leading-relaxed opacity-95 text-left">
               <p className="font-serif text-justify mb-4">
                 {t(
-                  "ArtiFact currently only includes 10 selected paintings as the system is presently intended for research and educational project purposes. Due to the limited number of artworks, users in Informational Mode will temporarily share certain features from the Gamified Educational Mode, such as using the Map icon to help locate paintings more easily.",
+                  "ArtiFact currently includes 30 selected paintings from three galleries on the second floor, which can be located through the Map icon. Among these, only 10 paintings feature a reward system where users can earn badges by completing mini-games. Users must explore the mini-map to find these reward-enabled paintings.",
                 )}
               </p>
               <p className="font-serif text-justify mb-4">
