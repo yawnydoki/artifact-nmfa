@@ -23,7 +23,6 @@ const Passport = () => {
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [activeModalTab, setActiveModalTab] = useState("origin");
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
-  
 
   const [showTutorial, setShowTutorial] = useState(false);
 
@@ -149,6 +148,7 @@ const Passport = () => {
           ) : (
             <div className="flex flex-col flex-1 relative">
               <div className="flex flex-col gap-4 mt-2 pb-6 overflow-y-auto hide-scrollbar">
+                
                 <div
                   onClick={() => setShowTutorial(true)}
                   className="bg-white p-3.5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors border border-[#E0CCB6]/50"
@@ -178,6 +178,44 @@ const Passport = () => {
                   </div>
                 </div>
 
+                <div
+                  onClick={() => navigate("/Certificate")}
+                  className="bg-[#381111] p-3.5 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer hover:brightness-110 transition-all border border-[#5A3B22]/30 active:scale-[0.98]"
+                >
+                  <div className="w-[50px] h-[50px] bg-[#E0CCB6] rounded-2xl flex-shrink-0 flex items-center justify-center shadow-inner relative p-2.5">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-full h-full text-[#381111] drop-shadow-sm"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12" />
+                      <circle
+                        cx="12"
+                        cy="8"
+                        r="5"
+                        fill="#E19B2D"
+                        className="text-[#381111]"
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="flex flex-col flex-1 text-left">
+                    <h3 className="font-serif text-[#E0CCB6] text-[18px] font-bold leading-tight mb-0.5">
+                      {t("Digital Certificate")}
+                    </h3>
+                    <p className="font-serif text-[#E0CCB6]/70 text-[13px] leading-tight">
+                      {t(
+                        "Claim your official achievement for your participation and badges!",
+                      )}
+                    </p>
+                  </div>
+                </div>
+                
                 {unlockedHistory.length === 0 ? (
                   <p className="font-serif text-center text-[#9A7B5C] mt-4 italic text-lg">
                     {t("Scan paintings to start your history!")}
@@ -236,31 +274,31 @@ const Passport = () => {
               </button>
             </div>
 
-          {!isInfoExpanded && (
-            <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl overflow-hidden rounded-lg relative">
-              {activeModalTab === "artist_description" ? (
-                selectedArtwork.artist_image_url ? (
+            {!isInfoExpanded && (
+              <div className="mx-5 mt-5 h-52 bg-[#D1C2B0] border border-[#BBA58F] flex items-center justify-center text-[#998670] font-serif text-3xl overflow-hidden rounded-lg relative">
+                {activeModalTab === "artist_description" ? (
+                  selectedArtwork.artist_image_url ? (
+                    <img
+                      src={selectedArtwork.artist_image_url}
+                      alt="Artist Photograph"
+                      className="w-full h-full object-cover opacity-90 scale-[1.03]"
+                    />
+                  ) : (
+                    <span className="text-[#998670] text-sm font-serif italic">
+                      {t("Image Unavailable")}
+                    </span>
+                  )
+                ) : selectedArtwork.thumbnail_url ? (
                   <img
-                    src={selectedArtwork.artist_image_url}
-                    alt="Artist Photograph"
+                    src={selectedArtwork.thumbnail_url}
+                    alt="Artwork Thumbnail"
                     className="w-full h-full object-cover opacity-90 scale-[1.03]"
                   />
                 ) : (
-                  <span className="text-[#998670] text-sm font-serif italic">
-                    {t("Image Unavailable")}
-                  </span>
-                )
-              ) : selectedArtwork.thumbnail_url ? (
-                <img
-                  src={selectedArtwork.thumbnail_url}
-                  alt="Artwork Thumbnail"
-                  className="w-full h-full object-cover opacity-90 scale-[1.03]"
-                />
-              ) : (
-                "img"
-              )}
-            </div>
-          )}
+                  "img"
+                )}
+              </div>
+            )}
 
             <h2
               className={`${isCJK ? "font-sans font-bold" : "font-serif"} text-center text-[2.5rem] text-[#4A260F] mt-3 leading-none`}
@@ -278,11 +316,7 @@ const Passport = () => {
 
             <div
               className={`mx-5 bg-[#F5EAD4] p-4 rounded-xl border border-[#E0CCB6] relative mb-4 transition-all duration-300
-                  ${
-                      isInfoExpanded
-                          ? "h-[30rem]"
-                          : "h-48"
-                  }
+                  ${isInfoExpanded ? "h-[30rem]" : "h-48"}
                   ${isCJK ? "font-sans text-sm" : "font-neohellenic text-[15px]"}
                   text-[#4A260F]/80 border border-[#E0CCB6] text-justify
               `}
@@ -300,48 +334,47 @@ const Passport = () => {
                   isCJK ? "font-sans text-sm" : "font-neohellenic text-[20px]"
                 } text-[#4A260F]/80 text-justify hide-scrollbar`}
               >
-
-              <div className="mb-2">
-                {typeof selectedArtwork[activeModalTab] === "object" &&
-                selectedArtwork[activeModalTab] !== null
-                  ? selectedArtwork[activeModalTab][currentLang] ||
-                    selectedArtwork[activeModalTab].eng
-                  : selectedArtwork[activeModalTab] ||
-                    t("More information coming soon...")}
-              </div>
-
-              {activeModalTab === "artist_description" && (
-                <div className="mt-5 pt-4 border-t border-[#C4AB8F]/50">
-                  <h4 className="font-serif font-bold text-[#783713] mb-3 text-base text-left">
-                    {t("Related Works")}
-                  </h4>
-                  <div className="flex overflow-x-auto gap-3 pb-2 hide-scrollbar">
-                    {selectedArtwork.related_arts &&
-                    selectedArtwork.related_arts.length > 0 ? (
-                      selectedArtwork.related_arts.map((art, idx) => (
-                        <div
-                          key={idx}
-                          className="w-24 shrink-0 flex flex-col gap-1"
-                        >
-                          <img
-                            src={art.image_url}
-                            alt={art.title}
-                            className="w-24 h-24 object-cover rounded-lg border border-[#C4AB8F] shadow-sm"
-                          />
-                          <span className="text-xs font-serif leading-tight text-center truncate text-[#4A260F]">
-                            {art.title}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs italic text-[#783713]/60 w-full text-center">
-                        {t("More works coming soon...")}
-                      </p>
-                    )}
-                  </div>
+                <div className="mb-2">
+                  {typeof selectedArtwork[activeModalTab] === "object" &&
+                  selectedArtwork[activeModalTab] !== null
+                    ? selectedArtwork[activeModalTab][currentLang] ||
+                      selectedArtwork[activeModalTab].eng
+                    : selectedArtwork[activeModalTab] ||
+                      t("More information coming soon...")}
                 </div>
-              )}
-            </div>
+
+                {activeModalTab === "artist_description" && (
+                  <div className="mt-5 pt-4 border-t border-[#C4AB8F]/50">
+                    <h4 className="font-serif font-bold text-[#783713] mb-3 text-base text-left">
+                      {t("Related Works")}
+                    </h4>
+                    <div className="flex overflow-x-auto gap-3 pb-2 hide-scrollbar">
+                      {selectedArtwork.related_arts &&
+                      selectedArtwork.related_arts.length > 0 ? (
+                        selectedArtwork.related_arts.map((art, idx) => (
+                          <div
+                            key={idx}
+                            className="w-24 shrink-0 flex flex-col gap-1"
+                          >
+                            <img
+                              src={art.image_url}
+                              alt={art.title}
+                              className="w-24 h-24 object-cover rounded-lg border border-[#C4AB8F] shadow-sm"
+                            />
+                            <span className="text-xs font-serif leading-tight text-center truncate text-[#4A260F]">
+                              {art.title}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs italic text-[#783713]/60 w-full text-center">
+                          {t("More works coming soon...")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="mx-5 grid grid-cols-3 gap-3 mb-3">
@@ -368,16 +401,17 @@ const Passport = () => {
             <div className="mx-5 mb-6 shadow-[0_4px_15px_rgba(0,0,0,0.3)]">
               <button
                 onClick={() =>
-                  navigate("/mini-game", { state: { artwork: selectedArtwork } })
+                  navigate("/mini-game", {
+                    state: { artwork: selectedArtwork },
+                  })
                 }
                 className="w-full border border-[#783713] text-[#783713] hover:bg-[#783713] hover:text-[#E0CCB6] shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition-all duration-150 active:scale-95 font-serif rounded-xl py-2.5 text-lg flex items-center justify-center gap-2.5"
               >
-                <svg 
-                  viewBox="0 0 512 512" 
-                  className="w-6 h-6"
-                >
+                <svg viewBox="0 0 512 512" className="w-6 h-6">
                   <g>
-                    <path fill="currentColor" d="M510.002,309.835l-0.068-0.326l-0.076-0.334l-26.508-112.721l-0.106-0.417l-0.106-0.418
+                    <path
+                      fill="currentColor"
+                      d="M510.002,309.835l-0.068-0.326l-0.076-0.334l-26.508-112.721l-0.106-0.417l-0.106-0.418
                 c-16.668-62.217-73.294-105.666-137.712-105.666H166.579c-64.418,0-121.045,43.449-137.712,105.666l-0.114,0.418l-0.099,0.417
                 L2.147,309.174l-0.076,0.326l-0.068,0.326c-9.749,46.43,16.926,92.496,62.036,107.168l1.586,0.509
                 c9.24,3.012,18.89,4.544,28.624,4.544c32.668,0,63.128-17.404,79.758-45.489l22.556-33.343l0.561-0.835l0.509-0.872
@@ -388,27 +422,42 @@ const Passport = () => {
                 c-11.592,0-22.312,6.206-28.101,16.258l-23.063,34.101c-11.804,20.484-33.434,32.433-56.081,32.433
                 c-6.661,0-13.405-1.032-20.013-3.186l-1.548-0.501c-31.431-10.219-50.102-42.485-43.311-74.819l26.508-112.722
                 c13.42-50.102,58.826-84.94,110.696-84.94h178.847c51.869,0,97.276,34.838,110.696,84.94l26.508,112.722
-                C489.413,347.912,470.75,380.178,439.318,390.397z"/>
-                    <polygon fill="currentColor" points="157.453,172.061 123.912,172.061 123.912,210.579 85.387,210.579 85.387,244.105 123.912,244.105 
-                123.912,282.637 157.453,282.637 157.453,244.105 195.978,244.105 195.978,210.579 157.453,210.579 	"/>
-                    <path fill="currentColor" d="M365.721,206.247c11.668,0,21.113-9.445,21.113-21.098c0-11.669-9.445-21.114-21.113-21.114
-                c-11.653,0-21.098,9.445-21.098,21.114C344.622,196.802,354.068,206.247,365.721,206.247z"/>
-                    <path fill="currentColor" d="M323.509,206.247c-11.653,0-21.106,9.453-21.106,21.098c0,11.669,9.453,21.122,21.106,21.122
-                c11.661,0,21.106-9.453,21.106-21.122C344.615,215.7,335.17,206.247,323.509,206.247z"/>
-                    <path fill="currentColor" d="M365.721,248.459c-11.653,0-21.098,9.445-21.098,21.114c0,11.653,9.445,21.098,21.098,21.098
-                c11.668,0,21.113-9.445,21.113-21.098C386.834,257.904,377.388,248.459,365.721,248.459z"/>
-                    <path fill="currentColor" d="M407.933,206.247c-11.653,0-21.099,9.453-21.099,21.098c0,11.669,9.446,21.122,21.099,21.122
-                c11.66,0,21.113-9.453,21.113-21.122C429.046,215.7,419.593,206.247,407.933,206.247z"/>
+                C489.413,347.912,470.75,380.178,439.318,390.397z"
+                    />
+                    <polygon
+                      fill="currentColor"
+                      points="157.453,172.061 123.912,172.061 123.912,210.579 85.387,210.579 85.387,244.105 123.912,244.105 
+                123.912,282.637 157.453,282.637 157.453,244.105 195.978,244.105 195.978,210.579 157.453,210.579   "
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M365.721,206.247c11.668,0,21.113-9.445,21.113-21.098c0-11.669-9.445-21.114-21.113-21.114
+                c-11.653,0-21.098,9.445-21.098,21.114C344.622,196.802,354.068,206.247,365.721,206.247z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M323.509,206.247c-11.653,0-21.106,9.453-21.106,21.098c0,11.669,9.453,21.122,21.106,21.122
+                c11.661,0,21.106-9.453,21.106-21.122C344.615,215.7,335.17,206.247,323.509,206.247z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M365.721,248.459c-11.653,0-21.098,9.445-21.098,21.114c0,11.653,9.445,21.098,21.098,21.098
+                c11.668,0,21.113-9.445,21.113-21.098C386.834,257.904,377.388,248.459,365.721,248.459z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M407.933,206.247c-11.653,0-21.099,9.453-21.099,21.098c0,11.669,9.446,21.122,21.099,21.122
+                c11.66,0,21.113-9.453,21.113-21.122C429.046,215.7,419.593,206.247,407.933,206.247z"
+                    />
                   </g>
                 </svg>
 
                 <span>{t("Mini-Game")}</span>
               </button>
             </div>
-          </div>  
+          </div>
         </div>
       )}
-      
 
       {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
     </div>

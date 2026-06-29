@@ -153,7 +153,7 @@ const PageWrapper = ({ children }) => (
 
 const ConditionalBottomNav = () => {
   const location = useLocation();
-  const hiddenRoutes = ['/puzzle', '/mini-game', '/quiz'];
+  const hiddenRoutes = ['/puzzle', '/mini-game', '/quiz', '/Certificate'];
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   if (isAdminRoute || hiddenRoutes.includes(location.pathname)) {
