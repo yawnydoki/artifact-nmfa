@@ -23,7 +23,7 @@ const AdminDashboard = () => {
   const [editItem, setEditItem] = useState(null);
   const [isNewItem, setIsNewItem] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [translateLang, setTranslateLang] = useState("tag");
+  const [translateLang, setTranslateLang] = useState("eng"); 
 
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
@@ -100,8 +100,6 @@ const AdminDashboard = () => {
         .select("thumbnail_url")
         .not("thumbnail_url", "is", null)
         .order("target_index", { ascending: true });
-      console.log(activeArtworks);
-      console.log("Images:", activeArtworks.length);
 
       if (fetchError) throw fetchError;
       if (!activeArtworks || activeArtworks.length === 0) {
@@ -120,7 +118,7 @@ const AdminDashboard = () => {
               reject(
                 new Error(`Failed to load target image: ${art.thumbnail_url}`),
               );
-            img.src = art.thumbnail_url;
+            img.src = `${art.thumbnail_url}?cv_id=${Date.now()}`;
           });
         }),
       );
@@ -136,10 +134,6 @@ const AdminDashboard = () => {
       }
 
       const compiler = new window.MINDAR.IMAGE.Compiler();
-
-      console.log("Artworks fetched:", activeArtworks.length);
-      console.log(activeArtworks);
-      console.log("Images loaded:", loadedImages.length);
       await compiler.compileImageTargets(loadedImages, (progress) => {
         setCompileProgress(Math.round(progress));
       });
@@ -184,14 +178,14 @@ const AdminDashboard = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
+      const { data: publicUrlData } = supabase.storage
         .from("art-thumbnails")
         .getPublicUrl(filePath);
 
-      console.log("Upload Success! URL obtained:", data.publicUrl);
+      console.log("Upload Success! URL obtained:", publicUrlData.publicUrl);
 
       setEditItem((prev) => {
-        const updated = { ...prev, thumbnail_url: data.publicUrl };
+        const updated = { ...prev, thumbnail_url: publicUrlData.publicUrl };
         console.log("State updated with URL:", updated);  
         return updated;
       });
@@ -245,9 +239,10 @@ const AdminDashboard = () => {
   };
 
   const openEditModal = (item, mode) => {
-    setEditItem(JSON.parse(JSON.stringify(item)));
+    setEditItem(item ? JSON.parse(JSON.stringify(item)) : { title: {}, artist: {}, clues: {}, artist_description: {}, art_element: {} });
     setModalMode(mode);
-    setIsNewItem(false);
+    setIsNewItem(!item);
+    if (mode === "translations") setTranslateLang("eng");
     setIsModalOpen(true);
   };
 
@@ -291,6 +286,7 @@ const AdminDashboard = () => {
       }
     });
   };
+
   const handleDelete = async () => {
     if (
       !window.confirm(
@@ -320,9 +316,24 @@ const AdminDashboard = () => {
   };
 
   const saveChanges = async () => {
-    //console.log("Final data to save:", editItem);
     setIsSaving(true);
     try {
+      const payload = {
+        title: editItem.title || {},
+        artist: editItem.artist || {},
+        clues: editItem.clues || {},
+        artist_description: editItem.artist_description || {},
+        art_element: editItem.art_element || {},
+        artist_year: editItem.artist_year || "",
+        zone: editItem.zone ? parseInt(editItem.zone) : null,
+        thumbnail_url: editItem.thumbnail_url || null,
+        q1: editItem.q1 || {},
+        q2: editItem.q2 || {},
+        q3: editItem.q3 || {},
+        q4: editItem.q4 || {},
+        q5: editItem.q5 || {}
+      };
+
       if (isNewItem) {
         const { data: highestTarget, error: highestError } = await supabase
           .from("artworks")
@@ -340,36 +351,28 @@ const AdminDashboard = () => {
             ? highestTarget.target_index + 1
             : 0;
 
-        const dataToSave = {
-          ...editItem,
-          target_index: nextTargetIndex,
-        };
+        const { data, error } = await supabase
+          .from("artworks")
+          .insert([{ ...payload, target_index: nextTargetIndex }])
+          .select();
 
-        delete dataToSave.id;
-
-        if (!dataToSave.thumbnail_url) {
-          dataToSave.thumbnail_url = null;
-        }
+        if (error) throw error;
+        setArtworks([...artworks, data[0]]);
+        alert("New painting created successfully!");
       } else {
         const { error } = await supabase
           .from("artworks")
-          .update({
-            title: editItem.title,
-            artist: editItem.artist,
-            clues: editItem.clues,
-            artist_year: editItem.artist_year,
-            zone: editItem.zone,
-            thumbnail_url: editItem.thumbnail_url, 
-          })
+          .update(payload)
           .eq("id", editItem.id);
 
         if (error) throw error;
 
         setArtworks(
           artworks.map((a) =>
-            a.id === editItem.id ? { ...a, ...editItem } : a,
+            a.id === editItem.id ? { ...a, ...payload } : a,
           ),
         );
+        alert("Changes saved successfully!");
       }
 
       closeModal();
@@ -500,7 +503,7 @@ const AdminDashboard = () => {
                   >
                     {isCompiling
                       ? "Compiling Matrix..."
-                      : "Rebuild AR Scanner File"}
+                      : "Compile"}
                   </button>
                   {isCompiling && (
                     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
@@ -516,7 +519,7 @@ const AdminDashboard = () => {
               <div className="mb-4">
                 <button
                   onClick={() => {
-                    setEditItem({ title: {}, artist: {}, clues: {} });
+                    setEditItem({ title: {}, artist: {}, clues: {}, artist_description: {}, art_element: {} });
                     setModalMode("content");
                     setIsNewItem(true);
                     setIsModalOpen(true);
@@ -985,7 +988,7 @@ const AdminDashboard = () => {
                       onChange={(e) =>
                         setEditItem({
                           ...editItem,
-                          zone: parseInt(e.target.value),
+                          zone: e.target.value ? parseInt(e.target.value) : "",
                         })
                       }
                       className={inputStyles}
@@ -1002,7 +1005,7 @@ const AdminDashboard = () => {
                       }
                       rows="3"
                       className={inputStyles}
-                    ></textarea>
+                    />
                   </div>
 
                   <div className="flex flex-col gap-2 md:col-span-2 bg-white p-4 rounded-xl border border-[#381111]/20 shadow-sm">
@@ -1065,7 +1068,7 @@ const AdminDashboard = () => {
 
               {modalMode === "translations" && (
                 <div className="flex flex-col gap-6">
-                  <div className="flex gap-2 border-b border-[#381111]/20 pb-2">
+                  <div className="flex gap-2 border-b border-[#381111]/20 pb-2 overflow-x-auto">
                     {["eng", "tag", "chi", "jap", "kor"].map((lang) => (
                       <button
                         key={lang}
@@ -1090,7 +1093,7 @@ const AdminDashboard = () => {
                       <label className="font-bold text-sm flex justify-between">
                         Title{" "}
                         <span className="opacity-60">
-                          (EN: {editItem.title?.eng})
+                          (EN: {editItem.title?.eng || "None"})
                         </span>
                       </label>
                       <input
@@ -1110,7 +1113,7 @@ const AdminDashboard = () => {
                       <label className="font-bold text-sm flex justify-between">
                         Artist{" "}
                         <span className="opacity-60">
-                          (EN: {editItem.artist?.eng})
+                          (EN: {editItem.artist?.eng || "None"})
                         </span>
                       </label>
                       <input
@@ -1130,7 +1133,7 @@ const AdminDashboard = () => {
                       <label className="font-bold text-sm flex justify-between">
                         Clues{" "}
                         <span className="opacity-60">
-                          (EN: {editItem.clues?.eng})
+                          (EN: {editItem.clues?.eng || "None"})
                         </span>
                       </label>
                       <textarea
@@ -1144,11 +1147,14 @@ const AdminDashboard = () => {
                         }
                         rows="2"
                         className={inputStyles}
-                      ></textarea>
+                      />
                     </div>
                     <div className="flex flex-col gap-2 md:col-span-2">
-                      <label className="font-bold text-sm">
+                      <label className="font-bold text-sm flex justify-between">
                         Artist Description
+                        <span className="opacity-60">
+                          (EN: {editItem.artist_description?.eng || "None"})
+                        </span>
                       </label>
                       <textarea
                         value={
@@ -1163,10 +1169,15 @@ const AdminDashboard = () => {
                         }
                         rows="3"
                         className={inputStyles}
-                      ></textarea>
+                      />
                     </div>
                     <div className="flex flex-col gap-2 md:col-span-2">
-                      <label className="font-bold text-sm">Art Elements</label>
+                      <label className="font-bold text-sm flex justify-between">
+                        Art Elements
+                        <span className="opacity-60">
+                          (EN: {editItem.art_element?.eng || "None"})
+                        </span>
+                      </label>
                       <textarea
                         value={editItem.art_element?.[translateLang] || ""}
                         onChange={(e) =>
@@ -1178,7 +1189,7 @@ const AdminDashboard = () => {
                         }
                         rows="3"
                         className={inputStyles}
-                      ></textarea>
+                      />
                     </div>
                   </div>
                 </div>
@@ -1286,20 +1297,32 @@ const AdminDashboard = () => {
               )}
             </div>
 
-            <div className="bg-[#E0CCB6] px-6 py-4 border-t border-[#381111]/20 flex justify-end gap-4 flex-shrink-0">
-              <button
-                onClick={closeModal}
-                className="px-6 py-2 rounded-lg font-bold text-[#381111] hover:bg-[#381111]/10 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveChanges}
-                disabled={isSaving || isUploadingImage}
-                className="px-6 py-2 rounded-lg font-bold bg-[#381111] text-[#E0CCB6] hover:brightness-110 disabled:opacity-50 transition-colors flex items-center gap-2"
-              >
-                {isSaving ? "Saving Database..." : "Save Changes"}
-              </button>
+            <div className="bg-[#E0CCB6] px-6 py-4 border-t border-[#381111]/20 flex justify-between items-center flex-shrink-0">
+              <div>
+                {!isNewItem && (
+                  <button
+                    onClick={handleDelete}
+                    className="px-4 py-2 rounded-lg font-bold text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Delete Painting
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-4">
+                <button
+                  onClick={closeModal}
+                  className="px-6 py-2 rounded-lg font-bold text-[#381111] hover:bg-[#381111]/10 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveChanges}
+                  disabled={isSaving || isUploadingImage}
+                  className="px-6 py-2 rounded-lg font-bold bg-[#381111] text-[#E0CCB6] hover:brightness-110 disabled:opacity-50 transition-colors flex items-center gap-2"
+                >
+                  {isSaving ? "Saving Database..." : "Save Changes"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
