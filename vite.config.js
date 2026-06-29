@@ -96,10 +96,10 @@ export default defineConfig({
           {
             urlPattern:
               /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
-            handler: "CacheFirst",
+            handler: "NetworkFirst",
             options: {
               cacheName: "artifact-supabase-images",
-              //networkTimeoutSeconds: 5,
+              networkTimeoutSeconds: 5,
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
