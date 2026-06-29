@@ -22,6 +22,7 @@ const EndSequence = lazy(() => import("./EndSequence"));
 const Certificate = lazy(() => import("./Certificate"));
 const AdminLogin = lazy(() => import("./AdminLogin"));
 const AdminDashboard = lazy(() => import("./AdminDashboard"));
+const Puzzle = lazy(() => import("./Puzzle")); 
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -122,6 +123,16 @@ const AnimatedRoutes = () => {
               </PageWrapper>    
             }
           />
+          
+          <Route 
+            path="/puzzle" 
+            element={
+              <PageWrapper>
+                <Puzzle />
+              </PageWrapper>    
+            }
+          />
+
         </Routes>
       </Suspense>
     </AnimatePresence>
@@ -139,6 +150,17 @@ const PageWrapper = ({ children }) => (
     {children}
   </motion.div>
 );
+
+const ConditionalBottomNav = () => {
+  const location = useLocation();
+  const hiddenRoutes = ['/puzzle', '/mini-game', '/quiz'];
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  if (isAdminRoute || hiddenRoutes.includes(location.pathname)) {
+    return null;
+  }
+  return <BottomNav />;
+};
 
 function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
@@ -255,7 +277,7 @@ function App() {
     <BrowserRouter>
       <div className="relative w-screen h-[100dvh] overflow-hidden bg-artifact-bg">
         <AnimatedRoutes />
-        <BottomNav />
+        <ConditionalBottomNav />
         {showTutorial && <TutorialModal onClose={handleCloseTutorial} />}
       </div>
     </BrowserRouter>
