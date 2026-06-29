@@ -2,18 +2,18 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import basicSsl from "@vitejs/plugin-basic-ssl";
-import viteCompression from "vite-plugin-compression"; 
+import viteCompression from "vite-plugin-compression";
 
 export default defineConfig({
   plugins: [
     react(),
     basicSsl(),
-    
+
     viteCompression({
       algorithm: "brotliCompress",
       ext: ".br",
-      threshold: 10240, 
-      filter: /\.(js|mjs|json|css|html|mind)$/i, 
+      threshold: 10240,
+      filter: /\.(js|mjs|json|css|html|mind)$/i,
       deleteOriginFile: false,
     }),
 
@@ -21,7 +21,7 @@ export default defineConfig({
       algorithm: "gzip",
       ext: ".gz",
       threshold: 10240,
-      filter: /\.(js|mjs|json|css|html|mind)$/i, 
+      filter: /\.(js|mjs|json|css|html|mind)$/i,
       deleteOriginFile: false,
     }),
 
@@ -63,7 +63,7 @@ export default defineConfig({
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 15000000,
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,mind}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg}"],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -102,8 +102,18 @@ export default defineConfig({
               //networkTimeoutSeconds: 5,
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30, 
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /.*\.mind.*/i,
+            handler: "NetworkFirst", 
+            options: {
+              cacheName: "artifact-ar-targets",
               cacheableResponse: {
                 statuses: [0, 200],
               },
