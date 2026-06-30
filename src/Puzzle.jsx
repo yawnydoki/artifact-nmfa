@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "./supabaseClient.js";  
 
 const GRID_SIZE = 3;
 const EMPTY_TILE = GRID_SIZE * GRID_SIZE - 1;
@@ -11,7 +12,11 @@ const Puzzle = () => {
 
   const [tiles, setTiles] = useState([]);
   const [isSolved, setIsSolved] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
   const [isSavingBadge, setIsSavingBadge] = useState(false);
+
+  const hasQuiz = artwork?.q1?.eng?.question?.trim().length > 0;
+  const earnedBadgeType = hasQuiz ? "Silver" : "Gold";
 
   const isSolvable = (arr) => {
     let inversions = 0;
@@ -33,6 +38,7 @@ const Puzzle = () => {
 
     setTiles(newTiles);
     setIsSolved(false);
+    setShowOverlay(false);
   }, []);
 
   useEffect(() => {
@@ -60,8 +66,12 @@ const Puzzle = () => {
       setTiles(newTiles);
 
       if (newTiles.every((val, i) => val === i)) {
-        setIsSolved(true);
-        handleWin();
+        setIsSolved(true); 
+        
+        setTimeout(() => {
+          setShowOverlay(true);
+          handleWin();
+        }, 1500);
       }
     }
   };
@@ -69,10 +79,26 @@ const Puzzle = () => {
   const handleWin = async () => {
     setIsSavingBadge(true);
     try {
-      // TODO:  Silver Badge logic here
-      console.log("Silver Badge Unlocked!");
+      const visitorId = localStorage.getItem("artifact_visitor_id");
+      
+      if (!visitorId) {
+        console.error("No visitor ID found. Cannot save badge.");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("unlocked_badges")
+        .upsert({
+          visitor_id: visitorId,
+          artwork_id: artwork.id,
+          badge_type: earnedBadgeType
+        }, { onConflict: "visitor_id,artwork_id" });
+
+      if (error) throw error;
+      
+      console.log(`${earnedBadgeType} Badge Unlocked successfully!`);
     } catch (error) {
-      console.error("Error saving badge:", error);
+      console.error("Error saving badge:", error.message);
     } finally {
       setIsSavingBadge(false);
     }
@@ -81,7 +107,6 @@ const Puzzle = () => {
   if (!artwork) return null;
 
   const imageUrl = artwork.thumbnail_url;
-  
   const badgeImgSrc = artwork.badge_url || "/logo_trans.png"; 
 
   return (
@@ -103,8 +128,9 @@ const Puzzle = () => {
         Piece it<br />Together!
       </h1>
 
-      <div className="w-full max-w-sm aspect-square bg-[#E8D2B8] p-1 rounded border-2 border-[#E4CBAF] relative shadow-2xl">
-        <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-[2px] bg-[#2D120E]">
+      <div className="w-full max-w-sm aspect-square bg-[#E8D2B8] p-1 rounded border-2 border-[#E4CBAF] relative shadow-2xl overflow-hidden">
+        
+        <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-[2px] bg-[#2D120E] relative">
           {tiles.map((tileValue, index) => {
             const isEmpty = tileValue === EMPTY_TILE;
             
@@ -136,15 +162,22 @@ const Puzzle = () => {
               </div>
             );
           })}
+
+          {isSolved && (
+             <div 
+               className="absolute inset-0 z-0 bg-cover bg-center animate-fade-in"
+               style={{ backgroundImage: `url(${imageUrl})` }}
+             />
+          )}
         </div>
 
-        {isSolved && (
+        {showOverlay && (
           <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded backdrop-blur-sm animate-fade-in z-10">
             
             <div className="w-28 h-28 mb-4 flex items-center justify-center drop-shadow-2xl">
                <img 
                  src={badgeImgSrc} 
-                 alt="Silver Badge" 
+                 alt={`${earnedBadgeType} Badge`} 
                  className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
                  onError={(e) => {
                    e.target.onerror = null;
@@ -154,7 +187,9 @@ const Puzzle = () => {
             </div>
 
             <h2 className="text-3xl font-bold text-gray-200 mb-1 drop-shadow-lg text-center">Masterclass!!</h2>
-            <p className="text-gray-300 text-sm mb-6 uppercase tracking-widest font-sans font-bold">Silver Badge Earned</p>
+            <p className="text-gray-300 text-sm mb-6 uppercase tracking-widest font-sans font-bold">
+              {earnedBadgeType} Badge Earned
+            </p>
             <button 
               onClick={() => navigate(-1)} 
               className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-500 text-white font-sans font-bold uppercase tracking-wider rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all"
