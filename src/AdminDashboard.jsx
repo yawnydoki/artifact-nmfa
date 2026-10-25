@@ -3,6 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 import { QRCodeSVG } from "qrcode.react";
 
+const formatLeaderboardTime = (totalSeconds) => {
+  const minutes = Math.floor(Number(totalSeconds || 0) / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (Number(totalSeconds || 0) % 60)
+    .toString()
+    .padStart(2, "0");
+  return `${minutes}:${seconds}`;
+};
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("content");
@@ -86,7 +96,7 @@ const AdminDashboard = () => {
         await Promise.all([
           supabase
             .from("puzzle_times")
-            .select("id, visitor_id, artwork_id, elapsed_seconds, completed_at")
+            .select("id, visitor_id, artwork_id, player_name, elapsed_seconds, completed_at")
             .order("elapsed_seconds", { ascending: true })
             .order("completed_at", { ascending: true }),
           supabase.from("artworks").select("id, title").order("target_index", { ascending: true }),
@@ -464,10 +474,19 @@ const AdminDashboard = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentData = activeTab === "feedback" || activeTab === "leaderboard" ? feedback : artworks;
+  const currentData = activeTab === "feedback" ? feedback : artworks;
   const currentItems = currentData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(currentData.length / itemsPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const visibleLeaderboard =
+    leaderboardArtworkFilter === "all"
+      ? leaderboard
+      : leaderboard.filter(
+          (entry) => String(entry.artwork_id) === leaderboardArtworkFilter,
+        );
+  const leaderboardPlayers = new Set(
+    visibleLeaderboard.map((entry) => entry.visitor_id),
+  ).size;
 
   const hasTranslation = (obj, lang) => {
     const exists = obj && obj[lang] && String(obj[lang]).trim() !== "";
@@ -551,6 +570,153 @@ const AdminDashboard = () => {
           <h2 className="font-serif text-4xl text-[#381111] mb-8 border-b-2 border-[#381111]/10 pb-4 flex-shrink-0">
             {tabs.find((t) => t.id === activeTab)?.label}
           </h2>
+
+          {activeTab === "leaderboard" && (
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col flex-1 min-h-0">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h3 className="font-serif text-2xl font-bold text-[#381111]">
+                    Puzzle Leaderboard
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Fastest recorded time for each visitor and artwork.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <select
+                    value={leaderboardArtworkFilter}
+                    onChange={(event) => setLeaderboardArtworkFilter(event.target.value)}
+                    className="p-2 rounded-lg border border-[#381111]/20 bg-white text-[#381111] text-sm focus:outline-none focus:ring-2 focus:ring-[#E19B2D]"
+                  >
+                    <option value="all">All artworks</option>
+                    {leaderboardArtworks.map((artwork) => (
+                      <option key={artwork.id} value={artwork.id}>
+                        {artwork.title?.eng || `Artwork #${artwork.id}`}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={fetchLeaderboard}
+                    disabled={isLoadingLeaderboard}
+                    className="px-4 py-2 rounded-lg bg-[#381111] text-[#E0CCB6] font-bold text-sm hover:brightness-110 disabled:opacity-50 transition-all"
+                  >
+                    {isLoadingLeaderboard ? "Refreshing..." : "Refresh"}
+                  </button>
+                </div>
+              </div>
+
+              {leaderboardError ? (
+                <div className="p-5 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm">
+                  {leaderboardError}
+                </div>
+              ) : isLoadingLeaderboard ? (
+                <div className="w-full py-12 flex justify-center text-[#4A260F] animate-pulse">
+                  Loading leaderboard...
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                    <div className="rounded-xl bg-[#F5EAD4]/60 border border-[#381111]/10 p-4">
+                      <p className="text-xs uppercase tracking-wider text-gray-500 font-bold">
+                        Entries
+                      </p>
+                      <p className="text-2xl font-bold text-[#381111] mt-1">
+                        {visibleLeaderboard.length}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-[#F5EAD4]/60 border border-[#381111]/10 p-4">
+                      <p className="text-xs uppercase tracking-wider text-gray-500 font-bold">
+                        Visitors
+                      </p>
+                      <p className="text-2xl font-bold text-[#381111] mt-1">
+                        {leaderboardPlayers}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-[#F5EAD4]/60 border border-[#381111]/10 p-4 col-span-2 sm:col-span-1">
+                      <p className="text-xs uppercase tracking-wider text-gray-500 font-bold">
+                        Best time
+                      </p>
+                      <p className="text-2xl font-bold text-[#381111] mt-1">
+                        {visibleLeaderboard[0]
+                          ? formatLeaderboardTime(visibleLeaderboard[0].elapsed_seconds)
+                          : "--:--"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="overflow-auto flex-1 rounded-xl border border-gray-200 hide-scrollbar shadow-inner relative">
+                    <table className="w-full text-left border-collapse min-w-[760px]">
+                      <thead className="sticky top-0 bg-[#E0CCB6] z-10 shadow-sm">
+                        <tr className="text-[#4A260F] text-sm uppercase tracking-wider">
+                          <th className="p-4 border-b border-gray-300 font-bold w-20">
+                            Rank
+                          </th>
+                          <th className="p-4 border-b border-gray-300 font-bold">
+                            Player
+                          </th>
+                          <th className="p-4 border-b border-gray-300 font-bold">
+                            Visitor
+                          </th>
+                          <th className="p-4 border-b border-gray-300 font-bold">
+                            Artwork
+                          </th>
+                          <th className="p-4 border-b border-gray-300 font-bold">
+                            Elapsed time
+                          </th>
+                          <th className="p-4 border-b border-gray-300 font-bold">
+                            Completed
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-sm">
+                        {visibleLeaderboard.map((entry, index) => (
+                          <tr
+                            key={entry.id}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="p-4 border-b border-gray-100 font-bold text-[#381111]">
+                              {index + 1}
+                            </td>
+                            <td className="p-4 border-b border-gray-100 font-bold text-[#381111] uppercase tracking-wider">
+                              {entry.player_name || "Anonymous"}
+                            </td>
+                            <td
+                              className="p-4 border-b border-gray-100 font-mono text-xs text-gray-500"
+                              title={entry.visitor_id}
+                            >
+                              {entry.visitor_id
+                                ? `${entry.visitor_id.slice(0, 8)}...`
+                                : "Anonymous"}
+                            </td>
+                            <td className="p-4 border-b border-gray-100 font-serif font-bold text-[#381111]">
+                              {entry.artworkTitle}
+                            </td>
+                            <td className="p-4 border-b border-gray-100 font-mono font-bold text-[#4A260F]">
+                              {formatLeaderboardTime(entry.elapsed_seconds)}
+                            </td>
+                            <td className="p-4 border-b border-gray-100 text-gray-500">
+                              {new Date(entry.completed_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                        {visibleLeaderboard.length === 0 && (
+                          <tr>
+                            <td
+                              colSpan="6"
+                              className="p-8 text-center text-gray-500 italic"
+                            >
+                              No completed puzzle times recorded yet.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {activeTab === "content" && (
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col flex-1 min-h-0">
@@ -952,6 +1118,7 @@ const AdminDashboard = () => {
           {!isLoadingData &&
             !isLoadingFeedback &&
             activeTab !== "gatepass" &&
+            activeTab !== "leaderboard" &&
             totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-4 flex-shrink-0">
                 <button

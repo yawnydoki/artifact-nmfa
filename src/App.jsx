@@ -199,11 +199,13 @@ function App() {
       }
 
       if (puzzleTimeQueue.length > 0) {
-        const { error } = await supabase
-          .from("puzzle_times")
-          .upsert(puzzleTimeQueue, { onConflict: "id" });
+        for (const puzzleTime of puzzleTimeQueue) {
+          const { error } = await supabase
+            .from("puzzle_times")
+            .insert(puzzleTime);
 
-        if (error) throw error;
+          if (error && error.code !== "23505") throw error;
+        }
         localStorage.removeItem("artifact_puzzle_time_queue");
       }
 
