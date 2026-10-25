@@ -5,9 +5,32 @@ const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
+const readCachedBadges = () => {
+  try {
+    return JSON.parse(localStorage.getItem('artifact_cached_badges') || '[]');
+  } catch (error) {
+    console.error("Failed to parse cached badges", error);
+    return [];
+  }
+};
+
+const applyBadgeData = (setUnlockedBadges, badges) => {
+  const normalizedBadges = (badges || []).map((badge) => ({
+    ...badge,
+    artwork_id: String(badge.artwork_id),
+  }));
+  setUnlockedBadges(normalizedBadges);
+  localStorage.setItem('artifact_cached_badges', JSON.stringify(normalizedBadges));
+};
+
 export const DataProvider = ({ children }) => {
   const [artworks, setArtworks] = useState([]);
-  const [unlockedBadges, setUnlockedBadges] = useState([]);
+  const [unlockedBadges, setUnlockedBadges] = useState(() =>
+    readCachedBadges().map((badge) => ({
+      ...badge,
+      artwork_id: String(badge.artwork_id),
+    })),
+  );
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   const loadInitialData = async (visitorId) => {
@@ -34,9 +57,7 @@ export const DataProvider = ({ children }) => {
         if (badgesError) throw badgesError;
         
         if (badgesData) {
-          setUnlockedBadges(badgesData);
-          
-          localStorage.setItem('artifact_cached_badges', JSON.stringify(badgesData));
+          applyBadgeData(setUnlockedBadges, badgesData);
         }
       }
     } catch (err) {
@@ -51,14 +72,7 @@ export const DataProvider = ({ children }) => {
         }
       }
 
-      const cachedBadges = localStorage.getItem('artifact_cached_badges');
-      if (cachedBadges) {
-        try {
-          setUnlockedBadges(JSON.parse(cachedBadges));
-        } catch (e) {
-          console.error("Failed to parse cached badges", e);
-        }
-      }
+      applyBadgeData(setUnlockedBadges, readCachedBadges());
     } finally {
       setIsDataLoading(false);
     }
@@ -76,21 +90,12 @@ export const DataProvider = ({ children }) => {
       if (error) throw error;
       
       if (data) {
-        setUnlockedBadges(data);
-        
-        localStorage.setItem('artifact_cached_badges', JSON.stringify(data));
+        applyBadgeData(setUnlockedBadges, data);
       }
     } catch (err) {
       console.warn("Error refreshing badges from server. Checking local cache:", err.message);
       
-      const cachedBadges = localStorage.getItem('artifact_cached_badges');
-      if (cachedBadges) {
-        try {
-          setUnlockedBadges(JSON.parse(cachedBadges));
-        } catch (e) {
-          console.error("Failed to parse cached badges", e);
-        }
-      }
+      applyBadgeData(setUnlockedBadges, readCachedBadges());
     }
   };
 

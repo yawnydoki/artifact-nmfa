@@ -30,7 +30,7 @@ const Passport = () => {
 
   const passportStamps = artworks.map((artwork) => {
     const unlockedBadge = unlockedBadges.find(
-      (b) => b.artwork_id === artwork.id,
+      (b) => String(b.artwork_id) === String(artwork.id),
     );
     return {
       ...artwork,

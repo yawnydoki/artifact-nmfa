@@ -72,13 +72,13 @@ const Dashboard = () => {
   }, [artworks]);
 
   const unlockedSet = useMemo(() => {
-    return new Set(unlockedBadges.map((b) => b.artwork_id));
+    return new Set(unlockedBadges.map((b) => String(b.artwork_id)));
   }, [unlockedBadges]);
 
   const unlockedByIndex = useMemo(() => {
     const arr = Array(10).fill(false);
     artworks.forEach((a) => {
-      if (unlockedSet.has(a.id)) {
+      if (unlockedSet.has(String(a.id))) {
         arr[a.target_index] = true;
       }
     });
@@ -170,7 +170,7 @@ const Dashboard = () => {
         } else {
           (async () => {
             const visitorId = localStorage.getItem("artifact_visitor_id");
-            if (visitorId && !unlockedSet.has(data.id)) {
+            if (visitorId && !unlockedSet.has(String(data.id))) {
               const newBadge = {
                 visitor_id: visitorId,
                 artwork_id: data.id,
@@ -196,7 +196,7 @@ const Dashboard = () => {
                 JSON.stringify(offlineQueue),
               );
 
-              if (visitorId && !unlockedSet.has(data.id)) {
+              if (visitorId && !unlockedSet.has(String(data.id))) {
                 setBadgeOverlay({ 
                   tier: "Bronze", 
                   artwork: data,
@@ -217,7 +217,11 @@ const Dashboard = () => {
                     },
                   ]);
 
-                if (error) throw error;
+                if (error && error.code !== "23505") throw error;
+
+                if (error?.code === "23505") {
+                  console.info("Badge already unlocked for this artwork.");
+                }
 
                 const updatedQueue = JSON.parse(
                   localStorage.getItem("artifact_offline_queue") || "[]",
