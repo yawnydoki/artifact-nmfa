@@ -573,8 +573,8 @@ const AdminDashboard = () => {
 
           {activeTab === "leaderboard" && (
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#4A260F]/10 flex flex-col flex-1 min-h-0">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-                <div>
+              <div className="flex flex-col items-center gap-4 mb-6">
+                <div className="text-center">
                   <h3 className="font-serif text-2xl font-bold text-[#381111]">
                     Puzzle Leaderboard
                   </h3>
@@ -583,7 +583,7 @@ const AdminDashboard = () => {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full">
                   <select
                     value={leaderboardArtworkFilter}
                     onChange={(event) => setLeaderboardArtworkFilter(event.target.value)}
