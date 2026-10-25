@@ -171,27 +171,42 @@ function App() {
 
   const syncOfflineQueue = async () => {
     if (!navigator.onLine) return;
-    const queue = JSON.parse(
+    const badgeQueue = JSON.parse(
       localStorage.getItem("artifact_offline_queue") || "[]",
     );
-    if (queue.length === 0) return;
+    const puzzleTimeQueue = JSON.parse(
+      localStorage.getItem("artifact_puzzle_time_queue") || "[]",
+    );
+    if (badgeQueue.length === 0 && puzzleTimeQueue.length === 0) return;
 
     const visitorId = localStorage.getItem("artifact_visitor_id");
     if (!visitorId) return;
 
     try {
-      const insertData = queue.map((b) => ({
-        visitor_id: visitorId,
-        artwork_id: b.artwork_id,
-        badge_type: b.badge_type,
-      }));
+      if (badgeQueue.length > 0) {
+        const insertData = badgeQueue.map((b) => ({
+          visitor_id: visitorId,
+          artwork_id: b.artwork_id,
+          badge_type: b.badge_type,
+        }));
 
-      const { error } = await supabase
-        .from("unlocked_badges")
-        .upsert(insertData, { onConflict: "visitor_id,artwork_id" });
+        const { error } = await supabase
+          .from("unlocked_badges")
+          .upsert(insertData, { onConflict: "visitor_id,artwork_id" });
 
-      if (error) throw error;
-      localStorage.removeItem("artifact_offline_queue");
+        if (error) throw error;
+        localStorage.removeItem("artifact_offline_queue");
+      }
+
+      if (puzzleTimeQueue.length > 0) {
+        const { error } = await supabase
+          .from("puzzle_times")
+          .upsert(puzzleTimeQueue, { onConflict: "id" });
+
+        if (error) throw error;
+        localStorage.removeItem("artifact_puzzle_time_queue");
+      }
+
       await loadInitialData(visitorId);
     } catch (err) {
       console.error("Failed to sync offline queue:", err.message);

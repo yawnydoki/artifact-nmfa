@@ -9,8 +9,13 @@ const AdminDashboard = () => {
 
   const [artworks, setArtworks] = useState([]);
   const [feedback, setFeedback] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardArtworks, setLeaderboardArtworks] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
+  const [leaderboardError, setLeaderboardError] = useState("");
+  const [leaderboardArtworkFilter, setLeaderboardArtworkFilter] = useState("all");
 
   const [currentDailyHash, setCurrentDailyHash] = useState("");
   const [isGeneratingHash, setIsGeneratingHash] = useState(false);
@@ -40,6 +45,8 @@ const AdminDashboard = () => {
       fetchFeedback();
     } else if (activeTab === "gatepass") {
       fetchTodayGatepass();
+    } else if (activeTab === "leaderboard") {
+      fetchLeaderboard();
     } else {
       fetchArtworks();
     }
@@ -68,6 +75,68 @@ const AdminDashboard = () => {
     if (error) console.error("Error fetching feedback:", error.message);
     else setFeedback(data || []);
     setIsLoadingFeedback(false);
+  };
+
+  const fetchLeaderboard = async () => {
+    setIsLoadingLeaderboard(true);
+    setLeaderboardError("");
+
+    try {
+      const [{ data: times, error: timesError }, { data: artworkData, error: artworksError }] =
+        await Promise.all([
+          supabase
+            .from("puzzle_times")
+            .select("id, visitor_id, artwork_id, elapsed_seconds, completed_at")
+            .order("elapsed_seconds", { ascending: true })
+            .order("completed_at", { ascending: true }),
+          supabase.from("artworks").select("id, title").order("target_index", { ascending: true }),
+        ]);
+
+      if (timesError) throw timesError;
+      if (artworksError) throw artworksError;
+
+      const artworkMap = new Map(
+        (artworkData || []).map((artwork) => [artwork.id, artwork]),
+      );
+      const bestTimes = new Map();
+
+      (times || []).forEach((time) => {
+        const key = `${time.visitor_id}-${time.artwork_id}`;
+        const existing = bestTimes.get(key);
+
+        if (
+          !existing ||
+          time.elapsed_seconds < existing.elapsed_seconds ||
+          (time.elapsed_seconds === existing.elapsed_seconds &&
+            new Date(time.completed_at) < new Date(existing.completed_at))
+        ) {
+          bestTimes.set(key, {
+            ...time,
+            artworkTitle:
+              artworkMap.get(time.artwork_id)?.title?.eng ||
+              `Artwork #${time.artwork_id}`,
+          });
+        }
+      });
+
+      setLeaderboardArtworks(artworkData || []);
+      setLeaderboard(
+        Array.from(bestTimes.values()).sort((a, b) => {
+          if (a.elapsed_seconds !== b.elapsed_seconds) {
+            return a.elapsed_seconds - b.elapsed_seconds;
+          }
+          return new Date(a.completed_at) - new Date(b.completed_at);
+        }),
+      );
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error.message);
+      setLeaderboardError(
+        "Unable to load leaderboard data. Make sure the puzzle_times migration has been applied.",
+      );
+      setLeaderboard([]);
+    } finally {
+      setIsLoadingLeaderboard(false);
+    }
   };
 
   const fetchTodayGatepass = async () => {
@@ -388,13 +457,14 @@ const AdminDashboard = () => {
     { id: "content", label: "Painting Content" },
     { id: "translations", label: "Translations" },
     { id: "quizzes", label: "Quizzes" },
+    { id: "leaderboard", label: "Leaderboards" },
     { id: "feedback", label: "Visitor Feedback" },
     { id: "gatepass", label: "Daily Gatepass" },
   ];
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentData = activeTab === "feedback" ? feedback : artworks;
+  const currentData = activeTab === "feedback" || activeTab === "leaderboard" ? feedback : artworks;
   const currentItems = currentData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(currentData.length / itemsPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);

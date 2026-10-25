@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 import { supabase } from "./supabaseClient.js";  
 
 const GRID_SIZE = 3;
 const EMPTY_TILE = GRID_SIZE * GRID_SIZE - 1;
+
+const formatElapsedTime = (totalSeconds) => {
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+  return `${minutes}:${seconds}`;
+};
 
 const Puzzle = () => {
   const navigate = useNavigate();
@@ -14,6 +21,10 @@ const Puzzle = () => {
   const [isSolved, setIsSolved] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const [isSavingBadge, setIsSavingBadge] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  const timerStartRef = useRef(null);
+  const completionTimeoutRef = useRef(null);
 
   const hasQuiz = artwork?.q1?.eng?.question?.trim().length > 0;
   const earnedBadgeType = hasQuiz ? "Silver" : "Gold";
@@ -39,6 +50,8 @@ const Puzzle = () => {
     setTiles(newTiles);
     setIsSolved(false);
     setShowOverlay(false);
+    setElapsedSeconds(0);
+    timerStartRef.current = Date.now();
   }, []);
 
   useEffect(() => {
@@ -48,6 +61,26 @@ const Puzzle = () => {
     }
     initPuzzle();
   }, [artwork, initPuzzle, navigate]);
+
+  useEffect(() => {
+    if (!timerStartRef.current || isSolved) return undefined;
+
+    const timerId = window.setInterval(() => {
+      setElapsedSeconds(
+        Math.floor((Date.now() - timerStartRef.current) / 1000),
+      );
+    }, 250);
+
+    return () => window.clearInterval(timerId);
+  }, [isSolved, tiles.length]);
+
+  useEffect(() => {
+    return () => {
+      if (completionTimeoutRef.current) {
+        window.clearTimeout(completionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleTileClick = (index) => {
     if (isSolved) return;
@@ -66,17 +99,62 @@ const Puzzle = () => {
       setTiles(newTiles);
 
       if (newTiles.every((val, i) => val === i)) {
-        setIsSolved(true); 
-        
-        setTimeout(() => {
+        const completedTime = Math.floor(
+          (Date.now() - timerStartRef.current) / 1000,
+        );
+
+        setElapsedSeconds(completedTime);
+        setIsSolved(true);
+
+        completionTimeoutRef.current = window.setTimeout(() => {
           setShowOverlay(true);
-          handleWin();
+          handleWin(completedTime);
         }, 1500);
       }
     }
   };
 
-  const handleWin = async () => {
+  const savePuzzleTime = async (visitorId, completedTime) => {
+    const timeData = {
+      id: uuidv4(),
+      visitor_id: visitorId,
+      artwork_id: artwork.id,
+      elapsed_seconds: completedTime,
+      completed_at: new Date().toISOString(),
+    };
+
+    const timeQueue = JSON.parse(
+      localStorage.getItem("artifact_puzzle_time_queue") || "[]",
+    );
+    timeQueue.push(timeData);
+    localStorage.setItem(
+      "artifact_puzzle_time_queue",
+      JSON.stringify(timeQueue),
+    );
+
+    try {
+      const { error } = await supabase
+        .from("puzzle_times")
+        .upsert(timeData, { onConflict: "id" });
+
+      if (error) throw error;
+
+      const remainingQueue = JSON.parse(
+        localStorage.getItem("artifact_puzzle_time_queue") || "[]",
+      ).filter((entry) => entry.id !== timeData.id);
+      localStorage.setItem(
+        "artifact_puzzle_time_queue",
+        JSON.stringify(remainingQueue),
+      );
+    } catch (error) {
+      console.warn(
+        "Puzzle time saved locally and will sync when online.",
+        error.message,
+      );
+    }
+  };
+
+  const handleWin = async (completedTime) => {
     setIsSavingBadge(true);
     try {
       const visitorId = localStorage.getItem("artifact_visitor_id");
@@ -85,6 +163,8 @@ const Puzzle = () => {
         console.error("No visitor ID found. Cannot save badge.");
         return;
       }
+
+      await savePuzzleTime(visitorId, completedTime);
 
       const { error } = await supabase
         .from("unlocked_badges")
@@ -122,10 +202,17 @@ const Puzzle = () => {
           </svg>
           <span className="font-sans font-bold text-sm uppercase tracking-wider text-[#E4CBAF]">Exit Puzzle</span>
         </button>
+
+        <div className="px-4 py-2 bg-black/30 backdrop-blur-sm border border-white/10 rounded-full shadow-lg text-right">
+          
+          <span className="block font-sans font-bold text-lg leading-none tracking-wider text-[#E4CBAF] tabular-nums">
+            {formatElapsedTime(elapsedSeconds)}
+          </span>
+        </div>
       </div>
 
       <h1 className="text-4xl text-center mb-8 leading-tight drop-shadow-md">
-        Piece it<br />Together!
+        Piece it together!
       </h1>
 
       <div className="w-full max-w-sm aspect-square bg-[#E8D2B8] p-1 rounded border-2 border-[#E4CBAF] relative shadow-2xl overflow-hidden">
@@ -189,6 +276,9 @@ const Puzzle = () => {
             <h2 className="text-3xl font-bold text-gray-200 mb-1 drop-shadow-lg text-center">Masterclass!!</h2>
             <p className="text-gray-300 text-sm mb-6 uppercase tracking-widest font-sans font-bold">
               {earnedBadgeType} Badge Earned
+            </p>
+            <p className="text-gray-200 text-sm mb-6 font-sans">
+              Completed in {formatElapsedTime(elapsedSeconds)}
             </p>
             <button 
               onClick={() => navigate(-1)} 
