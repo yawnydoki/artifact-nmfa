@@ -14,7 +14,14 @@ const localLeaderboardPath = path.resolve(
 
 const readLocalLeaderboard = async () => {
   try {
-    return JSON.parse(await fs.readFile(localLeaderboardPath, "utf8"));
+    const contents = await fs.readFile(localLeaderboardPath, "utf8");
+    if (!contents.trim()) return [];
+
+    const entries = JSON.parse(contents);
+    if (!Array.isArray(entries)) {
+      throw new Error("Local leaderboard data must be a JSON array.");
+    }
+    return entries;
   } catch (error) {
     if (error.code === "ENOENT") return [];
     throw error;
