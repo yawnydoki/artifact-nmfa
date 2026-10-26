@@ -1,22 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from './supabaseClient.js';
+import { isDevModeEnabled } from './devMode.js';
 
 const GatepassContext = createContext();
-
-// Keep the development shortcut out of production builds. The existing
-// `?dev=true` flag is also used by InstallGate for local development.
-const isDevBypass =
-  import.meta.env.DEV &&
-  new URLSearchParams(window.location.search).get('dev') === 'true';
 
 export const useGatepass = () => useContext(GatepassContext);
 
 export const GatepassProvider = ({ children }) => {
-  const [hasPass, setHasPass] = useState(isDevBypass);
+  const [hasPass, setHasPass] = useState(isDevModeEnabled);
   const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
-    if (isDevBypass) {
+    if (isDevModeEnabled) {
       console.info('[Gatepass Engine] Development bypass enabled via ?dev=true.');
       setHasPass(true);
       setIsVerifying(false);

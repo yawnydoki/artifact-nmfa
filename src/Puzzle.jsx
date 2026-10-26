@@ -3,6 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "./supabaseClient.js";  
 import { useData } from "./DataContext";
+import {
+  isLocalLeaderboardEnabled,
+  saveLocalLeaderboardEntry,
+} from "./localLeaderboard";
 
 const GRID_SIZE = 3;
 const EMPTY_TILE = GRID_SIZE * GRID_SIZE - 1;
@@ -113,9 +117,11 @@ const Puzzle = () => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [isSavingBadge, setIsSavingBadge] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
   const [playerName, setPlayerName] = useState("");
   const [nameError, setNameError] = useState("");
   const [showReference, setShowReference] = useState(false);
+  const [showStartPrompt, setShowStartPrompt] = useState(true);
   const [showHintPrompt, setShowHintPrompt] = useState(false);
 
   const timerStartRef = useRef(null);
@@ -150,8 +156,10 @@ const Puzzle = () => {
     setPlayerName("");
     setNameError("");
     setShowReference(false);
+    setShowStartPrompt(true);
     setShowHintPrompt(false);
-    timerStartRef.current = Date.now();
+    setHasStarted(false);
+    timerStartRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -163,7 +171,7 @@ const Puzzle = () => {
   }, [artwork, initPuzzle, navigate]);
 
   useEffect(() => {
-    if (!timerStartRef.current || isSolved) return undefined;
+    if (!hasStarted || !timerStartRef.current || isSolved) return undefined;
 
     const timerId = window.setInterval(() => {
       setElapsedSeconds(
@@ -172,10 +180,10 @@ const Puzzle = () => {
     }, 250);
 
     return () => window.clearInterval(timerId);
-  }, [isSolved, tiles.length]);
+  }, [hasStarted, isSolved, tiles.length]);
 
   useEffect(() => {
-    if (!timerStartRef.current || isSolved || showReference) {
+    if (!hasStarted || !timerStartRef.current || isSolved || showReference) {
       return undefined;
     }
 
@@ -184,7 +192,7 @@ const Puzzle = () => {
     }, HINT_PROMPT_DELAY_SECONDS * 1000);
 
     return () => window.clearTimeout(hintTimer);
-  }, [isSolved, showReference, tiles.length]);
+  }, [hasStarted, isSolved, showReference, tiles.length]);
 
   useEffect(() => {
     return () => {
@@ -219,6 +227,12 @@ const Puzzle = () => {
       (index === emptyIndex + GRID_SIZE); 
 
     if (isAdjacent) {
+      if (!timerStartRef.current) {
+        timerStartRef.current = Date.now();
+        setHasStarted(true);
+        setShowHintPrompt(false);
+      }
+
       const newTiles = [...tiles];
       [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
       setTiles(newTiles);
@@ -247,6 +261,11 @@ const Puzzle = () => {
       player_name: completedBy,
       completed_at: new Date().toISOString(),
     };
+
+    if (isLocalLeaderboardEnabled) {
+      await saveLocalLeaderboardEntry(timeData);
+      return;
+    }
 
     const timeQueue = JSON.parse(
       localStorage.getItem("artifact_puzzle_time_queue") || "[]",
@@ -374,45 +393,6 @@ const Puzzle = () => {
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setShowReference((visible) => !visible);
-                setShowHintPrompt(false);
-              }}
-              disabled={isSolved}
-              aria-label={showReference ? "Hide painting reference" : "Show painting reference"}
-              className="flex items-center gap-2 px-3 py-2 bg-black/30 backdrop-blur-sm border border-white/10 rounded-full shadow-lg text-[#E4CBAF] hover:bg-black/50 disabled:opacity-50 transition-all active:scale-95"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {showReference ? (
-                  <>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 012.242-3.592m3.12-2.07A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.958 9.958 0 01-3.04 4.664M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3l18 18" />
-                  </>
-                ) : (
-                  <>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-                  </>
-                )}
-              </svg>
-              <span className="hidden sm:inline font-sans text-[10px] font-bold uppercase tracking-wider">
-                Hint
-              </span>
-            </button>
-
-            {showHintPrompt && !showReference && !isSolved && (
-              <div className="absolute right-0 top-full mt-3 w-48 z-40 animate-fade-in-up">
-                <div className="absolute -top-2 right-7 w-4 h-4 rotate-45 bg-[#E4CBAF] border-l border-t border-[#6B3A1D]" />
-                <div className="relative rounded-xl border border-[#6B3A1D] bg-[#E4CBAF] px-4 py-3 text-center text-sm font-sans font-bold text-[#3A1414] shadow-xl">
-                  Need a little help?
-                </div>
-              </div>
-            )}
-          </div>
-
           <div className="px-4 py-2 bg-black/30 backdrop-blur-sm border border-white/10 rounded-full shadow-lg text-right">
             <span className="block font-sans font-bold text-lg leading-none tracking-wider text-[#E4CBAF] tabular-nums">
               {formatElapsedTime(elapsedSeconds)}
@@ -490,6 +470,65 @@ const Puzzle = () => {
           )}
         </div>
 
+      </div>
+
+      <div className="relative z-30 flex flex-col items-center mt-5">
+        {(showStartPrompt || showHintPrompt) && !showReference && !isSolved && (
+          <div className="absolute bottom-full mb-3 w-60 animate-fade-in-up">
+            <div className="relative rounded-xl border border-[#6B3A1D] bg-[#E4CBAF] px-4 py-3 text-center text-sm font-sans font-bold text-[#3A1414] shadow-xl">
+              {showStartPrompt
+                ? "Before you start, view the painting here."
+                : "Need a little help?"}
+              <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 bg-[#E4CBAF] border-r border-b border-[#6B3A1D]" />
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowReference((visible) => !visible);
+            setShowHintPrompt(false);
+            setShowStartPrompt(false);
+          }}
+          disabled={isSolved}
+          aria-label={showReference ? "Hide painting reference" : "Show painting reference"}
+          className={`flex items-center gap-2 rounded-full border px-5 py-2.5 font-sans text-xs font-bold uppercase tracking-wider text-[#3A1414] shadow-lg transition-all active:scale-95 disabled:opacity-50 ${
+            showStartPrompt
+              ? "border-[#F2C14E] bg-[#F2C14E] ring-4 ring-[#F2C14E]/40 animate-pulse"
+              : "border-[#E4CBAF] bg-[#E4CBAF] hover:brightness-110"
+          }`}
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {showReference ? (
+              <>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 012.242-3.592m3.12-2.07A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.958 9.958 0 01-3.04 4.664M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3l18 18" />
+              </>
+            ) : (
+              <>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+              </>
+            )}
+          </svg>
+        </button>
+
+        {import.meta.env.DEV && !isSolved && (
+          <button
+            type="button"
+            onClick={() => {
+              try {
+                solvePuzzleForTesting();
+              } catch (error) {
+                console.error("Test solver could not start:", error.message);
+              }
+            }}
+            className="mt-3 rounded-full border border-[#E4CBAF]/60 bg-black/30 px-4 py-2 font-sans text-[10px] font-bold uppercase tracking-wider text-[#E4CBAF] shadow-md transition-all hover:bg-black/50 active:scale-95"
+          >
+            Solve
+          </button>
+        )}
       </div>
 
       {showOverlay && (

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 import { QRCodeSVG } from "qrcode.react";
+import {
+  fetchLocalLeaderboard,
+  isLocalLeaderboardEnabled,
+} from "./localLeaderboard";
 
 const formatLeaderboardTime = (totalSeconds) => {
   const minutes = Math.floor(Number(totalSeconds || 0) / 60)
@@ -25,6 +29,9 @@ const AdminDashboard = () => {
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState("");
+  const [leaderboardSource, setLeaderboardSource] = useState(
+    isLocalLeaderboardEnabled ? "local" : "cloud",
+  );
   const [leaderboardArtworkFilter, setLeaderboardArtworkFilter] = useState("all");
 
   const [currentDailyHash, setCurrentDailyHash] = useState("");
@@ -56,12 +63,12 @@ const AdminDashboard = () => {
     } else if (activeTab === "gatepass") {
       fetchTodayGatepass();
     } else if (activeTab === "leaderboard") {
-      fetchLeaderboard();
+      fetchLeaderboard(leaderboardSource);
     } else {
       fetchArtworks();
     }
     setCurrentPage(1);
-  }, [activeTab]);
+  }, [activeTab, leaderboardSource]);
 
   const fetchArtworks = async () => {
     setIsLoadingData(true);
@@ -87,22 +94,28 @@ const AdminDashboard = () => {
     setIsLoadingFeedback(false);
   };
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = async (source = leaderboardSource) => {
     setIsLoadingLeaderboard(true);
     setLeaderboardError("");
 
     try {
-      const [{ data: times, error: timesError }, { data: artworkData, error: artworksError }] =
+      const useLocalSource = source === "local";
+      const [times, { data: artworkData, error: artworksError }] =
         await Promise.all([
-          supabase
-            .from("puzzle_times")
-            .select("id, visitor_id, artwork_id, player_name, elapsed_seconds, completed_at")
-            .order("elapsed_seconds", { ascending: true })
-            .order("completed_at", { ascending: true }),
+          useLocalSource
+            ? fetchLocalLeaderboard()
+            : supabase
+                .from("puzzle_times")
+                .select("id, visitor_id, artwork_id, player_name, elapsed_seconds, completed_at")
+                .order("elapsed_seconds", { ascending: true })
+                .order("completed_at", { ascending: true })
+                .then(({ data, error }) => {
+                  if (error) throw error;
+                  return data || [];
+                }),
           supabase.from("artworks").select("id, title").order("target_index", { ascending: true }),
         ]);
 
-      if (timesError) throw timesError;
       if (artworksError) throw artworksError;
 
       const artworkMap = new Map(
@@ -141,7 +154,9 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error fetching leaderboard:", error.message);
       setLeaderboardError(
-        "Unable to load leaderboard data. Make sure the puzzle_times migration has been applied.",
+        source === "local"
+          ? "Unable to load the local leaderboard. Make sure the Vite development server is running."
+          : "Unable to load cloud leaderboard data. Make sure the puzzle_times migration has been applied.",
       );
       setLeaderboard([]);
     } finally {
@@ -585,6 +600,16 @@ const AdminDashboard = () => {
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full">
                   <select
+                    value={leaderboardSource}
+                    onChange={(event) => setLeaderboardSource(event.target.value)}
+                    className="p-2 rounded-lg border border-[#381111]/20 bg-white text-[#381111] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#E19B2D]"
+                  >
+                    <option value="local" disabled={!import.meta.env.DEV}>
+                      Local
+                    </option>
+                    <option value="cloud">Cloud</option>
+                  </select>
+                  <select
                     value={leaderboardArtworkFilter}
                     onChange={(event) => setLeaderboardArtworkFilter(event.target.value)}
                     className="p-2 rounded-lg border border-[#381111]/20 bg-white text-[#381111] text-sm focus:outline-none focus:ring-2 focus:ring-[#E19B2D]"
@@ -597,7 +622,7 @@ const AdminDashboard = () => {
                     ))}
                   </select>
                   <button
-                    onClick={fetchLeaderboard}
+                    onClick={() => fetchLeaderboard(leaderboardSource)}
                     disabled={isLoadingLeaderboard}
                     className="px-4 py-2 rounded-lg bg-[#381111] text-[#E0CCB6] font-bold text-sm hover:brightness-110 disabled:opacity-50 transition-all"
                   >

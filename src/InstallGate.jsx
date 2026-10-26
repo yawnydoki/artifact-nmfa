@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isDevModeEnabled } from './devMode.js';
 
 const InstallGate = ({ children }) => {
   const [isStandalone, setIsStandalone] = useState(true);
@@ -38,11 +39,7 @@ const InstallGate = ({ children }) => {
 
   const isAdminRoute = window.location.pathname.startsWith('/admin');
 
-  const isDevBypass =
-    import.meta.env.DEV &&
-    new URLSearchParams(window.location.search).get('dev') === 'true';
-  
-  if (isStandalone || isDevBypass || isAdminRoute) {
+  if (isStandalone || isDevModeEnabled || isAdminRoute) {
     return children;
   }
 
