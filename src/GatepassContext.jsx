@@ -3,13 +3,26 @@ import { supabase } from './supabaseClient.js';
 
 const GatepassContext = createContext();
 
+// Keep the development shortcut out of production builds. The existing
+// `?dev=true` flag is also used by InstallGate for local development.
+const isDevBypass =
+  import.meta.env.DEV &&
+  new URLSearchParams(window.location.search).get('dev') === 'true';
+
 export const useGatepass = () => useContext(GatepassContext);
 
 export const GatepassProvider = ({ children }) => {
-  const [hasPass, setHasPass] = useState(false);
+  const [hasPass, setHasPass] = useState(isDevBypass);
   const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
+    if (isDevBypass) {
+      console.info('[Gatepass Engine] Development bypass enabled via ?dev=true.');
+      setHasPass(true);
+      setIsVerifying(false);
+      return;
+    }
+
     const checkSavedPass = () => {
       const savedToken = localStorage.getItem('artifact_daily_token');
       const tokenDate = localStorage.getItem('artifact_token_date');

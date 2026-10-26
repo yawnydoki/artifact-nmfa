@@ -38,7 +38,9 @@ const InstallGate = ({ children }) => {
 
   const isAdminRoute = window.location.pathname.startsWith('/admin');
 
-  const isDevBypass = window.location.search.includes('dev=true');
+  const isDevBypass =
+    import.meta.env.DEV &&
+    new URLSearchParams(window.location.search).get('dev') === 'true';
   
   if (isStandalone || isDevBypass || isAdminRoute) {
     return children;
