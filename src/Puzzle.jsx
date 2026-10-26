@@ -477,7 +477,7 @@ const Puzzle = () => {
           <div className="absolute bottom-full mb-3 w-60 animate-fade-in-up">
             <div className="relative rounded-xl border border-[#6B3A1D] bg-[#E4CBAF] px-4 py-3 text-center text-sm font-sans font-bold text-[#3A1414] shadow-xl">
               {showStartPrompt
-                ? "Before you start, view the painting here."
+                ? "View painting reference here!"
                 : "Need a little help?"}
               <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 bg-[#E4CBAF] border-r border-b border-[#6B3A1D]" />
             </div>
@@ -514,7 +514,7 @@ const Puzzle = () => {
           </svg>
         </button>
 
-        {import.meta.env.DEV && !isSolved && (
+        {false  && import.meta.env.DEV && !isSolved && (
           <button
             type="button"
             onClick={() => {
